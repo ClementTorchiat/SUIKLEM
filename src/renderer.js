@@ -1117,6 +1117,16 @@ export class GameRenderer {
 
   setChillMode(enabled) {
     this.chillMode = Boolean(enabled);
+    if (this.chillMode) {
+      this.flames = [];
+      this.lasers = [];
+      this.stars = [];
+      this.floatingTexts = [];
+      this.speechBubble = null;
+      this.shakeTimer = 0;
+      this.shakeIntensity = 0;
+      this.glitchTimer = 0;
+    }
   }
 
   _resizeHiDPI(viewWidth = JAR_BOUNDS.width) {
@@ -1159,18 +1169,18 @@ export class GameRenderer {
   }
 
   triggerShake(intensity = 5, duration = 0.22) {
-    if (this.reducedMotion) return;
+    if (this.reducedMotion || this.chillMode) return;
     this.shakeIntensity = Math.max(this.shakeIntensity, intensity);
     this.shakeTimer = Math.max(this.shakeTimer, duration);
   }
 
   triggerGlitch(duration = 0.22) {
-    if (this.reducedMotion) return;
+    if (this.reducedMotion || this.chillMode) return;
     this.glitchTimer = Math.max(this.glitchTimer, duration);
   }
 
   spawnFlameBurst(x, y, count = 8) {
-    if (this.reducedMotion) return;
+    if (this.reducedMotion || this.chillMode) return;
     const flameColors = ['#ff2a00', '#ff7b00', '#ffe600', this.palette.pink];
     for (let i = 0; i < count; i++) {
       this.flames.push({
@@ -1208,6 +1218,7 @@ export class GameRenderer {
   }
 
   spawnMicroExplosion(x, y, color = '#ffe600', label = '') {
+    if (this.chillMode) return;
     this.shockwaves.push({
       x,
       y,
@@ -1369,7 +1380,7 @@ export class GameRenderer {
     }
 
     // Nonsense random fires, micro-explosions, wall flames & chain lasers!
-    if (!this.reducedMotion && world && !world.chillMode && world.bodies.length > 0) {
+    if (!this.reducedMotion && world && !world.chillMode && !this.chillMode && world.bodies.length > 0) {
       for (const b of world.bodies) {
         if (b.onFireTimer > 0 && Math.random() < dt * 20) {
           this.spawnFlameBurst(b.x, b.y - b.radius * 0.4, 2);

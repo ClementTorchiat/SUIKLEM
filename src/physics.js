@@ -1586,7 +1586,7 @@ export class PhysicsWorld {
         body.mood = 'bonked';
         body.moodTimer = 0.45;
       }
-      if (speed > 320) {
+      if (speed > 320 && !this.chillMode) {
         body.onFireTimer = Math.max(body.onFireTimer, 1.0);
         if (allowAudio && this.callbacks.onChaosFx) {
           this.callbacks.onChaosFx({ type: 'bonk', x: hitX, y: hitY, tier: body.tier });
@@ -1652,7 +1652,7 @@ export class PhysicsWorld {
         graceTimer: 0.35,
       });
       newBody.hasCollided = true;
-      if (nextTier >= 4) newBody.onFireTimer = 1.4;
+      if (!this.chillMode && nextTier >= 4) newBody.onFireTimer = 1.4;
 
       this._nudgeNearby(clampedX, clampedY, nextDef.radius + 55, 34, newBody.id);
 

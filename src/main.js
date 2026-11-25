@@ -808,6 +808,7 @@ class SuiklemGame {
     const isChill = this.introStage === 'chill' || this.introStage === 'dialogue';
     document.documentElement.classList.toggle('is-chill-pre', isChill);
     document.body.classList.toggle('is-chill-intro', isChill);
+    this.world.chillMode = isChill;
     this.renderer.setChillMode(isChill);
     if (this.nextLabelEl) {
       this.nextLabelEl.textContent = isChill ? 'Prochain fruit' : 'Prochain mutant';
@@ -1267,6 +1268,7 @@ class SuiklemGame {
   }
 
   _handleChaosFx({ type, x, y, tier, hitsLeft }) {
+    if (this.introStage === 'chill' || this.world.chillMode) return;
     if (type === 'popcorn') {
       this.renderer.spawnMicroExplosion(x, y, '#ff7b00', 'POP!!');
       this.renderer.triggerShake(5, 0.16);
