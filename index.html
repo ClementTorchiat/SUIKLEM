@@ -29,10 +29,24 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap">
-  <link rel="stylesheet" href="styles/main.css?v=18">
+  <script>
+    try {
+      if (localStorage.getItem('suiklem-intro-seen') !== 'true') {
+        document.documentElement.classList.add('is-chill-pre');
+      }
+    } catch {}
+  </script>
+  <link rel="stylesheet" href="styles/main.css?v=19">
   <script type="module" src="src/main.js"></script>
 </head>
 <body>
+  <script>
+    try {
+      if (localStorage.getItem('suiklem-intro-seen') !== 'true') {
+        document.body.classList.add('is-chill-intro');
+      }
+    } catch {}
+  </script>
   <canvas id="bg-canvas" class="bg-canvas" aria-hidden="true"></canvas>
   <div id="flashlight-overlay" class="flashlight-overlay" hidden aria-hidden="true"></div>
   <div class="app-shell">
@@ -71,9 +85,21 @@
           </svg>
         </span>
         <div class="brand-text">
-          <h1>SUIKLEM.EXE</h1>
-          <p class="subtitle">Zéro chill &bull; 100% télémétrie inutile</p>
+          <h1>Suika Chill</h1>
+          <p class="subtitle">Tri fruité pastel &bull; Détente &amp; zen</p>
         </div>
+        <script>
+          try {
+            if (localStorage.getItem('suiklem-intro-seen') === 'true') {
+              document.title = 'SUIKLEM.EXE — Télémétrie du Bordel';
+              const bt = document.querySelector('.brand-text');
+              if (bt) {
+                bt.querySelector('h1').textContent = 'SUIKLEM.EXE';
+                bt.querySelector('.subtitle').textContent = 'Zéro chill • 100% télémétrie inutile';
+              }
+            }
+          } catch {}
+        </script>
       </div>
 
       <div class="ticker-bar" aria-label="Bandeau d'informations absurdes">
@@ -519,11 +545,11 @@
 
           <div class="next-readout-panel">
             <div class="next-header-plate">
-              <span id="next-label" class="stat-label">Prochain mutant</span>
+              <span id="next-label" class="stat-label">Prochain fruit</span>
               <span class="next-bio-led" aria-hidden="true"></span>
             </div>
             <div class="next-preview">
-              <span id="next-name" class="next-name">Atome Sus</span>
+              <span id="next-name" class="next-name">Cerise</span>
             </div>
           </div>
         </div>

@@ -192,9 +192,9 @@ class SuiklemGame {
     this.tickerBar = document.querySelector('.ticker-bar');
     this.tickerToggleBtn = document.getElementById('ticker-toggle');
     this.brandTitleEl = document.querySelector('.brand-text h1');
-    this.brandTitleDefault = this.brandTitleEl?.textContent ?? 'SUIKLEM.EXE';
+    this.brandTitleDefault = 'SUIKLEM.EXE';
     this.subtitleEl = document.querySelector('.subtitle');
-    this.subtitleDefault = this.subtitleEl?.textContent ?? '';
+    this.subtitleDefault = 'Zéro chill • 100% télémétrie inutile';
     this.replayIntroBtn = document.getElementById('replay-intro-btn');
     this.nextLabelEl = document.getElementById('next-label');
     this.introFxOverlayEl = document.getElementById('intro-fx-overlay');
@@ -806,6 +806,7 @@ class SuiklemGame {
 
   _applyIntroStageVisuals() {
     const isChill = this.introStage === 'chill' || this.introStage === 'dialogue';
+    document.documentElement.classList.toggle('is-chill-pre', isChill);
     document.body.classList.toggle('is-chill-intro', isChill);
     this.renderer.setChillMode(isChill);
     if (this.nextLabelEl) {
