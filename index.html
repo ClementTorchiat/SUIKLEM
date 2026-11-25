@@ -4,10 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SUIKLEM.EXE — Télémétrie du Bordel</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23ff2bd6'/%3E%3Cstop offset='100%25' stop-color='%23ffe600'/%3E%3C/linearGradient%3E%3CradialGradient id='sk' cx='38%25' cy='32%25' r='65%25'%3E%3Cstop offset='0%25' stop-color='%23d9ff70'/%3E%3Cstop offset='55%25' stop-color='%2365a30d'/%3E%3Cstop offset='100%25' stop-color='%2314532d'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect x='1' y='1' width='34' height='34' rx='9' fill='url(%23bg)' stroke='%232b0b00' stroke-width='2'/%3E%3Cpath d='M18 3 L20.5 7.5 L15.5 8 Z' fill='%23ff2bd6' stroke='%231b0824' stroke-width='1.2' stroke-linejoin='round'/%3E%3Cpath d='M8 18 C8 10.5 12.5 7 18 7 C23.5 7 28 10.5 28 18 C28 24.5 25 29 18 29 C11 29 8 24.5 8 18 Z' fill='url(%23sk)' stroke='%23090314' stroke-width='2'/%3E%3Ccircle cx='13.5' cy='15.5' r='4.4' fill='%23ffffff' stroke='%23090314' stroke-width='1.5'/%3E%3Ccircle cx='14.2' cy='14.8' r='1.7' fill='%23090314'/%3E%3Ccircle cx='22.8' cy='16.5' r='3.4' fill='%23ffffff' stroke='%23090314' stroke-width='1.5'/%3E%3Ccircle cx='22.1' cy='17.3' r='1.4' fill='%23ff006e'/%3E%3Cpath d='M11.5 21.5 Q18 27 24.5 21' fill='%232e0619' stroke='%23090314' stroke-width='1.4' stroke-linecap='round'/%3E%3Cpath d='M15.5 24.2 Q18 28.5 20.8 24.2 Z' fill='%23ff2bd6' stroke='%23090314' stroke-width='1'/%3E%3Crect x='13.5' y='21.4' width='2.3' height='2' rx='0.5' fill='%23fde047'/%3E%3Cellipse cx='12' cy='10.5' rx='2.2' ry='1' transform='rotate(-24 12 10.5)' fill='%23ffffff' opacity='0.65'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap">
-  <link rel="stylesheet" href="styles/main.css?v=6">
+  <link rel="stylesheet" href="styles/main.css?v=13">
   <script type="module" src="src/main.js"></script>
 </head>
 <body>
@@ -16,7 +17,27 @@
   <div class="app-shell">
     <header class="top-bar">
       <div class="brand">
-        <span class="brand-badge" aria-hidden="true">🤪</span>
+        <span class="brand-badge" aria-hidden="true">
+          <svg class="brand-logo-svg" viewBox="0 0 36 36" width="30" height="30" aria-hidden="true" focusable="false">
+            <defs>
+              <radialGradient id="logo-skin" cx="38%" cy="32%" r="65%">
+                <stop offset="0%" stop-color="#d9ff70"/>
+                <stop offset="55%" stop-color="#65a30d"/>
+                <stop offset="100%" stop-color="#14532d"/>
+              </radialGradient>
+            </defs>
+            <path d="M18 3 L20.5 7.5 L15.5 8 Z" fill="#ff2bd6" stroke="#1b0824" stroke-width="1.2" stroke-linejoin="round"/>
+            <path d="M8 18 C8 10.5 12.5 7 18 7 C23.5 7 28 10.5 28 18 C28 24.5 25 29 18 29 C11 29 8 24.5 8 18 Z" fill="url(#logo-skin)" stroke="#090314" stroke-width="2"/>
+            <circle cx="13.5" cy="15.5" r="4.4" fill="#ffffff" stroke="#090314" stroke-width="1.5"/>
+            <circle cx="14.2" cy="14.8" r="1.7" fill="#090314"/>
+            <circle cx="22.8" cy="16.5" r="3.4" fill="#ffffff" stroke="#090314" stroke-width="1.5"/>
+            <circle cx="22.1" cy="17.3" r="1.4" fill="#ff006e"/>
+            <path d="M11.5 21.5 Q18 27 24.5 21" fill="#2e0619" stroke="#090314" stroke-width="1.4" stroke-linecap="round"/>
+            <path d="M15.5 24.2 Q18 28.5 20.8 24.2 Z" fill="#ff2bd6" stroke="#090314" stroke-width="1"/>
+            <rect x="13.5" y="21.4" width="2.3" height="2" rx="0.5" fill="#fde047"/>
+            <ellipse cx="12" cy="10.5" rx="2.2" ry="1" transform="rotate(-24 12 10.5)" fill="#ffffff" opacity="0.65"/>
+          </svg>
+        </span>
         <div class="brand-text">
           <h1>SUIKLEM.EXE</h1>
           <p class="subtitle">Zéro chill &bull; 100% télémétrie inutile</p>
@@ -36,7 +57,15 @@
           id="ticker-toggle"
           class="ticker-pause-btn"
           aria-label="Mettre le bandeau en pause"
-        >⏸</button>
+        >
+          <svg class="icon-pause" aria-hidden="true" viewBox="0 0 16 16" width="13" height="13" fill="currentColor">
+            <rect x="3" y="2.5" width="3.5" height="11" rx="1"></rect>
+            <rect x="9.5" y="2.5" width="3.5" height="11" rx="1"></rect>
+          </svg>
+          <svg class="icon-play" aria-hidden="true" viewBox="0 0 16 16" width="13" height="13" fill="currentColor">
+            <polygon points="4,2.5 13.5,8 4,13.5"></polygon>
+          </svg>
+        </button>
       </div>
 
       <div class="top-actions">
@@ -82,7 +111,11 @@
           aria-pressed="false"
           aria-label="Couper la musique chiptune"
         >
-          <span aria-hidden="true">🎵</span>
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18V5l12-2v13"></path>
+            <circle cx="6" cy="18" r="3"></circle>
+            <circle cx="18" cy="16" r="3"></circle>
+          </svg>
           <span class="btn-label">Zik</span>
         </button>
 
@@ -92,7 +125,14 @@
           class="icon-btn"
           aria-label="Voir les succès débiles"
         >
-          <span aria-hidden="true">🏆</span>
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+            <path d="M4 22h16"></path>
+            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+            <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+          </svg>
           <span id="ach-count" class="btn-label">0/10</span>
         </button>
 
@@ -126,6 +166,137 @@
     </header>
 
     <main class="workspace">
+      <!-- Aile Extrême Gauche (Grands écrans) : Placebo, Mixage Inutile, Ventilo GPU -->
+      <aside class="side-panel wing-panel wing-left" aria-label="Module de maintenance inutile">
+        <section class="panel-card placebo-card" aria-label="Interrupteurs placebo">
+          <h2 class="panel-title">Labo Placebo</h2>
+          <button type="button" id="placebo-toggle-btn" class="placebo-btn" aria-pressed="false">
+            <span class="placebo-switch-svg" aria-hidden="true">
+              <svg viewBox="0 0 28 24" width="26" height="22" aria-hidden="true" focusable="false">
+                <rect x="2" y="3" width="24" height="18" rx="4" fill="#0f172a" stroke="#64748b" stroke-width="1.4"/>
+                <polygon points="14,5 20,8.5 20,15.5 14,19 8,15.5 8,8.5" fill="#475569" stroke="#090314" stroke-width="1"/>
+                <g class="placebo-bat">
+                  <rect x="12.5" y="1" width="3" height="11" rx="1.5" fill="#e2e8f0" stroke="#090314" stroke-width="0.9"/>
+                  <circle cx="14" cy="2.2" r="2.2" fill="#a6ff2e"/>
+                </g>
+              </svg>
+            </span>
+            <span class="placebo-text">
+              <strong>TURBO PLACEBO</strong>
+              <span id="placebo-status">INACTIF (0%)</span>
+            </span>
+          </button>
+
+          <button type="button" id="dont-touch-btn" class="dont-touch-btn">
+            <span class="dont-touch-dome" aria-hidden="true"></span>
+            <span class="dont-touch-label">NE PAS TOUCHER</span>
+          </button>
+
+          <div class="micro-stat temptation-row">
+            <span>Tentations</span>
+            <strong id="temptation-count">0</strong>
+          </div>
+        </section>
+
+        <section class="panel-card mixer-card" aria-label="Console de mixage inutile">
+          <div class="mixer-head">
+            <h2 class="panel-title">Mixage Mental</h2>
+            <span id="mixer-readout" class="mixer-readout">50%</span>
+          </div>
+          <div class="mixer-meter-wrap" aria-hidden="true">
+            <svg viewBox="0 0 140 36" width="140" height="36" class="mixer-meter-svg" aria-hidden="true" focusable="false">
+              <rect x="1" y="1" width="138" height="34" rx="5" fill="#060911" stroke="#334155" stroke-width="1.4"/>
+              <path d="M22 30 A52 52 0 0 1 118 30" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="3 3"/>
+              <path d="M98 16 A52 52 0 0 1 118 30" fill="none" stroke="#ff2bd6" stroke-width="2.4"/>
+              <g id="mixer-needle" class="mixer-needle">
+                <line x1="70" y1="32" x2="70" y2="7" stroke="#ffe600" stroke-width="2" stroke-linecap="round"/>
+              </g>
+              <circle cx="70" cy="31" r="3.5" fill="#94a3b8" stroke="#090314" stroke-width="1"/>
+            </svg>
+          </div>
+          <div class="mixer-sliders">
+            <div class="mixer-row">
+              <label for="mix-sauce">Sauce</label>
+              <input id="mix-sauce" class="mixer-slider" type="range" min="0" max="100" value="50">
+            </div>
+            <div class="mixer-row">
+              <label for="mix-cringe">Cringe</label>
+              <input id="mix-cringe" class="mixer-slider" type="range" min="0" max="100" value="50">
+            </div>
+            <div class="mixer-row">
+              <label for="mix-gravity">Gravité</label>
+              <input id="mix-gravity" class="mixer-slider" type="range" min="0" max="100" value="50">
+            </div>
+          </div>
+        </section>
+
+        <section id="fan-card" class="panel-card fan-card" data-fan-mode="normal" aria-label="Ventilateur GPU Cerveau">
+          <div class="fan-head">
+            <h2 class="panel-title">GPU Cerveau</h2>
+            <span id="fan-temp" class="fan-temp">68.4 °C</span>
+          </div>
+          <div class="fan-body">
+            <div class="fan-grille-wrap" aria-hidden="true">
+              <svg class="fan-svg" viewBox="0 0 64 64" width="58" height="58" aria-hidden="true" focusable="false">
+                <circle cx="32" cy="32" r="29" fill="#070a10" stroke="#475569" stroke-width="2.5"/>
+                <g class="fan-rotor">
+                  <path d="M32 32 C26 16 14 14 14 23 C14 29 22 31 32 32 Z" fill="#00f5d4" stroke="#0f172a" stroke-width="1"/>
+                  <path d="M32 32 C48 26 50 14 41 14 C35 14 33 22 32 32 Z" fill="#00f5d4" stroke="#0f172a" stroke-width="1"/>
+                  <path d="M32 32 C38 48 50 50 50 41 C50 35 42 33 32 32 Z" fill="#00f5d4" stroke="#0f172a" stroke-width="1"/>
+                  <path d="M32 32 C16 38 14 50 23 50 C29 50 31 42 32 32 Z" fill="#00f5d4" stroke="#0f172a" stroke-width="1"/>
+                </g>
+                <!-- Protective wire guard rings -->
+                <circle cx="32" cy="32" r="20" fill="none" stroke="rgba(148,163,184,0.45)" stroke-width="1.2"/>
+                <circle cx="32" cy="32" r="11" fill="none" stroke="rgba(148,163,184,0.45)" stroke-width="1.2"/>
+                <circle cx="32" cy="32" r="6" fill="#334155" stroke="#94a3b8" stroke-width="1.2"/>
+              </svg>
+            </div>
+            <div class="fan-controls">
+              <span class="stat-label">Régime</span>
+              <button type="button" id="fan-mode-btn" class="fan-mode-btn">NORMAL</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel-card geiger-card" aria-label="Compteur Geiger ambiant">
+          <div class="geiger-head">
+            <h2 class="panel-title">Compteur Geiger</h2>
+            <span id="geiger-value" class="geiger-value">0.42 mSv</span>
+          </div>
+          <div class="geiger-dial-wrap" aria-hidden="true">
+            <svg viewBox="0 0 140 34" width="140" height="34" class="geiger-svg" aria-hidden="true" focusable="false">
+              <rect x="1" y="1" width="138" height="32" rx="5" fill="#0d0b04" stroke="#713f12" stroke-width="1.4"/>
+              <path d="M20 28 A52 52 0 0 1 82 10" fill="none" stroke="#84cc16" stroke-width="2.2"/>
+              <path d="M84 10 A52 52 0 0 1 120 28" fill="none" stroke="#ef4444" stroke-width="2.4"/>
+              <g id="geiger-needle" class="geiger-needle">
+                <line x1="70" y1="30" x2="70" y2="7" stroke="#fef08a" stroke-width="1.8" stroke-linecap="round"/>
+              </g>
+              <circle cx="70" cy="29" r="3.2" fill="#eab308" stroke="#291202" stroke-width="1"/>
+            </svg>
+          </div>
+          <div class="geiger-foot">
+            <span id="geiger-status" class="geiger-status">Air : Mutagène léger</span>
+            <button type="button" id="geiger-btn" class="wing-action-btn wing-action-sm">TESTER</button>
+          </div>
+        </section>
+
+        <section id="doomsday-card" class="panel-card doomsday-card" aria-label="Horloge Fin du Monde">
+          <div class="doomsday-head">
+            <h2 class="panel-title">Fin du Monde</h2>
+            <span id="doomsday-badge" class="doomsday-badge">T-18s</span>
+          </div>
+          <div class="doomsday-lcd" aria-live="off">
+            <span id="doomsday-time" class="doomsday-time">23:59:42</span>
+            <span id="doomsday-sub" class="doomsday-sub">Minuit dans 18s • Tout va bien</span>
+          </div>
+          <div class="doomsday-controls">
+            <button type="button" id="doomsday-minus-btn" class="wing-action-btn doomsday-btn">-1s</button>
+            <button type="button" id="doomsday-plus-btn" class="wing-action-btn doomsday-btn">+1s</button>
+            <button type="button" id="doomsday-reset-btn" class="wing-action-btn wing-action-sm">RAZ</button>
+          </div>
+        </section>
+      </aside>
+
       <!-- Colonne Gauche : Mode, Score, Prochain, Pouvoirs, Télémétrie Joueur -->
       <aside class="side-panel panel-left" aria-label="Modes, scores, pouvoirs et télémétrie joueur">
         <div class="mode-switcher" role="group" aria-label="Mode de jeu">
@@ -659,7 +830,11 @@
           ></canvas>
 
           <div id="danger-banner" class="danger-banner" hidden>
-            <span aria-hidden="true">🚨</span>
+            <svg class="ui-svg-icon" aria-hidden="true" viewBox="0 0 20 20" width="17" height="17" focusable="false">
+              <path d="M5 14V9.5A5 5 0 0 1 15 9.5V14Z" fill="#ff2bd6" stroke="#ffffff" stroke-width="1.4"/>
+              <rect x="3.5" y="14" width="13" height="3" rx="1" fill="#ffe600" stroke="#090314" stroke-width="1"/>
+              <path d="M10 1.5V3.5M3.5 5L5 6.5M16.5 5L15 6.5" stroke="#ffe600" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
             <span>ALERTE CRINGE : ÇA DÉBORDE !</span>
           </div>
 
@@ -669,7 +844,10 @@
           </div>
 
           <div id="chaos-banner" class="chaos-banner" hidden>
-            <span id="chaos-banner-text">🌀 BORDEL ACTIF</span>
+            <span id="chaos-banner-icon" class="chaos-banner-icon" aria-hidden="true">
+              <svg class="ui-svg-icon" viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="10" r="7" fill="none" stroke="#ff2bd6" stroke-width="2"/><circle cx="10" cy="10" r="2.5" fill="#ffe600"/></svg>
+            </span>
+            <span id="chaos-banner-text">BORDEL ACTIF</span>
           </div>
 
           <div id="popups-layer" class="popups-layer" hidden aria-live="polite"></div>
@@ -694,7 +872,17 @@
           <div class="slot-machine-body">
             <div class="slot-cabinet">
               <div class="chaos-head-row">
-                <h2 class="panel-title">🎰 Roulette WTF</h2>
+                <h2 class="panel-title">
+                  <span class="title-with-icon">
+                    <svg class="ui-svg-icon" aria-hidden="true" viewBox="0 0 20 20" width="14" height="14" focusable="false">
+                      <rect x="2" y="4" width="16" height="12" rx="2.5" fill="#451a03" stroke="#ffe600" stroke-width="1.6"/>
+                      <line x1="7.3" y1="5" x2="7.3" y2="15" stroke="#92400e" stroke-width="1.1"/>
+                      <line x1="12.7" y1="5" x2="12.7" y2="15" stroke="#92400e" stroke-width="1.1"/>
+                      <path d="M3.8 8.5H5.8L4.3 12M9 8.5H11L9.5 12M14.2 8.5H16.2L14.7 12" fill="none" stroke="#ffe600" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Roulette WTF</span>
+                  </span>
+                </h2>
                 <span id="palette-name-text" class="palette-tag">DA : Cyber Raisin</span>
               </div>
 
@@ -865,10 +1053,165 @@
           </div>
         </div>
       </aside>
+
+      <!-- Aile Extrême Droite (Grands écrans) : Distributeur, Radar, Bourse, Imprimante -->
+      <aside class="side-panel wing-panel wing-right" aria-label="Systèmes d'observation inutiles">
+        <section class="vending-card" aria-label="Distributeur de boissons mutantes">
+          <div class="vending-cabinet">
+            <div class="vending-marquee">
+              <h2 class="panel-title">
+                <span class="title-with-icon">
+                  <svg class="ui-svg-icon" aria-hidden="true" viewBox="0 0 20 20" width="13" height="13" focusable="false">
+                    <rect x="5" y="4" width="10" height="13.5" rx="2.5" fill="#ff2bd6" stroke="#fef08a" stroke-width="1.4"/>
+                    <rect x="6.5" y="2" width="7" height="2" rx="0.8" fill="#e2e8f0"/>
+                    <rect x="7" y="6" width="1.8" height="9.5" rx="0.9" fill="#ffffff" opacity="0.5"/>
+                  </svg>
+                  <span>Boissons WTF</span>
+                </span>
+              </h2>
+              <span id="vending-display" class="vending-display">CHOISIS [A1-C3]</span>
+            </div>
+
+            <div class="vending-glass" aria-hidden="true">
+              <svg class="vending-shelf-svg" viewBox="0 0 176 54" width="176" height="54" aria-hidden="true" focusable="false">
+                <defs>
+                  <linearGradient id="vd-can-a" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#365314"/><stop offset="40%" stop-color="#a6ff2e"/><stop offset="100%" stop-color="#1a2e05"/>
+                  </linearGradient>
+                  <linearGradient id="vd-can-b" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#155e75"/><stop offset="40%" stop-color="#00f5d4"/><stop offset="100%" stop-color="#083344"/>
+                  </linearGradient>
+                  <linearGradient id="vd-can-c" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#831843"/><stop offset="40%" stop-color="#ff2bd6"/><stop offset="100%" stop-color="#500724"/>
+                  </linearGradient>
+                </defs>
+                <!-- Shelf bar -->
+                <rect x="6" y="42" width="164" height="5" rx="2" fill="#475569" stroke="#0f172a" stroke-width="1"/>
+                <!-- A1 Pickle Juice Can -->
+                <rect x="18" y="10" width="24" height="32" rx="4" fill="url(#vd-can-a)" stroke="#090314" stroke-width="1.3"/>
+                <rect x="20" y="7" width="20" height="3" rx="1.5" fill="#e2e8f0"/>
+                <text x="30" y="29" text-anchor="middle" font-size="9" font-weight="900" fill="#090314">A1</text>
+                <!-- B2 Mutant Cola Can -->
+                <rect x="76" y="10" width="24" height="32" rx="4" fill="url(#vd-can-b)" stroke="#090314" stroke-width="1.3"/>
+                <rect x="78" y="7" width="20" height="3" rx="1.5" fill="#e2e8f0"/>
+                <text x="88" y="29" text-anchor="middle" font-size="9" font-weight="900" fill="#090314">B2</text>
+                <!-- C3 Cringe Energy Can -->
+                <rect x="134" y="10" width="24" height="32" rx="4" fill="url(#vd-can-c)" stroke="#090314" stroke-width="1.3"/>
+                <rect x="136" y="7" width="20" height="3" rx="1.5" fill="#e2e8f0"/>
+                <text x="146" y="29" text-anchor="middle" font-size="9" font-weight="900" fill="#ffffff">C3</text>
+                <!-- Metallic spiral coils in front of cans -->
+                <g fill="none" stroke="#cbd5e1" stroke-width="1.4" opacity="0.82">
+                  <circle cx="30" cy="37" r="6"/><circle cx="88" cy="37" r="6"/><circle cx="146" cy="37" r="6"/>
+                </g>
+              </svg>
+            </div>
+
+            <div class="vending-controls">
+              <button type="button" class="vending-key vending-key-a" data-drink="A1">
+                <span>A1</span>
+                <svg class="ui-svg-icon" aria-hidden="true" viewBox="0 0 18 18" width="13" height="13" focusable="false">
+                  <rect x="5.5" y="2.5" width="7" height="13" rx="3.5" transform="rotate(-18 9 9)" fill="#a6ff2e" stroke="#090314" stroke-width="1.4"/>
+                  <circle cx="8" cy="7" r="1" fill="#365314"/><circle cx="10.2" cy="11" r="1" fill="#365314"/>
+                </svg>
+              </button>
+              <button type="button" class="vending-key vending-key-b" data-drink="B2">
+                <span>B2</span>
+                <svg class="ui-svg-icon" aria-hidden="true" viewBox="0 0 18 18" width="13" height="13" focusable="false">
+                  <path d="M6.5 3H11.5M7.5 3V7L4.5 14A1.5 1.5 0 0 0 5.9 16H12.1A1.5 1.5 0 0 0 13.5 14L10.5 7V3" fill="#083344" stroke="#00f5d4" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+                  <path d="M5.6 12.5H12.4L13.1 14.5A1 1 0 0 1 12.1 15.5H5.9A1 1 0 0 1 4.9 14.5Z" fill="#00f5d4"/>
+                </svg>
+              </button>
+              <button type="button" class="vending-key vending-key-c" data-drink="C3">
+                <span>C3</span>
+                <svg class="ui-svg-icon" aria-hidden="true" viewBox="0 0 18 18" width="13" height="13" focusable="false">
+                  <polygon points="10.5,2 4.5,10 9,10 7.5,16 13.5,8 9,8" fill="#ffe600" stroke="#090314" stroke-width="1.2" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="vending-tray">
+              <span class="vending-flap-label" aria-hidden="true">PUSH</span>
+              <span id="vending-tray-can" class="vending-tray-can" aria-hidden="true">
+                <svg class="vending-can-svg" viewBox="0 0 20 24" width="18" height="18" focusable="false">
+                  <rect x="4" y="4" width="12" height="17" rx="3" fill="#475569" stroke="#090314" stroke-width="1.6"/>
+                  <rect x="5.5" y="2" width="9" height="2.5" rx="1" fill="#e2e8f0" stroke="#090314" stroke-width="1"/>
+                  <rect x="6" y="6" width="2.2" height="13" rx="1" fill="#ffffff" opacity="0.35"/>
+                </svg>
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel-card radar-card" aria-label="Sonar à poulpes">
+          <div class="radar-head">
+            <h2 class="panel-title">Sonar Poulpe</h2>
+            <span id="radar-target" class="radar-target">Chaussette • 11.2m</span>
+          </div>
+          <div class="radar-bezel">
+            <canvas id="radar-canvas" width="136" height="136" aria-hidden="true"></canvas>
+          </div>
+          <button type="button" id="radar-ping-btn" class="wing-action-btn">PING SONAR</button>
+        </section>
+
+        <section class="panel-card market-card" aria-label="Bourse Cornichon/EUR">
+          <div class="market-head">
+            <h2 class="panel-title">Cornichon/EUR</h2>
+            <span id="market-price" class="market-price">+42.0%</span>
+          </div>
+          <div class="market-screen">
+            <canvas id="market-canvas" width="180" height="50" aria-hidden="true"></canvas>
+          </div>
+          <div class="market-footer">
+            <span class="market-wallet-label">
+              <span>Stock :</span>
+              <strong id="market-wallet">0</strong>
+              <svg class="ui-svg-icon" aria-hidden="true" viewBox="0 0 18 18" width="13" height="13" focusable="false">
+                <rect x="5.5" y="2.5" width="7" height="13" rx="3.5" transform="rotate(-18 9 9)" fill="#a6ff2e" stroke="#090314" stroke-width="1.4"/>
+                <circle cx="8" cy="7" r="1" fill="#365314"/><circle cx="10.2" cy="11" r="1" fill="#365314"/>
+              </svg>
+            </span>
+            <div class="market-btns">
+              <button type="button" id="market-buy-btn" class="market-btn market-buy">ACHETER</button>
+              <button type="button" id="market-sell-btn" class="market-btn market-sell">VENDRE</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel-card printer-card" aria-label="Imprimante à tickets absurdes">
+          <div class="printer-head">
+            <h2 class="panel-title">Reçus Fiscaux</h2>
+            <button type="button" id="printer-btn" class="wing-action-btn wing-action-sm">IMPRIMER</button>
+          </div>
+          <div class="receipt-slot" aria-hidden="true"></div>
+          <ul id="receipt-feed" class="receipt-feed"></ul>
+        </section>
+
+        <section id="polygraph-card" class="panel-card polygraph-card" aria-label="Polygraphe détecteur de mytho">
+          <div class="polygraph-head">
+            <h2 class="panel-title">Détecteur Mytho</h2>
+            <span id="polygraph-badge" class="polygraph-badge">VEILLE</span>
+          </div>
+          <div class="polygraph-leds" aria-hidden="true">
+            <span class="poly-led poly-led-true">VRAI</span>
+            <div class="poly-bars">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <span class="poly-led poly-led-lie">MYTHO</span>
+          </div>
+          <div class="polygraph-foot">
+            <span id="polygraph-verdict" class="polygraph-verdict">Preuve : 0% fiable</span>
+            <button type="button" id="polygraph-btn" class="wing-action-btn wing-action-sm">SCANNER</button>
+          </div>
+        </section>
+      </aside>
     </main>
 
     <div id="achievement-toast" class="achievement-toast" hidden aria-live="polite">
-      <span id="achievement-toast-emoji" class="achievement-toast-emoji" aria-hidden="true">🏆</span>
+      <span id="achievement-toast-emoji" class="achievement-toast-emoji" aria-hidden="true">
+        <svg class="achievement-svg-icon ui-svg-icon" viewBox="0 0 24 24" width="24" height="24" focusable="false">
+          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z" fill="none" stroke="#ffe600" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
       <span class="achievement-toast-text">
         <strong id="achievement-toast-title">Succès débloqué</strong>
         <span id="achievement-toast-desc"></span>
@@ -884,7 +1227,11 @@
       <div class="dialog-header">
         <h1 id="help-dialog-title">SUIKLEM.EXE — Règles du Bordel</h1>
         <form method="dialog">
-          <button type="submit" class="close-btn" aria-label="Fermer le lore">✕</button>
+          <button type="submit" class="close-btn" aria-label="Fermer le lore">
+            <svg class="ui-svg-icon" aria-hidden="true" viewBox="0 0 14 14" width="14" height="14" focusable="false">
+              <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          </button>
         </form>
       </div>
 
@@ -912,7 +1259,20 @@
   <!-- Dialogue Game Over -->
   <dialog id="gameover-dialog" aria-labelledby="gameover-title">
     <div class="dialog-card gameover-card">
-      <p class="gameover-emoji" aria-hidden="true">💀</p>
+      <div class="gameover-emoji" aria-hidden="true">
+        <svg class="gameover-skull-svg" viewBox="0 0 48 48" width="46" height="46" focusable="false">
+          <path d="M8 38L40 16M40 38L8 16" stroke="#ffe600" stroke-width="3.6" stroke-linecap="round"/>
+          <path d="M12 20C12 11 17 6 24 6C31 6 36 11 36 20C36 25 33 28 31 30V36H17V30C15 28 12 25 12 20Z" fill="#e2e8f0" stroke="#090314" stroke-width="2.4" stroke-linejoin="round"/>
+          <circle cx="19" cy="19" r="3.6" fill="#090314"/>
+          <circle cx="29" cy="19" r="3.6" fill="#090314"/>
+          <circle cx="19" cy="19" r="1.4" fill="#ff2bd6"/>
+          <circle cx="29" cy="19" r="1.4" fill="#00f5d4"/>
+          <path d="M21.5 27L24 23.5L26.5 27Z" fill="#090314"/>
+          <line x1="20.5" y1="32" x2="20.5" y2="36" stroke="#090314" stroke-width="1.8"/>
+          <line x1="24" y1="32" x2="24" y2="36" stroke="#090314" stroke-width="1.8"/>
+          <line x1="27.5" y1="32" x2="27.5" y2="36" stroke="#090314" stroke-width="1.8"/>
+        </svg>
+      </div>
       <h1 id="gameover-title">BORDEL CRITIQUE !</h1>
       <p id="gameover-quip" class="dialog-intro">Le bocal a explosé sous la pression du cringe.</p>
 
@@ -937,7 +1297,11 @@
       <div class="dialog-header">
         <h1 id="achievements-dialog-title">Succès Débiles (<span id="achievements-progress">0 / 10</span>)</h1>
         <form method="dialog">
-          <button type="submit" class="close-btn" aria-label="Fermer les succès">✕</button>
+          <button type="submit" class="close-btn" aria-label="Fermer les succès">
+            <svg class="ui-svg-icon" aria-hidden="true" viewBox="0 0 14 14" width="14" height="14" focusable="false">
+              <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+          </button>
         </form>
       </div>
       <p class="dialog-intro">Collectionne les pires trophées possibles. Ils restent sauvegardés entre tes parties.</p>

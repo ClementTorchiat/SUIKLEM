@@ -13,6 +13,8 @@ import { PhysicsWorld, JAR_BOUNDS } from './physics.js';
 import { GameRenderer, drawFruitShape } from './renderer.js';
 import { BackgroundRenderer } from './bg.js';
 import { BrainrotAudio } from './audio.js';
+import { WingsController } from './wings.js';
+import { createChaosIconSvg, createCloseCrossSvg, createAchievementIconSvg } from './icons.js';
 
 const STORAGE_BEST_KEY = 'suiklem-best-score';
 const STORAGE_MUTE_KEY = 'suiklem-muted';
@@ -124,7 +126,9 @@ class SuiklemGame {
     this.powerBannerTextEl = document.getElementById('power-banner-text');
     this.cancelPowerBtn = document.getElementById('cancel-power-btn');
     this.chaosBanner = document.getElementById('chaos-banner');
+    this.chaosBannerIconEl = document.getElementById('chaos-banner-icon');
     this.chaosBannerTextEl = document.getElementById('chaos-banner-text');
+    this.lastChaosBannerId = null;
     this.chaosTimerTextEl = document.getElementById('chaos-timer-text');
     this.chaosSlotMachineEl = document.getElementById('chaos-slot-machine');
     this.chaosSlotTrackEl = document.getElementById('chaos-slot-track');
@@ -195,6 +199,7 @@ class SuiklemGame {
     this.ecgCanvas = document.getElementById('ecg-canvas');
     this.ecgCtx = this.ecgCanvas.getContext('2d');
     this.ecgHistory = new Array(60).fill(0);
+    this.wings = new WingsController({ audio: this.audio, moodEl: this.moodEl });
 
     this.telemetryEls = {
       mouse: document.getElementById('stat-mouse'),
@@ -399,7 +404,6 @@ class SuiklemGame {
     }
     this.tickerToggleBtn.addEventListener('click', () => {
       const paused = this.tickerBar.classList.toggle('is-paused');
-      this.tickerToggleBtn.textContent = paused ? '▶' : '⏸';
       this.tickerToggleBtn.setAttribute(
         'aria-label',
         paused ? 'Relancer le bandeau' : 'Mettre le bandeau en pause',
@@ -709,7 +713,7 @@ class SuiklemGame {
     this._renderAchievements();
 
     if (this.achievementToastEl) {
-      this.achievementToastEmojiEl.textContent = ach.emoji;
+      this.achievementToastEmojiEl.replaceChildren(createAchievementIconSvg(id, true, 24));
       this.achievementToastTitleEl.textContent = `Succès débloqué : ${ach.title}`;
       this.achievementToastDescEl.textContent = ach.desc;
       this.achievementToastEl.hidden = false;
@@ -737,7 +741,7 @@ class SuiklemGame {
       const icon = document.createElement('span');
       icon.className = 'achievement-icon';
       icon.setAttribute('aria-hidden', 'true');
-      icon.textContent = unlocked ? ach.emoji : '🔒';
+      icon.replaceChildren(createAchievementIconSvg(ach.id, unlocked, 24));
       const info = document.createElement('div');
       info.className = 'achievement-info';
       const title = document.createElement('strong');
@@ -1192,7 +1196,7 @@ class SuiklemGame {
       closeBtn.type = 'button';
       closeBtn.className = 'win98-close';
       closeBtn.setAttribute('aria-label', `Fermer ${spec.title}`);
-      closeBtn.textContent = '✕';
+      closeBtn.appendChild(createCloseCrossSvg(10));
       closeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         card.remove();
@@ -1265,7 +1269,7 @@ class SuiklemGame {
 
       const emoji = document.createElement('span');
       emoji.className = 'slot-item-emoji';
-      emoji.textContent = item.emoji;
+      emoji.appendChild(createChaosIconSvg(item.id, 17));
 
       const label = document.createElement('span');
       label.className = 'slot-item-label';
@@ -1285,9 +1289,9 @@ class SuiklemGame {
     this.slotRestingEvent = null;
     if (!modeCfg.chaosEnabled) {
       this._renderSlotItems([
-        { emoji: '🍵', name: 'RESPIRATION' },
-        { emoji: '🧘', name: 'MODE ZEN' },
-        { emoji: '🍉', name: 'ZÉRO CHAOS' },
+        { id: 'zen-breath', name: 'RESPIRATION' },
+        { id: 'zen-lotus', name: 'MODE ZEN' },
+        { id: 'zen-melon', name: 'ZÉRO CHAOS' },
       ], 1);
       this._setSlotState('zen');
       this._setSlotProgress(0);
@@ -1298,7 +1302,7 @@ class SuiklemGame {
     const botEvt = this._pickRandomChaosEvent([topEvt.id]);
     this._renderSlotItems([
       topEvt,
-      { emoji: '🎰', name: 'PRÊT AU CHAOS' },
+      { id: 'slot-ready', name: 'PRÊT AU CHAOS' },
       botEvt,
     ], 1);
     this._setSlotState('idle');
@@ -1307,7 +1311,7 @@ class SuiklemGame {
 
   _startSlotSpin(modeCfg) {
     const targetEvent = this._pickRandomChaosEvent([this.lastChaosId]);
-    const centerItem = this.slotRestingEvent ?? { emoji: '🎰', name: 'PRÊT AU CHAOS' };
+    const centerItem = this.slotRestingEvent ?? { id: 'slot-ready', name: 'PRÊT AU CHAOS' };
     const topItem = this._pickRandomChaosEvent([centerItem.id]);
 
     const spinSteps = modeCfg.id === 'inferno' ? 18 : 24;
@@ -1854,8 +1858,12 @@ class SuiklemGame {
       if (this.world.activeChaos) {
         const c = this.world.activeChaos;
         this.chaosBanner.hidden = false;
-        this.chaosBannerTextEl.textContent = `${c.emoji} ${c.name} (${c.remaining.toFixed(1)}s)`;
-        this.chaosTimerTextEl.textContent = `JACKPOT : ${c.emoji} ${c.name} (${c.remaining.toFixed(1)}s)`;
+        if (this.chaosBannerIconEl && this.lastChaosBannerId !== c.id) {
+          this.lastChaosBannerId = c.id;
+          this.chaosBannerIconEl.replaceChildren(createChaosIconSvg(c.id, 16));
+        }
+        this.chaosBannerTextEl.textContent = `${c.name} (${c.remaining.toFixed(1)}s)`;
+        this.chaosTimerTextEl.textContent = `JACKPOT : ${c.name} (${c.remaining.toFixed(1)}s)`;
         this._setSlotState('active');
         this._setSlotProgress(c.duration > 0 ? c.remaining / c.duration : 0);
       } else if (!modeCfg.chaosEnabled) {
@@ -1865,7 +1873,7 @@ class SuiklemGame {
         this._setSlotProgress(0);
       } else if (this.slotSpin) {
         this.chaosBanner.hidden = true;
-        this.chaosTimerTextEl.textContent = `🎰 TIRAGE EN COURS… (${Math.max(0, this.chaosCountdown).toFixed(1)}s)`;
+        this.chaosTimerTextEl.textContent = `TIRAGE EN COURS… (${Math.max(0, this.chaosCountdown).toFixed(1)}s)`;
         this._setSlotState('spinning');
       } else {
         this.chaosBanner.hidden = true;
@@ -1964,6 +1972,7 @@ class SuiklemGame {
 
     const bgIntensity = this.world.activeChaos ? 2.4 : 1.0;
     this.bgRenderer.render(dt, this.elapsedTime, bgIntensity);
+    this.wings.update(dt, CHAOS_PALETTES[this.paletteIndex], this.isMonochrome, this.reducedMotion);
 
     this.telemetryAcc += dt;
     if (this.telemetryAcc >= 0.1) {

@@ -1145,4 +1145,52 @@ export class BrainrotAudio {
       });
     });
   }
+
+  playSwitchSnap() {
+    this.unlock();
+    if (this.muted || !this.ctx || this.ctx.state !== 'running') return;
+    this._playNoiseBurst({ freq: 2100, q: 3.2, duration: 0.016, gain: 0.09 });
+    this._playFMPluck({ freq: 520, duration: 0.055, gain: 0.07, modRatio: 2.0, modDepth: 0.8, modDecay: 0.02 });
+  }
+
+  playSonarPing() {
+    this.unlock();
+    if (this.muted || !this.ctx || this.ctx.state !== 'running') return;
+    this._playFMPluck({ freq: 1180, duration: 0.42, gain: 0.1, modRatio: 1.0, modDepth: 0.25, modDecay: 0.08 });
+  }
+
+  playCashBlip(up = true) {
+    this.unlock();
+    if (this.muted || !this.ctx || this.ctx.state !== 'running') return;
+    this._playFMPluck({ freq: up ? 880 : 490, duration: 0.08, gain: 0.07, modRatio: 2.0, modDepth: 0.7, modDecay: 0.02 });
+    this._playFMPluck({ freq: up ? 1318.5 : 370, duration: 0.12, gain: 0.07, modRatio: 2.0, modDepth: 0.6, modDecay: 0.03, delay: 0.05 });
+  }
+
+  playPrinterTick() {
+    this.unlock();
+    if (this.muted || !this.ctx || this.ctx.state !== 'running') return;
+    for (let i = 0; i < 4; i++) {
+      this._playNoiseBurst({ freq: 2900 + i * 240, q: 4.0, duration: 0.012, gain: 0.05, delay: i * 0.03 });
+    }
+  }
+
+  playVendingDrop() {
+    this.unlock();
+    if (this.muted || !this.ctx || this.ctx.state !== 'running') return;
+    // Metallic spiral hum + heavy can clunk in pickup tray + fizz
+    this._playFMPluck({ freq: 320, duration: 0.07, gain: 0.07, modRatio: 1.5, modDepth: 0.5, modDecay: 0.03 });
+    this._playBodyTone({ freq: 145, endFreq: 52, duration: 0.14, gain: 0.18, delay: 0.11, type: 'triangle' });
+    this._playNoiseBurst({ freq: 1850, q: 1.4, duration: 0.09, gain: 0.08, delay: 0.12 });
+    this._playNoiseBurst({ freq: 5200, q: 0.9, duration: 0.11, gain: 0.045, delay: 0.21 });
+  }
+
+  playGeigerBurst() {
+    this.unlock();
+    if (this.muted || !this.ctx || this.ctx.state !== 'running') return;
+    let t = 0;
+    for (let i = 0; i < 6; i++) {
+      t += 0.025 + Math.random() * 0.055;
+      this._playNoiseBurst({ freq: 3400 + Math.random() * 1400, q: 4.2, duration: 0.008, gain: 0.07, delay: t });
+    }
+  }
 }
