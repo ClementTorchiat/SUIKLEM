@@ -298,12 +298,70 @@
 
       <!-- Colonne Droite : Roulette WTF, Capteurs Absurdes, ECG, Mutations, Radio -->
       <aside class="side-panel panel-right" aria-label="Capteurs absurdes, roulette et mutations">
-        <div class="panel-card chaos-card">
+        <div id="chaos-slot-machine" class="panel-card chaos-card" data-slot-state="idle">
           <div class="chaos-head-row">
-            <h2 class="panel-title">Roulette WTF</h2>
+            <h2 class="panel-title">🎰 Roulette WTF</h2>
             <span id="palette-name-text" class="palette-tag">DA : Cyber Raisin</span>
           </div>
-          <p id="chaos-timer-text" class="chaos-timer-text">Clique pour lancer le chaos !</p>
+
+          <div class="slot-machine-body">
+            <div class="slot-cabinet">
+              <div class="slot-bulbs slot-bulbs-top" aria-hidden="true">
+                <span class="slot-bulb"></span><span class="slot-bulb"></span><span class="slot-bulb"></span>
+                <span class="slot-bulb"></span><span class="slot-bulb"></span><span class="slot-bulb"></span>
+                <span class="slot-bulb"></span><span class="slot-bulb"></span><span class="slot-bulb"></span>
+                <span class="slot-bulb"></span><span class="slot-bulb"></span><span class="slot-bulb"></span>
+              </div>
+
+              <div class="slot-middle-row">
+                <div class="slot-bulbs slot-bulbs-side" aria-hidden="true">
+                  <span class="slot-bulb"></span><span class="slot-bulb"></span>
+                  <span class="slot-bulb"></span><span class="slot-bulb"></span>
+                </div>
+
+                <div class="slot-viewport" aria-hidden="true">
+                  <div class="slot-payline">
+                    <span class="slot-pointer slot-pointer-left">▶</span>
+                    <span class="slot-pointer slot-pointer-right">◀</span>
+                  </div>
+
+                  <div id="chaos-slot-track" class="slot-track"></div>
+
+                  <div class="slot-drum-shade"></div>
+                  <div class="slot-digital-crt">
+                    <span class="slot-glitch-bar"></span>
+                  </div>
+                  <div class="slot-lens-dome"></div>
+                </div>
+
+                <div class="slot-bulbs slot-bulbs-side" aria-hidden="true">
+                  <span class="slot-bulb"></span><span class="slot-bulb"></span>
+                  <span class="slot-bulb"></span><span class="slot-bulb"></span>
+                </div>
+              </div>
+
+              <div class="slot-bulbs slot-bulbs-bottom" aria-hidden="true">
+                <span class="slot-bulb"></span><span class="slot-bulb"></span><span class="slot-bulb"></span>
+                <span class="slot-bulb"></span><span class="slot-bulb"></span><span class="slot-bulb"></span>
+                <span class="slot-bulb"></span><span class="slot-bulb"></span><span class="slot-bulb"></span>
+                <span class="slot-bulb"></span><span class="slot-bulb"></span><span class="slot-bulb"></span>
+              </div>
+            </div>
+
+            <div class="slot-lever" aria-hidden="true">
+              <div class="slot-lever-mount"></div>
+              <div class="slot-lever-shaft">
+                <span class="slot-lever-knob"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="slot-footer">
+            <p id="chaos-timer-text" class="chaos-timer-text">Clique pour lancer le chaos !</p>
+            <div class="slot-progress-track" aria-hidden="true">
+              <div id="chaos-slot-progress" class="slot-progress-fill"></div>
+            </div>
+          </div>
         </div>
 
         <section class="panel-card telemetry-card telemetry-right" aria-label="Capteurs absurdes du bocal">

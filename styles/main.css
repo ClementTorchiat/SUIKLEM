@@ -776,9 +776,35 @@ kbd {
   font-weight: 800;
 }
 
-/* Right Panel */
+/* Right Panel — Casino Slot Machine (Fixed independent Vegas styling) */
 .chaos-card {
-  border: 2px solid var(--pink);
+  --casino-gold: #ffd447;
+  --casino-gold-deep: #b86f00;
+  --casino-crimson: #9b1128;
+  --casino-crimson-dark: #470615;
+  --casino-velvet: #1b050d;
+  --casino-crt-blue: #38bdf8;
+  --casino-crt-glow: #0ea5e9;
+  --slot-row-h: 26px;
+
+  border: 2.5px solid var(--casino-gold);
+  background-color: var(--casino-velvet);
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(255, 212, 71, 0.16), transparent 62%),
+    linear-gradient(180deg, #320819 0%, #17040c 100%);
+  box-shadow:
+    0 0 14px rgba(255, 190, 40, 0.24),
+    4px 4px 0 #07020f;
+  color: #fff8e7;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.chaos-card[data-slot-state="active"] {
+  border-color: #fff078;
+  box-shadow:
+    0 0 22px rgba(255, 212, 71, 0.62),
+    0 0 40px rgba(255, 43, 214, 0.36),
+    4px 4px 0 #07020f;
 }
 
 .chaos-head-row {
@@ -786,6 +812,486 @@ kbd {
   align-items: center;
   justify-content: space-between;
   gap: 0.4rem;
+  margin-block-end: 0.34rem;
+}
+
+.chaos-head-row .panel-title {
+  margin: 0;
+  color: var(--casino-gold);
+  text-shadow: 0 1px 0 #4d1900, 0 0 8px rgba(255, 212, 71, 0.45);
+}
+
+.palette-tag {
+  margin: 0;
+  padding: 0.08rem 0.42rem;
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.55);
+  background-color: rgba(6, 26, 46, 0.85);
+  font-size: 0.64rem;
+  font-weight: 800;
+  color: #7dd3fc;
+  white-space: nowrap;
+}
+
+.slot-machine-body {
+  display: flex;
+  align-items: center;
+  gap: 0.36rem;
+}
+
+.slot-cabinet {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  padding: 0.28rem 0.32rem;
+  border-radius: 12px;
+  border: 2px solid #ffe787;
+  background-image: linear-gradient(160deg, #ffe270 0%, #d48806 38%, #8f4e00 68%, #f6c23e 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -2px 4px rgba(68, 22, 0, 0.75),
+    0 3px 10px rgba(0, 0, 0, 0.55);
+}
+
+.slot-bulbs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.14rem;
+}
+
+.slot-bulbs-top {
+  padding-inline: 0.24rem;
+  margin-block-end: 0.2rem;
+}
+
+.slot-bulbs-bottom {
+  padding-inline: 0.24rem;
+  margin-block-start: 0.2rem;
+}
+
+.slot-middle-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.22rem;
+}
+
+.slot-bulbs-side {
+  flex-direction: column;
+  justify-content: space-around;
+  padding-block: 0.15rem;
+}
+
+.slot-bulb {
+  inline-size: 6px;
+  block-size: 6px;
+  border-radius: 50%;
+  background-image: radial-gradient(circle at 35% 35%, #ffffff 0%, #ffe066 48%, #ff6b00 100%);
+  border: 1px solid rgba(72, 22, 0, 0.85);
+  box-shadow: 0 0 5px rgba(255, 215, 70, 0.85);
+  opacity: 0.92;
+}
+
+.slot-bulb:nth-child(3n + 1) {
+  background-image: radial-gradient(circle at 35% 35%, #ffffff 0%, #ff5e7e 52%, #b91c1c 100%);
+  box-shadow: 0 0 5px rgba(255, 75, 110, 0.85);
+}
+
+.slot-bulb:nth-child(3n + 2) {
+  background-image: radial-gradient(circle at 35% 35%, #ffffff 0%, #67e8f9 52%, #0284c7 100%);
+  box-shadow: 0 0 5px rgba(56, 189, 248, 0.85);
+}
+
+.chaos-card[data-slot-state="zen"] .slot-bulb {
+  opacity: 0.28;
+  box-shadow: none;
+}
+
+.chaos-card[data-slot-state="active"] .slot-cabinet {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 0 18px rgba(255, 212, 71, 0.72),
+    0 0 28px rgba(255, 43, 214, 0.42);
+}
+
+.chaos-card[data-slot-state="active"] .slot-bulb {
+  background-image: radial-gradient(circle at 35% 35%, #ffffff 0%, #fff066 42%, #ff9500 100%);
+  box-shadow:
+    0 0 6px 1px #ffffff,
+    0 0 14px 3px rgba(255, 212, 71, 0.95);
+}
+
+.chaos-card[data-slot-state="active"] .slot-bulb:nth-child(4n + 1) {
+  background-image: radial-gradient(circle at 35% 35%, #ffffff 0%, #ff77e9 45%, #ff007f 100%);
+  box-shadow:
+    0 0 6px 1px #ffffff,
+    0 0 14px 3px rgba(255, 43, 214, 0.95);
+}
+
+.chaos-card[data-slot-state="active"] .slot-bulb:nth-child(4n + 2) {
+  background-image: radial-gradient(circle at 35% 35%, #ffffff 0%, #7ef9ff 45%, #00d9ff 100%);
+  box-shadow:
+    0 0 6px 1px #ffffff,
+    0 0 14px 3px rgba(0, 229, 255, 0.95);
+}
+
+.chaos-card[data-slot-state="active"] .slot-bulb:nth-child(4n + 3) {
+  background-image: radial-gradient(circle at 35% 35%, #ffffff 0%, #b8ff6b 45%, #39ff14 100%);
+  box-shadow:
+    0 0 6px 1px #ffffff,
+    0 0 14px 3px rgba(57, 255, 20, 0.95);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .chaos-card[data-slot-state="idle"] .slot-bulb:nth-child(odd) {
+    animation: slot-bulb-pulse 1.2s ease-in-out infinite;
+  }
+
+  .chaos-card[data-slot-state="idle"] .slot-bulb:nth-child(even) {
+    animation: slot-bulb-pulse 1.2s ease-in-out -0.6s infinite;
+  }
+
+  .chaos-card[data-slot-state="spinning"] .slot-bulb:nth-child(odd) {
+    animation: slot-bulb-chase 0.48s ease-in-out infinite;
+  }
+
+  .chaos-card[data-slot-state="spinning"] .slot-bulb:nth-child(even) {
+    animation: slot-bulb-chase 0.48s ease-in-out -0.24s infinite;
+  }
+
+  .chaos-card[data-slot-state="active"] .slot-bulb:nth-child(4n + 1) {
+    animation: slot-bulb-jackpot 0.4s ease-in-out 0s infinite;
+  }
+
+  .chaos-card[data-slot-state="active"] .slot-bulb:nth-child(4n + 2) {
+    animation: slot-bulb-jackpot 0.4s ease-in-out -0.1s infinite;
+  }
+
+  .chaos-card[data-slot-state="active"] .slot-bulb:nth-child(4n + 3) {
+    animation: slot-bulb-jackpot 0.4s ease-in-out -0.2s infinite;
+  }
+
+  .chaos-card[data-slot-state="active"] .slot-bulb:nth-child(4n + 4) {
+    animation: slot-bulb-jackpot 0.4s ease-in-out -0.3s infinite;
+  }
+}
+
+@keyframes slot-bulb-pulse {
+  0%, 100% { opacity: 0.42; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+@keyframes slot-bulb-chase {
+  0%, 100% { opacity: 0.28; transform: scale(0.86); }
+  50% { opacity: 1; transform: scale(1.22); }
+}
+
+@keyframes slot-bulb-jackpot {
+  0%, 100% { opacity: 0.58; transform: scale(1.05); }
+  50% { opacity: 1; transform: scale(1.52); }
+}
+
+/* Convex "Loupe" Drum Viewport + Bluish Digital CRT Overlay */
+.slot-viewport {
+  position: relative;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  block-size: calc(var(--slot-row-h) * 3);
+  overflow: hidden;
+  border-radius: 12px;
+  border: 2.5px solid #351100;
+  background:
+    radial-gradient(ellipse at center, #141935 0%, #070b18 70%, #03050c 100%);
+  box-shadow:
+    0 0 0 1.5px rgba(255, 226, 112, 0.6),
+    0 3px 10px rgba(0, 0, 0, 0.72),
+    inset 0 0 14px rgba(0, 140, 255, 0.28);
+  perspective: 220px;
+}
+
+.slot-track {
+  position: relative;
+  z-index: 1;
+  will-change: transform;
+}
+
+.slot-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.34rem;
+  block-size: var(--slot-row-h);
+  padding-inline: 1.05rem;
+  border-block-end: 1px solid rgba(56, 189, 248, 0.14);
+  background: linear-gradient(90deg, rgba(16, 26, 56, 0.72), rgba(34, 15, 48, 0.85), rgba(16, 26, 56, 0.72));
+  color: #e2f2ff;
+  font-size: 0.71rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  transform: scale(0.9);
+  opacity: 0.62;
+  transition: transform 0.12s ease, opacity 0.12s ease, background-color 0.12s ease;
+}
+
+.slot-item:nth-child(even) {
+  background: linear-gradient(90deg, rgba(28, 12, 42, 0.78), rgba(58, 14, 42, 0.85), rgba(28, 12, 42, 0.78));
+}
+
+.slot-item.is-center {
+  transform: scale(1.07);
+  opacity: 1;
+  color: #ffffff;
+  background: linear-gradient(90deg, rgba(14, 68, 118, 0.55), rgba(168, 22, 68, 0.68), rgba(14, 68, 118, 0.55));
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.75), 0 1px 0 #000000;
+}
+
+.chaos-card[data-slot-state="active"] .slot-item.is-center {
+  background: linear-gradient(90deg, rgba(217, 119, 6, 0.36), rgba(220, 38, 38, 0.65), rgba(217, 119, 6, 0.36));
+  color: #fff7c2;
+  text-shadow: 0 0 10px rgba(255, 212, 71, 0.9), 0 1px 0 #000000;
+}
+
+.slot-item-emoji {
+  flex-shrink: 0;
+  font-size: 0.92rem;
+  line-height: 1;
+}
+
+.slot-item-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Payline markers */
+.slot-payline {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: var(--slot-row-h);
+  block-size: var(--slot-row-h);
+  z-index: 4;
+  pointer-events: none;
+  border-block: 1.5px solid rgba(255, 212, 71, 0.78);
+  background: linear-gradient(90deg, rgba(255, 212, 71, 0.14), transparent 18%, transparent 82%, rgba(255, 212, 71, 0.14));
+  box-shadow: inset 0 0 8px rgba(255, 212, 71, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: 0.18rem;
+}
+
+.slot-pointer {
+  font-size: 0.62rem;
+  line-height: 1;
+  color: #ffe270;
+  text-shadow: 0 0 6px rgba(255, 190, 30, 0.95), 0 1px 0 #3a1200;
+}
+
+/* Cylindrical drum shadow */
+.slot-drum-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(2, 5, 14, 0.84) 0%,
+    rgba(2, 5, 14, 0.24) 24%,
+    transparent 36%,
+    transparent 64%,
+    rgba(2, 5, 14, 0.24) 76%,
+    rgba(2, 5, 14, 0.84) 100%
+  );
+}
+
+/* Bluish digital CRT overlay + glowing blue side lines + subtle micro-glitch */
+.slot-digital-crt {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(56, 189, 248, 0.28) 0%,
+      rgba(14, 165, 233, 0.08) 12%,
+      rgba(14, 165, 233, 0.03) 50%,
+      rgba(14, 165, 233, 0.08) 88%,
+      rgba(56, 189, 248, 0.28) 100%
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(125, 211, 252, 0.11) 0 1px,
+      transparent 1px 3px
+    );
+}
+
+.slot-digital-crt::before,
+.slot-digital-crt::after {
+  content: "";
+  position: absolute;
+  inset-block: 4px;
+  inline-size: 4px;
+  border-radius: 3px;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(125, 211, 252, 0.92) 0 4px,
+      rgba(14, 165, 233, 0.22) 4px 7px
+    );
+  box-shadow: 0 0 7px rgba(56, 189, 248, 0.85);
+  opacity: 0.72;
+}
+
+.slot-digital-crt::before {
+  inset-inline-start: 3px;
+}
+
+.slot-digital-crt::after {
+  inset-inline-end: 3px;
+}
+
+.slot-glitch-bar {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  block-size: 3px;
+  background: linear-gradient(90deg, transparent, rgba(125, 211, 252, 0.65), rgba(244, 114, 182, 0.45), transparent);
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .slot-digital-crt {
+    animation: slot-crt-jitter 6.5s steps(2, end) infinite;
+  }
+
+  .slot-glitch-bar {
+    animation: slot-glitch-sweep 5.4s linear infinite;
+  }
+}
+
+@keyframes slot-crt-jitter {
+  0%, 94%, 100% { transform: translateX(0); opacity: 1; }
+  95% { transform: translateX(1px); opacity: 0.92; }
+  97% { transform: translateX(-1px); opacity: 0.96; }
+}
+
+@keyframes slot-glitch-sweep {
+  0%, 88%, 100% { opacity: 0; transform: translateY(8px); }
+  90% { opacity: 0.65; transform: translateY(20px); }
+  92% { opacity: 0.35; transform: translateY(52px); }
+  94% { opacity: 0; transform: translateY(70px); }
+}
+
+/* Convex "Loupe" Glass Dome bulging toward the player */
+.slot-lens-dome {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  border-radius: 10px;
+  border: 1.5px solid rgba(186, 230, 253, 0.36);
+  background:
+    radial-gradient(115% 58% at 50% -6%, rgba(255, 255, 255, 0.34) 0%, rgba(186, 230, 253, 0.14) 38%, transparent 52%),
+    radial-gradient(90% 44% at 50% 108%, rgba(56, 189, 248, 0.24) 0%, transparent 58%),
+    radial-gradient(ellipse at center, transparent 58%, rgba(2, 10, 26, 0.52) 100%);
+  box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.38),
+    inset 0 -3px 5px rgba(14, 165, 233, 0.28),
+    inset 0 0 12px rgba(2, 8, 22, 0.78);
+}
+
+/* Side Mechanical Lever */
+.slot-lever {
+  position: relative;
+  flex-shrink: 0;
+  inline-size: 16px;
+  block-size: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.slot-lever-mount {
+  inline-size: 6px;
+  block-size: 20px;
+  border-radius: 0 5px 5px 0;
+  background: linear-gradient(180deg, #ffe270, #995800);
+  border: 1.5px solid #351100;
+}
+
+.slot-lever-shaft {
+  position: absolute;
+  inset-inline-start: 4px;
+  inset-block-end: 36px;
+  inline-size: 5px;
+  block-size: 32px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #e2e8f0, #94a3b8);
+  border: 1px solid #1e293b;
+  transform-origin: bottom center;
+  transform: rotate(0deg) scaleY(1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .slot-lever-shaft {
+    transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .chaos-card[data-slot-state="spinning"] .slot-lever-shaft {
+    transform: rotate(18deg) scaleY(-0.85);
+  }
+}
+
+.slot-lever-knob {
+  position: absolute;
+  inset-block-start: -7px;
+  inset-inline-start: -4.5px;
+  inline-size: 12px;
+  block-size: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 32%, #ffb4b4 0%, #ef4444 45%, #7f1d1d 100%);
+  border: 1.5px solid #2d0505;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.65);
+}
+
+.slot-footer {
+  margin-block-start: 0.32rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.chaos-timer-text {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: var(--casino-gold);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 0 #1b050d;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slot-progress-track {
+  inline-size: 100%;
+  block-size: 5px;
+  border-radius: 999px;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 212, 71, 0.35);
+}
+
+.slot-progress-fill {
+  inline-size: 100%;
+  block-size: 100%;
+  transform-origin: left center;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, #38bdf8, #ffd447, #ff477e);
+}
+
+.chaos-card[data-slot-state="active"] .slot-progress-fill {
+  background: linear-gradient(90deg, #ff477e, #ffd447);
 }
 
 .evo-card {
@@ -804,26 +1310,10 @@ kbd {
   letter-spacing: 0.06em;
 }
 
-.chaos-card .panel-title { color: var(--pink); }
 .telemetry-left .panel-title { color: var(--lime); }
 .telemetry-right .panel-title { color: var(--cyan); }
 .evo-card .panel-title { color: var(--lime); }
 .radio-card .panel-title { color: var(--orange); }
-
-.chaos-timer-text {
-  margin: 0;
-  font-size: 0.84rem;
-  font-weight: 900;
-  color: var(--yellow);
-  font-variant-numeric: tabular-nums;
-}
-
-.palette-tag {
-  margin: 0;
-  font-size: 0.68rem;
-  font-weight: 800;
-  color: var(--cyan);
-}
 
 .evolution-list {
   list-style: none;
@@ -1598,4 +2088,59 @@ body.is-monochrome .fourthwall-bubble {
 
 body.is-monochrome #fourthwall-canvas {
   filter: none;
+}
+
+body.is-monochrome .chaos-card {
+  background-color: #000000;
+  background-image: none;
+  border-color: #ffffff;
+  box-shadow: 4px 4px 0 #ffffff;
+  color: #ffffff;
+}
+
+body.is-monochrome .chaos-head-row .panel-title,
+body.is-monochrome .chaos-timer-text,
+body.is-monochrome .palette-tag,
+body.is-monochrome .slot-pointer {
+  color: #ffffff;
+  background-color: #000000;
+  border-color: #ffffff;
+}
+
+body.is-monochrome .slot-cabinet,
+body.is-monochrome .slot-lever-mount,
+body.is-monochrome .slot-lever-shaft,
+body.is-monochrome .slot-lever-knob,
+body.is-monochrome .slot-bulb,
+body.is-monochrome .slot-progress-fill {
+  background-image: none;
+  background-color: #ffffff;
+  border-color: #000000;
+  box-shadow: none;
+}
+
+body.is-monochrome .slot-viewport,
+body.is-monochrome .slot-item,
+body.is-monochrome .slot-item.is-center,
+body.is-monochrome .slot-payline,
+body.is-monochrome .slot-digital-crt,
+body.is-monochrome .slot-lens-dome,
+body.is-monochrome .slot-drum-shade,
+body.is-monochrome .slot-progress-track {
+  background-image: none;
+  background-color: #000000;
+  border-color: #ffffff;
+  box-shadow: none;
+  color: #ffffff;
+}
+
+body.is-monochrome .slot-item.is-center {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+body.is-monochrome .slot-digital-crt::before,
+body.is-monochrome .slot-digital-crt::after,
+body.is-monochrome .slot-glitch-bar {
+  display: none;
 }

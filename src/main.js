@@ -24,6 +24,9 @@ const CHARGE_PER_GAUGE = 185;
 const MAX_GAUGES = 5;
 const MAX_CHARGE = CHARGE_PER_GAUGE * MAX_GAUGES;
 const CLONE_MAX_TIER = 6;
+const SLOT_ROW_HEIGHT = 26;
+const SLOT_SPIN_DURATION_CLASSIC = 3.5;
+const SLOT_SPIN_DURATION_INFERNO = 2.2;
 
 // --- Top-layer dialog helpers (from modern-web-guidance) ---
 let supportsDisplayTransition;
@@ -123,6 +126,9 @@ class SuiklemGame {
     this.chaosBanner = document.getElementById('chaos-banner');
     this.chaosBannerTextEl = document.getElementById('chaos-banner-text');
     this.chaosTimerTextEl = document.getElementById('chaos-timer-text');
+    this.chaosSlotMachineEl = document.getElementById('chaos-slot-machine');
+    this.chaosSlotTrackEl = document.getElementById('chaos-slot-track');
+    this.chaosSlotProgressEl = document.getElementById('chaos-slot-progress');
     this.paletteNameTextEl = document.getElementById('palette-name-text');
     this.gaugeSummaryEl = document.getElementById('gauge-summary');
     this.gaugeFills = [
@@ -274,7 +280,12 @@ class SuiklemGame {
     this.pointerWorldPos = null;
 
     this.chaosCountdown = 11;
+    this.chaosCycleTotal = 11;
     this.lastChaosId = null;
+    this.slotSpin = null;
+    this.slotRestingEvent = null;
+    this.slotItemEls = [];
+    this.slotState = 'idle';
     this.paletteIndex = 0;
     this.isMonochrome = false;
 
@@ -613,6 +624,9 @@ class SuiklemGame {
     this.hoveredFruitId = null;
     this.pointerWorldPos = null;
     this.chaosCountdown = modeCfg.chaosEnabled ? modeCfg.chaosMin : 9999;
+    this.chaosCycleTotal = this.chaosCountdown;
+    this.lastChaosId = null;
+    this._resetSlotReel(modeCfg);
     this.isMonochrome = false;
     this.isMystery = false;
     this.lagRenderAcc = 999;
@@ -1218,10 +1232,145 @@ class SuiklemGame {
     this.popupsLayerEl.hidden = true;
   }
 
-  _triggerRandomChaos() {
-    const pool = CHAOS_EVENTS.filter((ev) => ev.id !== this.lastChaosId);
-    const evt = pool[Math.floor(Math.random() * pool.length)];
+  _getSlotSpinDuration(modeCfg) {
+    return modeCfg.id === 'inferno' ? SLOT_SPIN_DURATION_INFERNO : SLOT_SPIN_DURATION_CLASSIC;
+  }
+
+  _setSlotState(state) {
+    if (!this.chaosSlotMachineEl || this.slotState === state) return;
+    this.slotState = state;
+    this.chaosSlotMachineEl.dataset.slotState = state;
+  }
+
+  _setSlotProgress(ratio) {
+    if (!this.chaosSlotProgressEl) return;
+    const clamped = Math.max(0, Math.min(1, ratio));
+    this.chaosSlotProgressEl.style.transform = `scaleX(${clamped.toFixed(4)})`;
+  }
+
+  _pickRandomChaosEvent(excludeIds = []) {
+    const excluded = new Set(excludeIds.filter(Boolean));
+    const pool = CHAOS_EVENTS.filter((ev) => !excluded.has(ev.id));
+    const source = pool.length > 0 ? pool : CHAOS_EVENTS;
+    return source[Math.floor(Math.random() * source.length)];
+  }
+
+  _renderSlotItems(items, centerIndex) {
+    if (!this.chaosSlotTrackEl) return;
+    const fragment = document.createDocumentFragment();
+    const els = [];
+    items.forEach((item, idx) => {
+      const row = document.createElement('div');
+      row.className = idx === centerIndex ? 'slot-item is-center' : 'slot-item';
+
+      const emoji = document.createElement('span');
+      emoji.className = 'slot-item-emoji';
+      emoji.textContent = item.emoji;
+
+      const label = document.createElement('span');
+      label.className = 'slot-item-label';
+      label.textContent = item.name;
+
+      row.append(emoji, label);
+      fragment.appendChild(row);
+      els.push(row);
+    });
+    this.chaosSlotTrackEl.replaceChildren(fragment);
+    this.slotItemEls = els;
+    this.chaosSlotTrackEl.style.transform = `translateY(${(-(centerIndex - 1) * SLOT_ROW_HEIGHT).toFixed(2)}px)`;
+  }
+
+  _resetSlotReel(modeCfg) {
+    this.slotSpin = null;
+    this.slotRestingEvent = null;
+    if (!modeCfg.chaosEnabled) {
+      this._renderSlotItems([
+        { emoji: '🍵', name: 'RESPIRATION' },
+        { emoji: '🧘', name: 'MODE ZEN' },
+        { emoji: '🍉', name: 'ZÉRO CHAOS' },
+      ], 1);
+      this._setSlotState('zen');
+      this._setSlotProgress(0);
+      return;
+    }
+
+    const topEvt = this._pickRandomChaosEvent();
+    const botEvt = this._pickRandomChaosEvent([topEvt.id]);
+    this._renderSlotItems([
+      topEvt,
+      { emoji: '🎰', name: 'PRÊT AU CHAOS' },
+      botEvt,
+    ], 1);
+    this._setSlotState('idle');
+    this._setSlotProgress(0);
+  }
+
+  _startSlotSpin(modeCfg) {
+    const targetEvent = this._pickRandomChaosEvent([this.lastChaosId]);
+    const centerItem = this.slotRestingEvent ?? { emoji: '🎰', name: 'PRÊT AU CHAOS' };
+    const topItem = this._pickRandomChaosEvent([centerItem.id]);
+
+    const spinSteps = modeCfg.id === 'inferno' ? 18 : 24;
+    const sequence = [topItem, centerItem];
+    let prevId = centerItem.id;
+
+    for (let i = 0; i < spinSteps; i += 1) {
+      const isLastFiller = i === spinSteps - 1;
+      const nextEvt = this._pickRandomChaosEvent(
+        isLastFiller ? [prevId, targetEvent.id] : [prevId],
+      );
+      sequence.push(nextEvt);
+      prevId = nextEvt.id;
+    }
+
+    const targetIndex = sequence.length;
+    sequence.push(targetEvent);
+    sequence.push(this._pickRandomChaosEvent([targetEvent.id]));
+
+    this._renderSlotItems(sequence, 1);
+    this.slotSpin = {
+      targetEvent,
+      sequence,
+      startRemaining: Math.max(0.25, this.chaosCountdown),
+      targetIndex,
+      lastStep: 1,
+      lastTickAudioAt: -1,
+    };
+    this._setSlotState('spinning');
+    this.audio.playSlotPull();
+  }
+
+  _updateSlotSpin() {
+    if (!this.slotSpin || !this.chaosSlotTrackEl) return;
+    const spin = this.slotSpin;
+    const u = Math.max(0, Math.min(1, 1 - (this.chaosCountdown / spin.startRemaining)));
+    const eased = this.reducedMotion ? (u >= 1 ? 1 : 0) : 1 - Math.pow(1 - u, 4.2);
+    const floatIndex = 1 + eased * (spin.targetIndex - 1);
+
+    this.chaosSlotTrackEl.style.transform = `translateY(${(-(floatIndex - 1) * SLOT_ROW_HEIGHT).toFixed(2)}px)`;
+
+    const step = Math.min(spin.targetIndex, Math.round(floatIndex));
+    if (step !== spin.lastStep) {
+      if (this.slotItemEls[spin.lastStep]) {
+        this.slotItemEls[spin.lastStep].classList.remove('is-center');
+      }
+      if (this.slotItemEls[step]) {
+        this.slotItemEls[step].classList.add('is-center');
+      }
+      if (!this.reducedMotion && this.elapsedTime - spin.lastTickAudioAt >= 0.032) {
+        this.audio.playSlotTick(u);
+        spin.lastTickAudioAt = this.elapsedTime;
+      }
+      spin.lastStep = step;
+    }
+
+    this._setSlotProgress(u);
+  }
+
+  _triggerRandomChaos(forcedEvent = null) {
+    const evt = forcedEvent ?? this._pickRandomChaosEvent([this.lastChaosId]);
     this.lastChaosId = evt.id;
+    this.slotRestingEvent = evt;
     this.chaosSurvivedCount += 1;
     if (this.chaosSurvivedCount >= 5) {
       this._unlockAchievement('wtf_veteran');
@@ -1461,6 +1610,8 @@ class SuiklemGame {
     this._clearWin98Popups();
     this.dangerBanner.hidden = true;
     this.chaosBanner.hidden = true;
+    this.slotSpin = null;
+    this._setSlotState(GAME_MODES[this.gameMode].chaosEnabled ? 'idle' : 'zen');
     this.audio.playGameOver();
 
     const quip = GAMEOVER_QUIPS[Math.floor(Math.random() * GAMEOVER_QUIPS.length)];
@@ -1646,12 +1797,28 @@ class SuiklemGame {
         }
       }
 
-      // Random Chaos Roulette timer (disabled in Zen mode)
-      if (modeCfg.chaosEnabled && this.hasStartedDropping && !this.world.activeChaos && this.world.bodies.length >= 2) {
+      // Random Chaos Roulette timer + integrated slot machine spin (disabled in Zen mode)
+      if (modeCfg.chaosEnabled && this.hasStartedDropping && !this.world.activeChaos && (this.world.bodies.length >= 2 || this.slotSpin)) {
         this.chaosCountdown -= dt;
+        const spinDuration = this._getSlotSpinDuration(modeCfg);
+        if (!this.slotSpin && this.chaosCountdown <= spinDuration) {
+          this._startSlotSpin(modeCfg);
+        }
+        if (this.slotSpin) {
+          this._updateSlotSpin();
+        }
         if (this.chaosCountdown <= 0) {
-          this._triggerRandomChaos();
+          const landedEvent = this.slotSpin?.targetEvent ?? null;
+          if (this.slotSpin && this.chaosSlotTrackEl) {
+            const { targetIndex, lastStep } = this.slotSpin;
+            if (this.slotItemEls[lastStep]) this.slotItemEls[lastStep].classList.remove('is-center');
+            if (this.slotItemEls[targetIndex]) this.slotItemEls[targetIndex].classList.add('is-center');
+            this.chaosSlotTrackEl.style.transform = `translateY(${(-(targetIndex - 1) * SLOT_ROW_HEIGHT).toFixed(2)}px)`;
+          }
+          this.slotSpin = null;
+          this._triggerRandomChaos(landedEvent);
           this.chaosCountdown = modeCfg.chaosMin + Math.random() * (modeCfg.chaosMax - modeCfg.chaosMin);
+          this.chaosCycleTotal = this.chaosCountdown;
         }
       }
 
@@ -1688,15 +1855,34 @@ class SuiklemGame {
         const c = this.world.activeChaos;
         this.chaosBanner.hidden = false;
         this.chaosBannerTextEl.textContent = `${c.emoji} ${c.name} (${c.remaining.toFixed(1)}s)`;
-        this.chaosTimerTextEl.textContent = `EN COURS : ${c.emoji} ${c.name} (${c.remaining.toFixed(1)}s)`;
+        this.chaosTimerTextEl.textContent = `JACKPOT : ${c.emoji} ${c.name} (${c.remaining.toFixed(1)}s)`;
+        this._setSlotState('active');
+        this._setSlotProgress(c.duration > 0 ? c.remaining / c.duration : 0);
       } else if (!modeCfg.chaosEnabled) {
         this.chaosBanner.hidden = true;
         this.chaosTimerTextEl.textContent = 'Mode Zen : zéro roulette WTF';
+        this._setSlotState('zen');
+        this._setSlotProgress(0);
+      } else if (this.slotSpin) {
+        this.chaosBanner.hidden = true;
+        this.chaosTimerTextEl.textContent = `🎰 TIRAGE EN COURS… (${Math.max(0, this.chaosCountdown).toFixed(1)}s)`;
+        this._setSlotState('spinning');
       } else {
         this.chaosBanner.hidden = true;
-        this.chaosTimerTextEl.textContent = this.hasStartedDropping
-          ? `Prochain incident : ${Math.max(1, Math.ceil(this.chaosCountdown))}s`
-          : 'Clique pour lancer le chaos !';
+        this._setSlotState('idle');
+        if (!this.hasStartedDropping) {
+          this._setSlotProgress(0);
+          this.chaosTimerTextEl.textContent = 'Clique pour lancer le chaos !';
+        } else {
+          const spinDuration = this._getSlotSpinDuration(modeCfg);
+          const timeToSpin = Math.max(0, this.chaosCountdown - spinDuration);
+          const waitSpan = Math.max(0.1, this.chaosCycleTotal - spinDuration);
+          const waitProgress = Math.max(0, Math.min(1, 1 - (timeToSpin / waitSpan)));
+          this._setSlotProgress(waitProgress);
+          this.chaosTimerTextEl.textContent = this.world.bodies.length < 2
+            ? 'Lâche encore 1 boule pour armer…'
+            : `Prochain tirage : ${Math.max(1, Math.ceil(timeToSpin))}s`;
+        }
       }
 
       this.audio.setMusicState({

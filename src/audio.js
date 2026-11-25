@@ -1045,6 +1045,48 @@ export class BrainrotAudio {
     });
   }
 
+  playSlotPull() {
+    this.unlock();
+    // Chunky mechanical lever pull + spring latch click
+    this._playBodyTone({
+      freq: 175,
+      endFreq: 92,
+      duration: 0.11,
+      gain: 0.14,
+      type: 'triangle',
+      cutoff: 720,
+    });
+    this._playNoiseBurst({
+      freq: 1650,
+      endFreq: 680,
+      q: 2.2,
+      duration: 0.045,
+      gain: 0.09,
+    });
+  }
+
+  playSlotTick(progress = 0) {
+    if (this.muted || !this.ctx || this.ctx.state !== 'running') return;
+    const clamped = Math.max(0, Math.min(1, progress));
+    // Crisp reel detent click that deepens slightly as the wheel slows down
+    const tickFreq = 1350 - clamped * 380;
+    const toneFreq = 760 - clamped * 220;
+    this._playNoiseBurst({
+      freq: tickFreq,
+      q: 3.4,
+      duration: 0.012,
+      gain: 0.055 + clamped * 0.025,
+    });
+    this._playFMPluck({
+      freq: toneFreq,
+      duration: 0.045,
+      gain: 0.04 + clamped * 0.02,
+      modRatio: 2.2,
+      modDepth: 0.65,
+      modDecay: 0.025,
+    });
+  }
+
   playChaosAlert() {
     this.unlock();
     // Quirky mischievous tritone/lounge bell chime
