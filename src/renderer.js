@@ -55,7 +55,7 @@ export function drawFruitShape(ctx, tier, radius, options = {}) {
       ctx.stroke();
       ctx.fillStyle = '#ffe600';
     }
-    ctx.font = `900 ${Math.max(12, Math.round(radius * 1.15))}px ui-rounded, system-ui, sans-serif`;
+    ctx.font = `700 ${Math.max(12, Math.round(radius * 1.15))}px "Pixelify Sans", ui-monospace, system-ui, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('?', 0, 1);
@@ -1104,7 +1104,7 @@ export class GameRenderer {
         ctx.fillRect(b.x - 24, b.y - renderRadius - 22, 48, 17);
         ctx.strokeRect(b.x - 24, b.y - renderRadius - 22, 48, 17);
         ctx.fillStyle = '#ffffff';
-        ctx.font = '900 11px ui-rounded, system-ui, sans-serif';
+        ctx.font = '700 11px "Pixelify Sans", ui-monospace, system-ui, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(`💣 ${rem.toFixed(1)}s`, b.x, b.y - renderRadius - 13);
@@ -1166,7 +1166,7 @@ export class GameRenderer {
             ctx.fillRect(sx - 24, sy - 9, 48, 16);
             ctx.strokeRect(sx - 24, sy - 9, 48, 16);
             ctx.fillStyle = mono ? '#000000' : '#ffffff';
-            ctx.font = '900 10px ui-rounded, system-ui, sans-serif';
+            ctx.font = '700 10px "Pixelify Sans", ui-monospace, system-ui, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText('GRÈVE!', sx, sy - 0.5);
@@ -1283,7 +1283,7 @@ export class GameRenderer {
       ctx.globalAlpha = alpha;
       ctx.translate(t.x, t.y);
       ctx.rotate(t.tilt || 0);
-      ctx.font = '900 16px ui-rounded, system-ui, sans-serif';
+      ctx.font = '700 16px "Pixelify Sans", ui-monospace, system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.lineWidth = 4.5;
       ctx.strokeStyle = mono ? '#000000' : '#090314';
@@ -1341,7 +1341,7 @@ export class GameRenderer {
       }
       const depthPx = Math.round(bottom - JAR_BOUNDS.bottom);
       ctx.fillStyle = mono ? '#ffffff' : this.palette.yellow;
-      ctx.font = '900 12px ui-rounded, system-ui, sans-serif';
+      ctx.font = '700 12px "Pixelify Sans", ui-monospace, system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(`⬇ ABYSSE (-${depthPx} px HORS ÉCRAN) ⬇`, (left + right) * 0.5, height - 12);
       ctx.restore();
@@ -1355,7 +1355,7 @@ export class GameRenderer {
       ctx.fillRect(right - 134, top + 8, 124, 24);
       ctx.strokeRect(right - 134, top + 8, 124, 24);
       ctx.fillStyle = mono ? '#000000' : '#ffffff';
-      ctx.font = '900 11px ui-rounded, system-ui, sans-serif';
+      ctx.font = '700 11px "Pixelify Sans", ui-monospace, system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('📡 PING : 999 ms', right - 72, top + 20);
@@ -1376,7 +1376,7 @@ export class GameRenderer {
       if (speaker && speaker.y < height - 10) {
         const text = this.speechBubble.text;
         ctx.save();
-        ctx.font = '900 11px ui-rounded, system-ui, sans-serif';
+        ctx.font = '700 11px "Pixelify Sans", ui-monospace, system-ui, sans-serif';
         const padX = 9;
         const boxW = Math.min(200, ctx.measureText(text).width + padX * 2);
         const boxH = 22;
@@ -1561,7 +1561,7 @@ export class GameRenderer {
     ctx.stroke();
 
     ctx.fillStyle = '#090314';
-    ctx.font = '900 11px ui-rounded, system-ui, sans-serif';
+    ctx.font = '700 11px "Pixelify Sans", ui-monospace, system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(badgeText, bx, by + 0.5);
