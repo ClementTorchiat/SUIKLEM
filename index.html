@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SUIKLEM.EXE — Télémétrie du Bordel</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <script type="module" src="src/main.js"></script>
+</head>
+<body>
+  <canvas id="bg-canvas" class="bg-canvas" aria-hidden="true"></canvas>
+  <div id="flashlight-overlay" class="flashlight-overlay" hidden aria-hidden="true"></div>
+  <div class="app-shell">
+    <header class="top-bar">
+      <div class="brand">
+        <span class="brand-badge" aria-hidden="true">🤪</span>
+        <div class="brand-text">
+          <h1>SUIKLEM.EXE</h1>
+          <p class="subtitle">Zéro chill &bull; 100% télémétrie inutile</p>
+        </div>
+      </div>
+
+      <div class="ticker-bar" aria-label="Bandeau d'informations absurdes">
+        <span class="ticker-tag">LIVE</span>
+        <div class="ticker-viewport">
+          <div id="ticker-track" class="ticker-track">
+            <span>CORNICHON/EUR +420,69% ▲ &bull; HUMIDITÉ BOCAL : 98,4% &bull; CHAUSSETTES PERDUES : 42 &bull; MICROPLASTIQUES : CRITIQUE &bull; SHREK INDEX : BULLISH ▲ &bull; PRESSION TACO : 1042 hPa &bull; GPU CERVEAU : 104% &bull;</span>
+            <span aria-hidden="true">CORNICHON/EUR +420,69% ▲ &bull; HUMIDITÉ BOCAL : 98,4% &bull; CHAUSSETTES PERDUES : 42 &bull; MICROPLASTIQUES : CRITIQUE &bull; SHREK INDEX : BULLISH ▲ &bull; PRESSION TACO : 1042 hPa &bull; GPU CERVEAU : 104% &bull;</span>
+          </div>
+        </div>
+        <button
+          type="button"
+          id="ticker-toggle"
+          class="ticker-pause-btn"
+          aria-label="Mettre le bandeau en pause"
+        >⏸</button>
+      </div>
+
+      <div class="top-actions">
+        <button
+          type="button"
+          id="stats-toggle"
+          class="icon-btn"
+          aria-pressed="false"
+          aria-label="Masquer les stats inutiles"
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span class="btn-label">Stats</span>
+        </button>
+
+        <button
+          type="button"
+          id="sound-toggle"
+          class="icon-btn"
+          aria-pressed="false"
+          aria-label="Couper le son"
+        >
+          <svg class="icon-sound-on" aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <svg class="icon-sound-off" aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="22" y1="9" x2="16" y2="15"></line>
+            <line x1="16" y1="9" x2="22" y2="15"></line>
+          </svg>
+          <span class="btn-label">Son</span>
+        </button>
+
+        <button
+          type="button"
+          id="music-toggle"
+          class="icon-btn"
+          aria-pressed="false"
+          aria-label="Couper la musique chiptune"
+        >
+          <span aria-hidden="true">🎵</span>
+          <span class="btn-label">Zik</span>
+        </button>
+
+        <button
+          type="button"
+          id="achievements-btn"
+          class="icon-btn"
+          aria-label="Voir les succès débiles"
+        >
+          <span aria-hidden="true">🏆</span>
+          <span id="ach-count" class="btn-label">0/10</span>
+        </button>
+
+        <button
+          type="button"
+          id="help-btn"
+          class="icon-btn"
+          aria-label="Voir le lore et les touches"
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span class="btn-label">Lore</span>
+        </button>
+
+        <button
+          type="button"
+          id="restart-btn"
+          class="icon-btn"
+          aria-label="Tout raser et recommencer"
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          <span class="btn-label">Reset</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <!-- Colonne Gauche : Mode, Score, Prochain, Pouvoirs, Télémétrie Joueur -->
+      <aside class="side-panel panel-left" aria-label="Modes, scores, pouvoirs et télémétrie joueur">
+        <div class="mode-switcher" role="group" aria-label="Mode de jeu">
+          <button type="button" class="mode-btn" data-mode="classic" aria-pressed="true">🌀 Chaos</button>
+          <button type="button" class="mode-btn" data-mode="zen" aria-pressed="false">🧘 Zen</button>
+          <button type="button" class="mode-btn" data-mode="inferno" aria-pressed="false">😈 Inferno</button>
+        </div>
+
+        <div class="score-grid">
+          <div class="stat-pill stat-score">
+            <div class="score-label-row">
+              <span class="stat-label">Score</span>
+              <span id="fever-pill" class="fever-pill" hidden>FEVER ×2</span>
+            </div>
+            <strong id="score-value" class="stat-value">0</strong>
+          </div>
+
+          <div class="stat-pill stat-best">
+            <span class="stat-label">Record</span>
+            <strong id="best-value" class="stat-value">0</strong>
+          </div>
+        </div>
+
+        <div class="next-pill" aria-label="Prochaine créature">
+          <span class="stat-label">Prochain mutant</span>
+          <div class="next-preview">
+            <canvas id="next-canvas" width="44" height="44" aria-hidden="true"></canvas>
+            <span id="next-name" class="next-name">Atome Sus</span>
+          </div>
+        </div>
+
+        <section class="powers-card" aria-label="Pouvoirs débiles à jauges">
+          <div class="powers-header">
+            <span class="stat-label">Jauges du Bordel</span>
+            <span id="gauge-summary" class="gauge-summary">0 / 5 jauges</span>
+          </div>
+
+          <div class="gauge-track" aria-hidden="true">
+            <div class="gauge-segment"><div id="gauge-fill-0" class="gauge-fill"></div></div>
+            <div class="gauge-segment"><div id="gauge-fill-1" class="gauge-fill"></div></div>
+            <div class="gauge-segment"><div id="gauge-fill-2" class="gauge-fill"></div></div>
+            <div class="gauge-segment"><div id="gauge-fill-3" class="gauge-fill"></div></div>
+            <div class="gauge-segment"><div id="gauge-fill-4" class="gauge-fill"></div></div>
+          </div>
+
+          <div class="power-buttons">
+            <button
+              type="button"
+              id="power-nuke-btn"
+              class="power-btn power-btn-1"
+              aria-disabled="true"
+              aria-pressed="false"
+            >
+              <span class="power-icon" aria-hidden="true">💣</span>
+              <span class="power-text">
+                <span class="power-name">Bombe Locale</span>
+                <span class="power-cost">1 jauge &bull; [1]</span>
+              </span>
+            </button>
+
+            <button
+              type="button"
+              id="power-wind-btn"
+              class="power-btn power-btn-2"
+              aria-disabled="true"
+            >
+              <span class="power-icon" aria-hidden="true">🌪️</span>
+              <span class="power-text">
+                <span class="power-name">Essorage 9000</span>
+                <span class="power-cost">2 jauges &bull; [2]</span>
+              </span>
+            </button>
+
+            <button
+              type="button"
+              id="power-clone-btn"
+              class="power-btn power-btn-3"
+              aria-disabled="true"
+              aria-pressed="false"
+            >
+              <span class="power-icon" aria-hidden="true">🧬</span>
+              <span class="power-text">
+                <span class="power-name">Rayon Cloneur</span>
+                <span class="power-cost">3 jauges &bull; [3]</span>
+              </span>
+            </button>
+
+            <button
+              type="button"
+              id="power-purge-btn"
+              class="power-btn power-btn-4"
+              aria-disabled="true"
+            >
+              <span class="power-icon" aria-hidden="true">🧹</span>
+              <span class="power-text">
+                <span class="power-name">Purge Pucerons</span>
+                <span class="power-cost">4 jauges &bull; [4]</span>
+              </span>
+            </button>
+
+            <button
+              type="button"
+              id="power-apocalypse-btn"
+              class="power-btn power-btn-5"
+              aria-disabled="true"
+            >
+              <span class="power-icon" aria-hidden="true">☄️</span>
+              <span class="power-text">
+                <span class="power-name">Orage Mutant</span>
+                <span class="power-cost">5 jauges &bull; [5]</span>
+              </span>
+            </button>
+          </div>
+        </section>
+
+        <section class="panel-card telemetry-card telemetry-left" aria-label="Statistiques inutiles du joueur">
+          <h2 class="panel-title">Télémétrie Joueur</h2>
+          <dl class="micro-stats-grid">
+            <div class="micro-stat"><dt>Souris</dt><dd id="stat-mouse">0 px</dd></div>
+            <div class="micro-stat"><dt>Lâchers</dt><dd id="stat-drops">0</dd></div>
+            <div class="micro-stat"><dt>Fusions</dt><dd id="stat-merges">0</dd></div>
+            <div class="micro-stat"><dt>Bonks</dt><dd id="stat-bonks">0</dd></div>
+            <div class="micro-stat"><dt>Temps perdu</dt><dd id="stat-time">00:00</dd></div>
+            <div class="micro-stat"><dt>Calories</dt><dd id="stat-kcal">0 kcal</dd></div>
+            <div class="micro-stat"><dt>Masse</dt><dd id="stat-mass">0 kg</dd></div>
+            <div class="micro-stat"><dt>Énergie</dt><dd id="stat-energy">0 J</dd></div>
+            <div class="micro-stat"><dt>V. max</dt><dd id="stat-speed">0 px/s</dd></div>
+            <div class="micro-stat"><dt>RPM moy.</dt><dd id="stat-rpm">0 tr/m</dd></div>
+          </dl>
+        </section>
+      </aside>
+
+      <!-- Colonne Centre : Bocal centré + LEDs inutiles -->
+      <section class="stage-center" aria-label="Cuve centrale">
+        <div class="jar-frame">
+          <canvas
+            id="game-canvas"
+            width="380"
+            height="560"
+            tabindex="0"
+            aria-label="Cuve Suiklem : déplacez avec la souris, le doigt ou les flèches gauche/droite, et relâchez ou appuyez sur Espace pour lâcher la créature"
+          ></canvas>
+
+          <div id="danger-banner" class="danger-banner" hidden>
+            <span aria-hidden="true">🚨</span>
+            <span>ALERTE CRINGE : ÇA DÉBORDE !</span>
+          </div>
+
+          <div id="power-banner" class="power-banner" hidden>
+            <span id="power-banner-text">Clique sur une boule</span>
+            <button type="button" id="cancel-power-btn" class="cancel-power-btn">Annuler</button>
+          </div>
+
+          <div id="chaos-banner" class="chaos-banner" hidden>
+            <span id="chaos-banner-text">🌀 BORDEL ACTIF</span>
+          </div>
+
+          <div id="popups-layer" class="popups-layer" hidden aria-live="polite"></div>
+        </div>
+
+        <div class="led-strip" aria-hidden="true">
+          <span class="led-chip">FPS <strong id="led-fps">60</strong></span>
+          <span class="led-chip">PLEIN <strong id="led-fill">0%</strong></span>
+          <span class="led-chip">BOULES <strong id="led-count">0</strong></span>
+          <span class="led-chip">FEUX <strong id="led-fires">0</strong></span>
+          <span class="led-chip">CLICS <strong id="led-clicks">0</strong></span>
+        </div>
+
+        <p class="controls-hint">
+          1re boule libre, puis 1s/boule &bull; <kbd>Espace</kbd> lâcher &bull; <kbd>1</kbd>–<kbd>5</kbd> pouvoirs
+        </p>
+      </section>
+
+      <!-- Colonne Droite : Roulette WTF, Capteurs Absurdes, ECG, Mutations, Radio -->
+      <aside class="side-panel panel-right" aria-label="Capteurs absurdes, roulette et mutations">
+        <div class="panel-card chaos-card">
+          <div class="chaos-head-row">
+            <h2 class="panel-title">Roulette WTF</h2>
+            <span id="palette-name-text" class="palette-tag">DA : Cyber Raisin</span>
+          </div>
+          <p id="chaos-timer-text" class="chaos-timer-text">Clique pour lancer le chaos !</p>
+        </div>
+
+        <section class="panel-card telemetry-card telemetry-right" aria-label="Capteurs absurdes du bocal">
+          <h2 class="panel-title">Capteurs du Bocal</h2>
+          <dl class="micro-stats-grid">
+            <div class="micro-stat"><dt>Cringe</dt><dd id="stat-cringe">0.0%</dd></div>
+            <div class="micro-stat"><dt>Pression</dt><dd id="stat-pressure">1013 hPa</dd></div>
+            <div class="micro-stat"><dt>Temp.</dt><dd id="stat-temp">21.4 °C</dd></div>
+            <div class="micro-stat"><dt>WiFi Poulpe</dt><dd id="stat-wifi">0.4 Gbps</dd></div>
+            <div class="micro-stat"><dt>Sel</dt><dd id="stat-salt">0.0 g</dd></div>
+            <div class="micro-stat"><dt>QI Estimé</dt><dd id="stat-iq">100</dd></div>
+            <div class="micro-stat"><dt>Bruit</dt><dd id="stat-db">42 dB</dd></div>
+            <div class="micro-stat"><dt>Pouls</dt><dd id="stat-bpm">72 BPM</dd></div>
+            <div class="micro-stat"><dt>Microplast.</dt><dd id="stat-plastic">120 ppm</dd></div>
+            <div class="micro-stat"><dt>Entropie</dt><dd id="stat-entropy">1.00</dd></div>
+          </dl>
+          <div class="ecg-wrap">
+            <span class="ecg-label">ECG Mental</span>
+            <canvas id="ecg-canvas" width="240" height="34" aria-hidden="true"></canvas>
+          </div>
+        </section>
+
+        <div class="panel-card evo-card">
+          <h2 class="panel-title">Mutations (16)</h2>
+          <ol id="evolution-list" class="evolution-list"></ol>
+        </div>
+
+        <div class="panel-card radio-card">
+          <h2 class="panel-title">Radio Bordel</h2>
+          <p id="jar-mood" class="mood-text">Clique pour lâcher la 1re boule… ensuite, 1s max !</p>
+        </div>
+      </aside>
+    </main>
+
+    <div id="achievement-toast" class="achievement-toast" hidden aria-live="polite">
+      <span id="achievement-toast-emoji" class="achievement-toast-emoji" aria-hidden="true">🏆</span>
+      <span class="achievement-toast-text">
+        <strong id="achievement-toast-title">Succès débloqué</strong>
+        <span id="achievement-toast-desc"></span>
+      </span>
+    </div>
+
+    <div id="live-announcer" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+  </div>
+
+  <!-- Dialogue Lore & Contrôles -->
+  <dialog id="help-dialog" closedby="any" aria-labelledby="help-dialog-title">
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <h1 id="help-dialog-title">SUIKLEM.EXE — Règles du Bordel</h1>
+        <form method="dialog">
+          <button type="submit" class="close-btn" aria-label="Fermer le lore">✕</button>
+        </form>
+      </div>
+
+      <p class="dialog-intro">
+        Tu as <strong>1 seconde max</strong> par boule (après la 1re) ! Empile 16 mutations de plus en plus absurdes jusqu'à la <strong>PASTÈQUE 3000</strong>. À chaque événement WTF, les couleurs du jeu mutent pour de bon !
+      </p>
+
+      <h2>Commandes &amp; Pouvoirs</h2>
+      <ul class="help-controls">
+        <li><strong>Timer forcé :</strong> la 1re boule attend ton clic, puis c'est 1 seconde max par boule !</li>
+        <li><strong>Souris / Tactile / Clavier :</strong> <kbd>←</kbd> <kbd>→</kbd> (ou <kbd>Q</kbd> <kbd>D</kbd>), <kbd>Espace</kbd> ou <kbd>↓</kbd>.</li>
+        <li><strong>5 Pouvoirs (<kbd>1</kbd>–<kbd>5</kbd>) :</strong> 1 Bombe locale, 2 Essorage 9000, 3 Rayon cloneur (fusion garantie), 4 Purge pucerons, 5 Orage mutant (<kbd>Échap</kbd> annule).</li>
+        <li><strong>Raccourcis :</strong> <kbd>M</kbd> son, <kbd>R</kbd> reset.</li>
+      </ul>
+
+      <h2>Les 16 créatures mutantes</h2>
+      <ol id="help-fruit-grid" class="help-fruit-grid"></ol>
+
+      <form method="dialog" class="dialog-footer">
+        <button type="submit" class="primary-btn" autofocus>ENVOYER LA SAUCE</button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Dialogue Game Over -->
+  <dialog id="gameover-dialog" aria-labelledby="gameover-title">
+    <div class="dialog-card gameover-card">
+      <p class="gameover-emoji" aria-hidden="true">💀</p>
+      <h1 id="gameover-title">BORDEL CRITIQUE !</h1>
+      <p id="gameover-quip" class="dialog-intro">Le bocal a explosé sous la pression du cringe.</p>
+
+      <dl class="gameover-stats">
+        <div class="gameover-stat"><dt>Score</dt><dd id="final-score">0</dd></div>
+        <div class="gameover-stat"><dt>Record</dt><dd id="final-best">0</dd></div>
+        <div class="gameover-stat"><dt>Mutant max</dt><dd id="final-biggest">Atome Sus</dd></div>
+        <div class="gameover-stat gameover-useless"><dt>Temps perdu</dt><dd id="final-time">00:00</dd></div>
+        <div class="gameover-stat gameover-useless"><dt>Souris</dt><dd id="final-mouse">0 px</dd></div>
+        <div class="gameover-stat gameover-useless"><dt>QI final</dt><dd id="final-iq">100</dd></div>
+      </dl>
+
+      <form method="dialog" class="dialog-footer">
+        <button type="submit" value="retry" class="primary-btn" autofocus>REFAIRE UN BORDEL</button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Dialogue Succès Débiles -->
+  <dialog id="achievements-dialog" closedby="any" aria-labelledby="achievements-dialog-title">
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <h1 id="achievements-dialog-title">Succès Débiles (<span id="achievements-progress">0 / 10</span>)</h1>
+        <form method="dialog">
+          <button type="submit" class="close-btn" aria-label="Fermer les succès">✕</button>
+        </form>
+      </div>
+      <p class="dialog-intro">Collectionne les pires trophées possibles. Ils restent sauvegardés entre tes parties.</p>
+      <ul id="achievements-list" class="achievements-list"></ul>
+      <form method="dialog" class="dialog-footer">
+        <button type="submit" class="primary-btn" autofocus>RETOUR AU BOCAL</button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Acteur Brisage du 4ème Mur (en bas à droite de la fenêtre) -->
+  <aside id="fourthwall-actor" class="fourthwall-actor" hidden aria-live="polite">
+    <div id="fourthwall-bubble" class="fourthwall-bubble"></div>
+    <canvas id="fourthwall-canvas" width="136" height="136" aria-hidden="true"></canvas>
+  </aside>
+</body>
+</html>
