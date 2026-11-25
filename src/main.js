@@ -205,7 +205,22 @@ class SuiklemGame {
     this.ecgCanvas = document.getElementById('ecg-canvas');
     this.ecgCtx = this.ecgCanvas.getContext('2d');
     this.ecgHistory = new Array(60).fill(0);
-    this.wings = new WingsController({ audio: this.audio, moodEl: this.moodEl });
+    this.achFilterBtns = Array.from(document.querySelectorAll('.ach-filter-btn'));
+    this.achievementFilter = 'all';
+    this.usedPowerThisRun = false;
+    this.powersUsedThisRun = 0;
+    this.forcedDropsThisRun = 0;
+    this.pinballHitsThisChaos = 0;
+    this.pongHitsThisChaos = 0;
+    this.mosquitosSwattedThisChaos = 0;
+    this.pacChompsThisChaos = 0;
+    this.retroSeen = new Set();
+    this.prevActiveChaosId = null;
+    this.wings = new WingsController({
+      audio: this.audio,
+      moodEl: this.moodEl,
+      onAchievement: (id) => this._unlockAchievement(id),
+    });
 
     this.telemetryEls = {
       mouse: document.getElementById('stat-mouse'),
@@ -403,6 +418,16 @@ class SuiklemGame {
       this._renderAchievements();
       this.achievementsDialog.showModal();
     });
+    for (const btn of this.achFilterBtns) {
+      btn.addEventListener('click', () => {
+        this.achievementFilter = btn.dataset.filter || 'all';
+        for (const b of this.achFilterBtns) {
+          b.setAttribute('aria-pressed', String(b === btn));
+        }
+        this.audio.playSwitchSnap();
+        this._renderAchievements();
+      });
+    }
     this.helpBtn.addEventListener('click', () => this.helpDialog.showModal());
     this.restartBtn.addEventListener('click', () => this.startNewGame());
     for (const btn of this.modeBtns) {
@@ -673,6 +698,14 @@ class SuiklemGame {
     this.totalMerges = 0;
     this.runSeconds = 0;
     this.iqScore = 100;
+    this.usedPowerThisRun = false;
+    this.powersUsedThisRun = 0;
+    this.forcedDropsThisRun = 0;
+    this.pinballHitsThisChaos = 0;
+    this.pongHitsThisChaos = 0;
+    this.mosquitosSwattedThisChaos = 0;
+    this.pacChompsThisChaos = 0;
+    this.prevActiveChaosId = null;
     this.ecgHistory.fill(0);
 
     this._applyPalette(this.paletteIndex);
@@ -700,6 +733,9 @@ class SuiklemGame {
 
   setGameMode(modeId) {
     if (!GAME_MODES[modeId] || this.gameMode === modeId) return;
+    if (this.isSabotage) {
+      this._unlockAchievement('secret_sabotage_click');
+    }
     this.gameMode = modeId;
     writeStorage(STORAGE_MODE_KEY, modeId);
     this.startNewGame();
@@ -717,6 +753,9 @@ class SuiklemGame {
     if (!this.isMusicMuted) this.audio.unlock();
     writeStorage(STORAGE_MUSIC_MUTE_KEY, this.isMusicMuted);
     this._syncMusicButton();
+    if (this.isMuted && this.isMusicMuted) {
+      this._unlockAchievement('secret_mute_all');
+    }
   }
 
   _syncMusicButton() {
@@ -760,20 +799,27 @@ class SuiklemGame {
     }
     if (!this.achievementsListEl) return;
     this.achievementsListEl.textContent = '';
-    for (const ach of ACHIEVEMENTS) {
+    const filtered = ACHIEVEMENTS.filter((ach) => {
       const unlocked = this.unlockedAchievements.has(ach.id);
+      if (this.achievementFilter === 'unlocked') return unlocked;
+      if (this.achievementFilter === 'secret') return Boolean(ach.hidden);
+      return true;
+    });
+    for (const ach of filtered) {
+      const unlocked = this.unlockedAchievements.has(ach.id);
+      const isHiddenLocked = Boolean(ach.hidden && !unlocked);
       const li = document.createElement('li');
-      li.className = `achievement-item${unlocked ? ' is-unlocked' : ''}`;
+      li.className = `achievement-item${unlocked ? ' is-unlocked' : ''}${ach.hidden ? ' is-secret' : ''}`;
       const icon = document.createElement('span');
       icon.className = 'achievement-icon';
       icon.setAttribute('aria-hidden', 'true');
-      icon.replaceChildren(createAchievementIconSvg(ach.id, unlocked, 24));
+      icon.replaceChildren(createAchievementIconSvg(ach.id, unlocked, 24, isHiddenLocked));
       const info = document.createElement('div');
       info.className = 'achievement-info';
       const title = document.createElement('strong');
-      title.textContent = ach.title;
+      title.textContent = isHiddenLocked ? '???' : ach.title;
       const desc = document.createElement('span');
-      desc.textContent = ach.desc;
+      desc.textContent = isHiddenLocked ? 'Succès caché — à toi de le découvrir !' : ach.desc;
       info.append(title, desc);
       li.append(icon, info);
       this.achievementsListEl.appendChild(li);
@@ -832,7 +878,9 @@ class SuiklemGame {
     this.hideUselessStats = !this.hideUselessStats;
     writeStorage(STORAGE_HIDE_STATS_KEY, this.hideUselessStats);
     this._syncStatsButton();
-    if (!this.hideUselessStats) {
+    if (this.hideUselessStats) {
+      this._unlockAchievement('secret_no_stats');
+    } else {
       this._updateTelemetryUI();
     }
   }
@@ -852,6 +900,9 @@ class SuiklemGame {
     if (!this.isMuted) this.audio.unlock();
     writeStorage(STORAGE_MUTE_KEY, this.isMuted);
     this._syncSoundButton();
+    if (this.isMuted && this.isMusicMuted) {
+      this._unlockAchievement('secret_mute_all');
+    }
   }
 
   _syncSoundButton() {
@@ -871,6 +922,8 @@ class SuiklemGame {
     this._unlockAchievement('first_drop');
     if (forced) {
       this.iqScore -= 3;
+      this.forcedDropsThisRun += 1;
+      if (this.forcedDropsThisRun >= 5) this._unlockAchievement('secret_afk_drop');
       if (this.iqScore < 0) this._unlockAchievement('negative_iq');
     }
 
@@ -932,6 +985,8 @@ class SuiklemGame {
     } else if (type === 'pinballHit') {
       this.audio.playPinball();
       this._addScore(25);
+      this.pinballHitsThisChaos += 1;
+      if (this.pinballHitsThisChaos >= 8) this._unlockAchievement('pinball_wizard');
       this.renderer.spawnMicroExplosion(x, y, '#ffe600', '+25!');
       this.renderer.triggerShake(3, 0.1);
       this._updateHUD();
@@ -942,6 +997,7 @@ class SuiklemGame {
     } else if (type === 'krakenRepelled') {
       this.audio.playCashBlip(true);
       this._addScore(80);
+      this._unlockAchievement('kraken_hero');
       this.renderer.spawnMicroExplosion(x, y, '#a6ff2e', 'SAUVÉ ! +80');
       this.renderer.triggerShake(7, 0.2);
       this.moodEl.textContent = 'BIEN JOUÉ ! LE KRAKEN EST REPARTI LES TENTACULES VIDES !';
@@ -956,10 +1012,13 @@ class SuiklemGame {
       this.renderer.triggerShake(7, 0.22);
       this.renderer.triggerGlitch(0.2);
     } else if (type === 'laserDevolve') {
+      this._unlockAchievement('laser_victim');
       this.renderer.spawnMicroExplosion(x, y, '#ff2bd6', 'DÉ-ÉVOLUÉ !');
     } else if (type === 'mosquitoSwat') {
       this.audio.playChomp();
       this._addScore(45);
+      this.mosquitosSwattedThisChaos += 1;
+      if (this.mosquitosSwattedThisChaos >= 3) this._unlockAchievement('mosquito_hunter');
       this.powerCharge = Math.min(MAX_CHARGE, this.powerCharge + 45);
       this.renderer.spawnMicroExplosion(x, y, '#a6ff2e', 'SPLAT ! +45 JUS');
       this._updateHUD();
@@ -971,12 +1030,16 @@ class SuiklemGame {
     } else if (type === 'pacmanChomp') {
       this.audio.playChomp();
       this._addScore(60);
+      this.pacChompsThisChaos += 1;
+      if (this.pacChompsThisChaos >= 3) this._unlockAchievement('pacman_feast');
       this.renderer.spawnMicroExplosion(x, y, '#ffe600', 'WAKA ! +60');
       this.renderer.triggerShake(4, 0.12);
       this._updateHUD();
     } else if (type === 'pongHit') {
       this.audio.playPinball();
       this._addScore(20);
+      this.pongHitsThisChaos += 1;
+      if (this.pongHitsThisChaos >= 5) this._unlockAchievement('pong_ace');
       this.renderer.spawnMicroExplosion(x, y, '#00f5d4', 'PONG ! +20');
       this._updateHUD();
     } else if (type === 'mitosisSplit') {
@@ -988,6 +1051,7 @@ class SuiklemGame {
       this.audio.playGaugeReady();
       const scoreBonus = FRUITS[tier]?.score ?? 25;
       this._addScore(scoreBonus);
+      this._unlockAchievement('lightning_lucky');
       this._markDiscovered(tier);
       if (tier > this.biggestTier) this.biggestTier = tier;
       this.renderer.spawnLaserBolt(x + (Math.random() - 0.5) * 50, 0, x, y, '#ffe600');
@@ -997,6 +1061,7 @@ class SuiklemGame {
     } else if (type === 'dvdCornerHit') {
       this.audio.playApocalypse();
       this._addScore(500);
+      this._unlockAchievement('dvd_corner');
       this.feverTimer = Math.max(this.feverTimer, 6.0);
       this.renderer.spawnMicroExplosion(x, y, '#ffe600', 'COIN PARFAIT !! +500');
       this.renderer.triggerShake(12, 0.4);
@@ -1150,8 +1215,19 @@ class SuiklemGame {
       this.bestScore = this.score;
       writeStorage(STORAGE_BEST_KEY, this.bestScore);
     }
-    if (this.gameMode === 'inferno' && this.score >= 500) {
+    if (this.score >= 10000) this._unlockAchievement('score_10k');
+    if (this.score >= 30000) this._unlockAchievement('score_30k');
+    if (this.gameMode === 'inferno' && this.score >= 5000) {
       this._unlockAchievement('inferno_runner');
+    }
+    if (this.gameMode === 'inferno' && this.score >= 15000) {
+      this._unlockAchievement('inferno_master');
+    }
+    if (this.gameMode === 'zen' && this.score >= 15000) {
+      this._unlockAchievement('zen_chill');
+    }
+    if (!this.usedPowerThisRun && this.score >= 12000) {
+      this._unlockAchievement('purist_run');
     }
     if (total > 0) {
       this._bounceScore(total);
@@ -1236,8 +1312,14 @@ class SuiklemGame {
     if (this.comboCount >= 5) {
       this._unlockAchievement('combo_king');
     }
+    if (this.comboCount >= 8) {
+      this._unlockAchievement('combo_ultra');
+    }
     if (newTier >= 15 || isMaxPop) {
       this._unlockAchievement('watermelon');
+    }
+    if (isMaxPop) {
+      this._unlockAchievement('double_watermelon');
     }
 
     const addedScore = this._addScore(gained);
@@ -1518,8 +1600,15 @@ class SuiklemGame {
     this.lastChaosId = evt.id;
     this.slotRestingEvent = evt;
     this.chaosSurvivedCount += 1;
+    this.pinballHitsThisChaos = 0;
+    this.pongHitsThisChaos = 0;
+    this.mosquitosSwattedThisChaos = 0;
+    this.pacChompsThisChaos = 0;
     if (this.chaosSurvivedCount >= 5) {
       this._unlockAchievement('wtf_veteran');
+    }
+    if (this.chaosSurvivedCount >= 10) {
+      this._unlockAchievement('wtf_10');
     }
 
     this._cyclePalette();
@@ -1547,8 +1636,16 @@ class SuiklemGame {
     return Math.floor(this.powerCharge / CHARGE_PER_GAUGE);
   }
 
+  _recordPowerUsed() {
+    this.usedPowerThisRun = true;
+    this.powersUsedThisRun += 1;
+    if (this.powersUsedThisRun >= 5) this._unlockAchievement('power_bomber');
+    if (this.isSabotage) this._unlockAchievement('secret_sabotage_click');
+  }
+
   _activatePower(type) {
     if (this.isGameOver) return;
+    if (this.isSabotage) this._unlockAchievement('secret_sabotage_click');
     if (this.powerMode === type) {
       this._cancelPowerMode();
       return;
@@ -1571,6 +1668,7 @@ class SuiklemGame {
       this._cancelPowerMode(false);
       this.powerCharge = Math.max(0, this.powerCharge - 2 * CHARGE_PER_GAUGE);
       this.powerNoChargeTimer = Math.max(this.powerNoChargeTimer, 2.8);
+      this._recordPowerUsed();
       this.world.triggerWind(2.6);
       this.audio.playWind();
       this.renderer.triggerShake(6, 0.35);
@@ -1605,6 +1703,7 @@ class SuiklemGame {
         return;
       }
       this.powerCharge = Math.max(0, this.powerCharge - 4 * CHARGE_PER_GAUGE);
+      this._recordPowerUsed();
       this.audio.playNuke();
       this.renderer.triggerShake(9, 0.35);
       this.renderer.triggerGlitch(0.3);
@@ -1631,6 +1730,7 @@ class SuiklemGame {
       }
       this.powerCharge = Math.max(0, this.powerCharge - 5 * CHARGE_PER_GAUGE);
       this.powerNoChargeTimer = Math.max(this.powerNoChargeTimer, 1.8);
+      this._recordPowerUsed();
       this.audio.playApocalypse();
       this.renderer.triggerShake(11, 0.45);
       this.renderer.triggerGlitch(0.4);
@@ -1669,6 +1769,7 @@ class SuiklemGame {
         return;
       }
       this.powerCharge = Math.max(0, this.powerCharge - CHARGE_PER_GAUGE);
+      this._recordPowerUsed();
       this.audio.playNuke();
       this.renderer.triggerShake(10, 0.32);
       this.renderer.triggerGlitch(0.28);
@@ -1695,6 +1796,8 @@ class SuiklemGame {
       const res = this.world.cloneFruit(hit.id, CLONE_MAX_TIER);
       if (!res) return;
       this.powerCharge = Math.max(0, this.powerCharge - 3 * CHARGE_PER_GAUGE);
+      this._recordPowerUsed();
+      if (res.src.tier === CLONE_MAX_TIER) this._unlockAchievement('big_clone');
       this.audio.playClone();
       this.renderer.triggerShake(7, 0.25);
       this.renderer.triggerGlitch(0.22);
@@ -1759,6 +1862,9 @@ class SuiklemGame {
     this.chaosBanner.hidden = true;
     this.slotSpin = null;
     this._setSlotState(GAME_MODES[this.gameMode].chaosEnabled ? 'idle' : 'zen');
+    if (this.runSeconds > 0 && this.runSeconds < 15) {
+      this._unlockAchievement('secret_fast_death');
+    }
     this.audio.playGameOver();
 
     const quip = GAMEOVER_QUIPS[Math.floor(Math.random() * GAMEOVER_QUIPS.length)];
@@ -1787,6 +1893,9 @@ class SuiklemGame {
     }
     if (this.iqScore < 0) {
       this._unlockAchievement('negative_iq');
+    }
+    if (this.mouseDistancePx >= 25000) {
+      this._unlockAchievement('secret_marathon');
     }
     if (this.hideUselessStats) return;
     const els = this.telemetryEls;
@@ -1862,6 +1971,9 @@ class SuiklemGame {
 
   _markDiscovered(tier) {
     this.discoveredTiers.add(tier);
+    if (this.discoveredTiers.size >= FRUITS.length) {
+      this._unlockAchievement('all_specimens');
+    }
     const items = this.evolutionListEl.querySelectorAll('.evo-item');
     items.forEach((item) => {
       if (Number(item.dataset.tier) === tier) {
@@ -1988,6 +2100,18 @@ class SuiklemGame {
         this.world.step(fixedStep, simScale);
         this.accumulator -= fixedStep;
       }
+
+      const curChaosId = this.world.activeChaos?.id ?? null;
+      if (this.prevActiveChaosId && curChaosId !== this.prevActiveChaosId && !this.isGameOver) {
+        if (this.prevActiveChaosId === 'blackhole') {
+          this._unlockAchievement('survived_blackhole');
+        }
+        if (this.prevActiveChaosId === 'gameboy' || this.prevActiveChaosId === 'vhs') {
+          this.retroSeen.add(this.prevActiveChaosId);
+          if (this.retroSeen.size >= 2) this._unlockAchievement('retro_gamer');
+        }
+      }
+      this.prevActiveChaosId = curChaosId;
 
       if (this.world.maxDangerRatio >= 0.75) {
         this.hadHighDangerThisRun = true;

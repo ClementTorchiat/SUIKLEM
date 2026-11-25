@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap">
-  <link rel="stylesheet" href="styles/main.css?v=14">
+  <link rel="stylesheet" href="styles/main.css?v=15">
   <script type="module" src="src/main.js"></script>
 </head>
 <body>
@@ -1295,7 +1295,7 @@
   <dialog id="achievements-dialog" closedby="any" aria-labelledby="achievements-dialog-title">
     <div class="dialog-card">
       <div class="dialog-header">
-        <h1 id="achievements-dialog-title">Succès Débiles (<span id="achievements-progress">0 / 10</span>)</h1>
+        <h1 id="achievements-dialog-title">Succès Débiles (<span id="achievements-progress">0 / 48</span>)</h1>
         <form method="dialog">
           <button type="submit" class="close-btn" aria-label="Fermer les succès">
             <svg class="ui-svg-icon" aria-hidden="true" viewBox="0 0 14 14" width="14" height="14" focusable="false">
@@ -1304,7 +1304,12 @@
           </button>
         </form>
       </div>
-      <p class="dialog-intro">Collectionne les pires trophées possibles. Ils restent sauvegardés entre tes parties.</p>
+      <p class="dialog-intro">Collectionne les pires trophées possibles (cachés, inutiles, hardcore). Ils restent sauvegardés.</p>
+      <div class="ach-filters" role="group" aria-label="Filtrer les succès">
+        <button type="button" class="ach-filter-btn" data-filter="all" aria-pressed="true">Tous</button>
+        <button type="button" class="ach-filter-btn" data-filter="unlocked" aria-pressed="false">Débloqués</button>
+        <button type="button" class="ach-filter-btn" data-filter="secret" aria-pressed="false">Cachés</button>
+      </div>
       <ul id="achievements-list" class="achievements-list"></ul>
       <form method="dialog" class="dialog-footer">
         <button type="submit" class="primary-btn" autofocus>RETOUR AU BOCAL</button>

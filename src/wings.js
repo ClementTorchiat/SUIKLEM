@@ -53,9 +53,17 @@ const POLYGRAPH_VERDICTS = [
 ];
 
 export class WingsController {
-  constructor({ audio, moodEl }) {
+  constructor({ audio, moodEl, onAchievement = null }) {
     this.audio = audio;
     this.moodEl = moodEl;
+    this.onAchievement = onAchievement;
+
+    this.placeboToggles = 0;
+    this.geigerTests = 0;
+    this.sonarPings = 0;
+    this.receiptPrints = 0;
+    this.polygraphLies = 0;
+    this.vendingDrinksSeen = new Set();
 
     // Placebo + Forbidden Button
     this.placeboBtn = document.getElementById('placebo-toggle-btn');
@@ -147,11 +155,13 @@ export class WingsController {
   _bindEvents() {
     this.placeboBtn?.addEventListener('click', () => {
       this.placeboActive = !this.placeboActive;
+      this.placeboToggles += 1;
       this.placeboBtn.setAttribute('aria-pressed', String(this.placeboActive));
       if (this.placeboStatusEl) {
         this.placeboStatusEl.textContent = this.placeboActive ? 'ACTIF (+0.00%)' : 'INACTIF (0%)';
       }
       this.audio.playSwitchSnap();
+      if (this.placeboToggles >= 5) this.onAchievement?.('placebo_believer');
     });
 
     this.dontTouchBtn?.addEventListener('click', () => {
@@ -163,6 +173,7 @@ export class WingsController {
       if (this.moodEl) {
         this.moodEl.textContent = FORBIDDEN_QUIPS[this.temptations % FORBIDDEN_QUIPS.length];
       }
+      if (this.temptations >= 10) this.onAchievement?.('temptation_10');
     });
 
     for (const slider of this.mixerSliders) {
@@ -174,10 +185,12 @@ export class WingsController {
       this.fanIndex = (this.fanIndex + 1) % this.fanSpeeds.length;
       this._syncFan();
       this.audio.playSwitchSnap();
+      if (this.fanSpeeds[this.fanIndex] === 'off') this.onAchievement?.('gpu_meltdown');
     });
 
     this.radarPingBtn?.addEventListener('click', () => {
       this.radarPingWave = 1.0;
+      this.sonarPings += 1;
       const picked = this.radarBlips[Math.floor(Math.random() * this.radarBlips.length)];
       picked.angle = Math.random() * Math.PI * 2;
       picked.dist = 0.25 + Math.random() * 0.65;
@@ -186,12 +199,14 @@ export class WingsController {
         this.radarTargetEl.textContent = `${picked.label} • ${(picked.dist * 18).toFixed(1)}m`;
       }
       this.audio.playSonarPing();
+      if (this.sonarPings >= 5) this.onAchievement?.('sonar_spammer');
     });
 
     this.marketBuyBtn?.addEventListener('click', () => {
       this.picklesOwned += 1;
       this._syncMarketText();
       this.audio.playCashBlip(true);
+      if (this.picklesOwned >= 10) this.onAchievement?.('pickle_tycoon');
     });
 
     this.marketSellBtn?.addEventListener('click', () => {
@@ -201,21 +216,25 @@ export class WingsController {
     });
 
     this.printerBtn?.addEventListener('click', () => {
+      this.receiptPrints += 1;
       const line = RECEIPT_LINES[Math.floor(Math.random() * RECEIPT_LINES.length)];
       this.receipts.push(line);
       if (this.receipts.length > 3) this.receipts.shift();
       this._renderReceipts();
       this.audio.playPrinterTick();
+      if (this.receiptPrints >= 5) this.onAchievement?.('tax_auditor');
     });
 
     this.geigerBtn?.addEventListener('click', () => {
       this.geigerSpike = 1.0;
+      this.geigerTests += 1;
       const msv = (1.4 + Math.random() * 8.4).toFixed(2);
       if (this.geigerValueEl) this.geigerValueEl.textContent = `${msv} mSv`;
       if (this.geigerStatusEl) {
         this.geigerStatusEl.textContent = GEIGER_VERDICTS[Math.floor(Math.random() * GEIGER_VERDICTS.length)];
       }
       this.audio.playGeigerBurst();
+      if (this.geigerTests >= 5) this.onAchievement?.('geiger_panic');
     });
 
     for (const btn of this.vendingBtns) {
@@ -224,6 +243,7 @@ export class WingsController {
         const drink = VENDING_DRINKS[code];
         if (!drink) return;
         this.vendingCount += 1;
+        this.vendingDrinksSeen.add(code);
         if (this.vendingDisplayEl) {
           this.vendingDisplayEl.textContent = `${code}: ${drink.name} (#${this.vendingCount})`;
         }
@@ -235,6 +255,7 @@ export class WingsController {
           this.vendingTrayCanEl.classList.add('is-dropping');
         }
         this.audio.playVendingDrop();
+        if (this.vendingDrinksSeen.size >= 3) this.onAchievement?.('vending_addict');
       });
     }
 
@@ -244,6 +265,7 @@ export class WingsController {
       this._syncDoomsday();
       if (this.doomsdayRemaining === 0 && !wasZero) {
         this.audio.playChaosAlert();
+        this.onAchievement?.('doomsday_midnight');
       } else {
         this.audio.playSwitchSnap();
       }
@@ -270,7 +292,9 @@ export class WingsController {
       if (this.polygraphBadgeEl) this.polygraphBadgeEl.textContent = verdict.badge;
       if (this.polygraphVerdictEl) this.polygraphVerdictEl.textContent = verdict.text;
       if (verdict.lie) {
+        this.polygraphLies += 1;
         this.audio.playSonarPing();
+        if (this.polygraphLies >= 3) this.onAchievement?.('secret_mytho_3');
       } else {
         this.audio.playCashBlip();
       }
@@ -287,6 +311,9 @@ export class WingsController {
     }
     if (this.mixerReadoutEl) {
       this.mixerReadoutEl.textContent = `${Math.round(avg)}%`;
+    }
+    if (this.mixerSliders.every((el) => Number(el.value) >= 100)) {
+      this.onAchievement?.('mixer_dj');
     }
   }
 

@@ -525,19 +525,98 @@ const ACHIEVEMENT_GLYPHS = {
       el('path', { d: 'M4 5L6 7M20 5L18 7M12 1.8V4.2', stroke: '#ffe600', 'stroke-width': 1.8, 'stroke-linecap': 'round' }),
     );
   },
+  secret: (s) => {
+    s.append(
+      el('polygon', { points: '12,2.5 20.5,7 20.5,17 12,21.5 3.5,17 3.5,7', fill: '#2e1065', stroke: '#a855f7', 'stroke-width': 1.8, 'stroke-linejoin': 'round' }),
+      el('path', { d: 'M9.5 9A2.6 2.6 0 1 1 13.8 11C13.8 12.3 12 12.7 12 14', fill: 'none', stroke: '#f0abfc', 'stroke-width': 2.1, 'stroke-linecap': 'round' }),
+      el('circle', { cx: 12, cy: 17, r: 1.3, fill: '#ffe600' }),
+    );
+  },
 };
 
-export function createAchievementIconSvg(id, unlocked = true, size = 24) {
+const ACHIEVEMENT_MEDALS = {
+  score_10k: ['#00f5d4', '#083344', '10K'],
+  score_30k: ['#ffe600', '#451a03', '30K'],
+  inferno_master: ['#ef4444', '#450a0a', '15K'],
+  zen_chill: ['#a6ff2e', '#14532d', 'ZEN'],
+  combo_ultra: ['#ff2bd6', '#4a0736', '×8'],
+  double_watermelon: ['#22c55e', '#052e16', '×2'],
+  all_specimens: ['#ffe600', '#1e1b4b', '16'],
+  purist_run: ['#e2e8f0', '#1e293b', 'PUR'],
+  power_bomber: ['#ff7b00', '#431407', '×5'],
+  big_clone: ['#00f5d4', '#164e63', '2×'],
+  wtf_10: ['#ff2bd6', '#3b0764', '10×'],
+  kraken_hero: ['#a855f7', '#2e1065', 'K'],
+  mosquito_hunter: ['#a6ff2e', '#1a2e05', 'ZZ'],
+  pinball_wizard: ['#ffe600', '#701a75', '8×'],
+  pong_ace: ['#00f5d4', '#0f172a', 'PG'],
+  laser_victim: ['#ff2bd6', '#500724', '-1'],
+  lightning_lucky: ['#ffe600', '#1e293b', '+1'],
+  pacman_feast: ['#ffe600', '#7c2d12', 'WK'],
+  survived_blackhole: ['#a855f7', '#090314', 'BH'],
+  retro_gamer: ['#9bbc0f', '#0f380f', '93'],
+  placebo_believer: ['#ff7b00', '#2b1306', '0%'],
+  temptation_10: ['#ef4444', '#450a0a', '10'],
+  mixer_dj: ['#00f5d4', '#1e293b', 'DJ'],
+  gpu_meltdown: ['#ff2bd6', '#450a0a', '°C'],
+  geiger_panic: ['#ffe600', '#422006', 'RAD'],
+  doomsday_midnight: ['#ef4444', '#2b0910', '00'],
+  vending_addict: ['#ff2bd6', '#4c0519', 'VIP'],
+  sonar_spammer: ['#a6ff2e', '#052e16', '5×'],
+  pickle_tycoon: ['#a6ff2e', '#365314', '10'],
+  tax_auditor: ['#e2e8f0', '#334155', 'TVA'],
+  dvd_corner: ['#00f5d4', '#090314', 'DVD'],
+  secret_mytho_3: ['#ff2bd6', '#2e1065', 'LIE'],
+  secret_fast_death: ['#ef4444', '#090314', 'RIP'],
+  secret_afk_drop: ['#ffe600', '#1f2937', 'AFK'],
+  secret_marathon: ['#00f5d4', '#082f49', '25K'],
+  secret_mute_all: ['#94a3b8', '#0f172a', 'MUTE'],
+  secret_no_stats: ['#cbd5e1', '#1e293b', 'OFF'],
+  secret_sabotage_click: ['#ff2bd6', '#450a0a', 'AIM'],
+};
+
+export function createAchievementIconSvg(id, unlocked = true, size = 24, hidden = false) {
   const svg = makeSvg('0 0 24 24', size, 'achievement-svg-icon ui-svg-icon');
-  const key = unlocked ? id : 'locked';
+  const key = unlocked ? id : (hidden ? 'secret' : 'locked');
   const draw = ACHIEVEMENT_GLYPHS[key];
   if (draw) {
     draw(svg);
-  } else {
-    svg.append(
-      el('circle', { cx: 12, cy: 12, r: 8, fill: '#ffe600', stroke: '#090314', 'stroke-width': 1.8 }),
-      el('circle', { cx: 12, cy: 12, r: 3, fill: '#ff2bd6' }),
-    );
+    return svg;
   }
+  const medal = ACHIEVEMENT_MEDALS[key];
+  if (medal) {
+    const [rim, bg, code] = medal;
+    svg.append(
+      el('polygon', {
+        points: '12,2 20,6.5 20,17.5 12,22 4,17.5 4,6.5',
+        fill: bg,
+        stroke: rim,
+        'stroke-width': 2,
+        'stroke-linejoin': 'round',
+      }),
+      el('polygon', {
+        points: '12,4.5 17.8,7.8 17.8,16.2 12,19.5 6.2,16.2 6.2,7.8',
+        fill: 'none',
+        stroke: '#ffffff',
+        opacity: 0.25,
+        'stroke-width': 1,
+      }),
+    );
+    const txt = el('text', {
+      x: 12,
+      y: 14,
+      'text-anchor': 'middle',
+      'font-size': code.length >= 4 ? 5.6 : (code.length === 3 ? 6.8 : 8.2),
+      'font-weight': 900,
+      fill: rim,
+    });
+    txt.textContent = code;
+    svg.append(txt);
+    return svg;
+  }
+  svg.append(
+    el('circle', { cx: 12, cy: 12, r: 8, fill: '#ffe600', stroke: '#090314', 'stroke-width': 1.8 }),
+    el('circle', { cx: 12, cy: 12, r: 3, fill: '#ff2bd6' }),
+  );
   return svg;
 }

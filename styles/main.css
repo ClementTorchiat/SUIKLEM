@@ -5374,6 +5374,41 @@ body.is-sabotage .subtitle {
   color: var(--pink);
 }
 
+/* Achievements Filter Bar & Secret Badges */
+.ach-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.ach-filter-btn {
+  padding: 0.2rem 0.56rem;
+  border-radius: 7px;
+  border: 1.5px solid #475569;
+  border-block-end-width: 3px;
+  background: linear-gradient(180deg, #2d3444 0%, #171c26 100%);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  box-shadow: var(--keycap-shadow);
+}
+
+.ach-filter-btn[aria-pressed="true"] {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background: linear-gradient(180deg, #1b2d3b 0%, #0d161f 100%);
+}
+
+.achievement-item.is-secret:not(.is-unlocked) {
+  border-color: rgba(168, 85, 247, 0.45);
+  background-color: #160d26;
+}
+
+.achievement-item.is-secret:not(.is-unlocked) .achievement-info strong {
+  color: #e879f9;
+}
+
 body.is-monochrome .brand-logo-svg {
   filter: grayscale(1) contrast(1000%);
 }
