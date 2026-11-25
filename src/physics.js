@@ -133,6 +133,37 @@ export class PhysicsWorld {
       }
     }
 
+    let krakenTargetId = null;
+    if (event.id === 'kraken' && this.bodies.length > 0) {
+      let best = this.bodies[0];
+      for (let i = 1; i < this.bodies.length; i++) {
+        if (this.bodies[i].tier > best.tier || (this.bodies[i].tier === best.tier && this.bodies[i].radius > best.radius)) {
+          best = this.bodies[i];
+        }
+      }
+      krakenTargetId = best.id;
+    }
+
+    const bumpers = event.id === 'pinball'
+      ? [
+        { x: 112, y: 268, r: 21, flash: 0, cooldown: 0 },
+        { x: 268, y: 268, r: 21, flash: 0, cooldown: 0 },
+        { x: 190, y: 386, r: 24, flash: 0, cooldown: 0 },
+      ]
+      : null;
+
+    const mosquitos = event.id === 'mosquitos'
+      ? Array.from({ length: 4 }, (_, i) => ({
+        id: i + 1,
+        x: 60 + i * 75,
+        y: 170 + (i % 2) * 90,
+        vx: (i % 2 === 0 ? 1 : -1) * (135 + i * 20),
+        vy: (i % 3 === 0 ? 1 : -1) * 110,
+        alive: true,
+        phase: i * 1.4,
+      }))
+      : null;
+
     this.activeChaos = {
       ...event,
       remaining: event.duration,
@@ -150,6 +181,43 @@ export class PhysicsWorld {
       ufoTimer: 0.35,
       ufoDestX: 190,
       escapedBall,
+      bumpers,
+      tiltAngle: 0,
+      krakenTargetId,
+      krakenHits: 0,
+      krakenMaxHits: 3,
+      krakenProgress: 0,
+      krakenPhase: krakenTargetId ? 'grab' : 'repelled',
+      laserPhase: 'aim',
+      laserTimer: 1.35,
+      laserY: 320,
+      laserHitIds: new Set(),
+      mosquitos,
+      meteors: [],
+      meteorSpawnTimer: 0.25,
+      defragScanX: JAR_BOUNDS.left,
+      pacX: 190,
+      pacY: 315,
+      pacVx: (Math.random() < 0.5 ? 1 : -1) * 165,
+      pacVy: -125,
+      pacAngle: 0,
+      paddleX: 190,
+      paddlePrevX: 190,
+      paddleY: 392,
+      paddleHalfW: 48,
+      paddleHalfH: 7,
+      pongFlash: 0,
+      pongCooldown: 0,
+      lightningTimer: 0.45,
+      dvdX: 190,
+      dvdY: 270,
+      dvdVx: (Math.random() < 0.5 ? 1 : -1) * 155,
+      dvdVy: (Math.random() < 0.5 ? 1 : -1) * 125,
+      dvdW: 72,
+      dvdH: 34,
+      dvdColorIdx: 0,
+      dvdCornerCooldown: 0,
+      discoBeatTimer: 0.25,
     };
     this._chaosTickAcc = 0;
 
@@ -204,7 +272,22 @@ export class PhysicsWorld {
         b.mood = 'worried';
         b.moodTimer = 1.2;
       }
+    } else if (event.id === 'helium') {
+      for (const b of this.bodies) {
+        b.vy -= 55 + Math.random() * 65;
+        b.vx += (Math.random() - 0.5) * 65;
+        b.angularVel += (Math.random() - 0.5) * 3;
+        b.mood = 'happy';
+        b.moodTimer = 1.2;
+      }
     }
+  }
+
+  setPaddleX(x) {
+    if (this.activeChaos?.id !== 'pong') return;
+    const minX = this.jarLeft + this.activeChaos.paddleHalfW + 4;
+    const maxX = this.jarRight - this.activeChaos.paddleHalfW - 4;
+    this.activeChaos.paddleX = Math.max(minX, Math.min(maxX, x));
   }
 
   findFruitAt(x, y) {
@@ -218,6 +301,58 @@ export class PhysicsWorld {
       }
     }
     return null;
+  }
+
+  tryInteractChaos(x, y) {
+    const c = this.activeChaos;
+    if (!c) return { handled: false };
+
+    if (c.id === 'kraken' && c.krakenPhase === 'grab' && c.krakenTargetId) {
+      const target = this.bodies.find((b) => b.id === c.krakenTargetId);
+      if (target) {
+        const midX = (target.x + this.jarRight) * 0.5;
+        const midY = (target.y + Math.max(JAR_BOUNDS.top + 30, target.y - 45)) * 0.5;
+        const nearTarget = Math.hypot(x - target.x, y - target.y) <= target.radius + 28;
+        const nearTentacle = Math.hypot(x - midX, y - midY) <= 52;
+        if (nearTarget || nearTentacle) {
+          c.krakenHits += 1;
+          c.krakenProgress = Math.max(0, c.krakenProgress - 0.36);
+          if (c.krakenHits >= c.krakenMaxHits) {
+            c.krakenPhase = 'repelled';
+            target.graceTimer = Math.max(target.graceTimer, 1.4);
+            target.mood = 'happy';
+            target.moodTimer = 1.2;
+            if (this.callbacks.onChaosFx) {
+              this.callbacks.onChaosFx({ type: 'krakenRepelled', x: target.x, y: target.y, tier: target.tier });
+            }
+          } else if (this.callbacks.onChaosFx) {
+            this.callbacks.onChaosFx({
+              type: 'krakenSlap',
+              x,
+              y,
+              tier: target.tier,
+              hitsLeft: c.krakenMaxHits - c.krakenHits,
+            });
+          }
+          return { handled: true };
+        }
+      }
+    }
+
+    if (c.id === 'mosquitos' && Array.isArray(c.mosquitos)) {
+      for (const m of c.mosquitos) {
+        if (!m.alive) continue;
+        if (Math.hypot(x - m.x, y - m.y) <= 32) {
+          m.alive = false;
+          if (this.callbacks.onChaosFx) {
+            this.callbacks.onChaosFx({ type: 'mosquitoSwat', x: m.x, y: m.y, tier: 0 });
+          }
+          return { handled: true };
+        }
+      }
+    }
+
+    return { handled: false };
   }
 
   removeFruitById(id) {
@@ -403,12 +538,15 @@ export class PhysicsWorld {
     return Math.max(JAR_BOUNDS.dropY + radius, bestY);
   }
 
-  step(dt) {
+  step(dt, timeScale = 1) {
+    const simDt = dt * timeScale;
     const substeps = 4;
     const iterations = 3;
-    const subDt = dt / substeps;
+    const subDt = simDt / substeps;
     const mergedIds = new Set();
     const pendingMerges = [];
+    const splitIds = new Set();
+    const pendingSplits = [];
 
     if (this.windTimer > 0) {
       this.windTimer = Math.max(0, this.windTimer - dt);
@@ -469,21 +607,33 @@ export class PhysicsWorld {
     }
 
     const chaosId = this.activeChaos?.id ?? null;
-    const gx = chaosId === 'sideways'
-      ? Math.sin(this.activeChaos.elapsed * 1.4) * 850
-      : chaosId === 'quake'
-        ? Math.sin(this.activeChaos.elapsed * 32) * 2400
-        : this.gravityX;
-    const gy = chaosId === 'antigrav'
-      ? -760
-      : chaosId === 'blackhole'
-        ? 50
-        : chaosId === 'sideways'
-          ? 840
-          : this.gravityY;
-    const activeRestitution = chaosId === 'bouncy' ? 1.03 : (chaosId === 'quake' ? 0.72 : this.restitution);
-    const activeWallRest = chaosId === 'bouncy' ? 1.02 : (chaosId === 'quake' ? 0.72 : this.wallRestitution);
-    const activeDamping = chaosId === 'bouncy' ? 0.999 : this.linearDamping;
+    if (chaosId === 'tiltfloor' && this.activeChaos) {
+      this.activeChaos.tiltAngle = Math.sin(this.activeChaos.elapsed * 2.15) * 0.34;
+    }
+    const tiltSin = chaosId === 'tiltfloor' && this.activeChaos ? Math.sin(this.activeChaos.tiltAngle) : 0;
+    const tiltCos = chaosId === 'tiltfloor' && this.activeChaos ? Math.cos(this.activeChaos.tiltAngle) : 1;
+
+    const gx = chaosId === 'tiltfloor'
+      ? tiltSin * 1350
+      : chaosId === 'sideways'
+        ? Math.sin(this.activeChaos.elapsed * 1.4) * 850
+        : chaosId === 'quake'
+          ? Math.sin(this.activeChaos.elapsed * 32) * 2400
+          : this.gravityX;
+    const gy = chaosId === 'helium'
+      ? 0
+      : chaosId === 'tiltfloor'
+        ? tiltCos * 1150
+        : chaosId === 'antigrav'
+          ? -760
+          : chaosId === 'blackhole'
+            ? 50
+            : chaosId === 'sideways'
+              ? 840
+              : this.gravityY;
+    const activeRestitution = chaosId === 'bouncy' ? 1.03 : (chaosId === 'helium' ? 0.85 : (chaosId === 'quake' ? 0.72 : (chaosId === 'pinball' ? 0.45 : this.restitution)));
+    const activeWallRest = chaosId === 'bouncy' ? 1.02 : (chaosId === 'helium' ? 0.85 : (chaosId === 'quake' ? 0.72 : this.wallRestitution));
+    const activeDamping = (chaosId === 'bouncy' || chaosId === 'helium') ? 0.998 : this.linearDamping;
     const isBouncy = chaosId === 'bouncy';
 
     const windActive = this.windTimer > 0 || chaosId === 'tornado';
@@ -546,6 +696,18 @@ export class PhysicsWorld {
           b.graceTimer = Math.max(b.graceTimer, 1.0);
         }
 
+        if (chaosId === 'defrag') {
+          const span = Math.max(40, (this.jarRight - b.radius) - (this.jarLeft + b.radius));
+          const tierFrac = b.tier / Math.max(1, FRUITS.length - 1);
+          const targetX = this.jarLeft + b.radius + tierFrac * span;
+          const dxDefrag = targetX - b.x;
+          b.vx += Math.max(-920, Math.min(920, dxDefrag * 14)) * subDt;
+          if (Math.abs(dxDefrag) > 28 && Math.abs(b.vy) < 40) {
+            b.vy -= 180 * subDt;
+          }
+          b.graceTimer = Math.max(b.graceTimer, 0.8);
+        }
+
         if (windActive) {
           const dx = b.x - centerX;
           const dy = b.y - centerY;
@@ -582,9 +744,82 @@ export class PhysicsWorld {
         b.y += b.vy * subDt;
         b.angle += b.angularVel * subDt;
 
+        // Pinball bumpers collision inside substeps
+        if (chaosId === 'pinball' && Array.isArray(this.activeChaos?.bumpers)) {
+          for (const bm of this.activeChaos.bumpers) {
+            const dx = b.x - bm.x;
+            const dy = b.y - bm.y;
+            const minD = b.radius + bm.r;
+            const dSq = dx * dx + dy * dy;
+            if (dSq > 0 && dSq < minD * minD) {
+              const d = Math.sqrt(dSq);
+              const nx = dx / d;
+              const ny = dy / d;
+              b.x = bm.x + nx * (minD + 0.5);
+              b.y = bm.y + ny * (minD + 0.5);
+              const spd = Math.max(470, Math.hypot(b.vx, b.vy) * 1.15);
+              b.vx = nx * spd;
+              b.vy = ny * spd - 90;
+              b.angularVel += (Math.random() - 0.5) * 9;
+              b.onFireTimer = Math.max(b.onFireTimer, 0.75);
+              b.graceTimer = Math.max(b.graceTimer, 0.9);
+              if (bm.cooldown <= 0) {
+                bm.flash = 1.0;
+                bm.cooldown = 0.12;
+                b.squashX = 1.28;
+                b.squashY = 0.75;
+                b.mood = 'happy';
+                b.moodTimer = 0.7;
+                if (this.callbacks.onChaosFx) {
+                  this.callbacks.onChaosFx({ type: 'pinballHit', x: bm.x, y: bm.y, tier: b.tier });
+                }
+              }
+            }
+          }
+        }
+
+        // Arcade Pong Paddle collision
+        if (chaosId === 'pong' && this.activeChaos) {
+          const c = this.activeChaos;
+          const leftP = c.paddleX - c.paddleHalfW;
+          const rightP = c.paddleX + c.paddleHalfW;
+          const topP = c.paddleY - c.paddleHalfH;
+          const botP = c.paddleY + c.paddleHalfH;
+          const cx = Math.max(leftP, Math.min(rightP, b.x));
+          const cy = Math.max(topP, Math.min(botP, b.y));
+          const dx = b.x - cx;
+          const dy = b.y - cy;
+          const dSq = dx * dx + dy * dy;
+          if (dSq < b.radius * b.radius) {
+            const above = b.y <= c.paddleY;
+            if (above) {
+              b.y = topP - b.radius - 0.5;
+              b.vy = -Math.max(430, Math.abs(b.vy) * 1.15);
+            } else {
+              b.y = botP + b.radius + 0.5;
+              b.vy = Math.max(300, Math.abs(b.vy) * 1.1);
+            }
+            const padVx = Math.max(-460, Math.min(460, (c.paddleX - c.paddlePrevX) / Math.max(0.001, dt)));
+            b.vx += padVx * 0.45 + (b.x - c.paddleX) * 4.5;
+            b.angularVel += (b.x - c.paddleX) * 0.1;
+            b.graceTimer = Math.max(b.graceTimer, 0.9);
+            if (c.pongCooldown <= 0) {
+              c.pongFlash = 1.0;
+              c.pongCooldown = 0.08;
+              b.squashX = 1.25;
+              b.squashY = 0.78;
+              b.mood = 'happy';
+              b.moodTimer = 0.7;
+              if (this.callbacks.onChaosFx) {
+                this.callbacks.onChaosFx({ type: 'pongHit', x: b.x, y: c.paddleY, tier: b.tier });
+              }
+            }
+          }
+        }
+
         // Keep fruits bounded inside top of jar during chaotic upward events
         if (
-          (windActive || chaosId === 'bouncy' || chaosId === 'quake' || chaosId === 'antigrav' || chaosId === 'popcorn' || chaosId === 'blackhole' || chaosId === 'hotpotato')
+          (windActive || chaosId === 'bouncy' || chaosId === 'quake' || chaosId === 'antigrav' || chaosId === 'popcorn' || chaosId === 'blackhole' || chaosId === 'hotpotato' || chaosId === 'pinball' || chaosId === 'meteors' || chaosId === 'helium' || chaosId === 'pong')
           && b.y - b.radius < JAR_BOUNDS.top
         ) {
           b.y = JAR_BOUNDS.top + b.radius;
@@ -612,7 +847,18 @@ export class PhysicsWorld {
               continue;
             }
 
-            this._resolvePair(a, b, dx, dy, distSq, minDist, s === 0 && iter === 0, activeRestitution);
+            const speedHit = this._resolvePair(a, b, dx, dy, distSq, minDist, s === 0 && iter === 0, activeRestitution);
+            if (
+              chaosId === 'mitosis'
+              && speedHit > 195
+              && (this.bodies.length + pendingSplits.length) < 28
+            ) {
+              const target = a.tier >= b.tier ? a : b;
+              if (target.tier >= 4 && !splitIds.has(target.id) && !mergedIds.has(target.id)) {
+                splitIds.add(target.id);
+                pendingSplits.push(target);
+              }
+            }
           }
         }
 
@@ -637,7 +883,15 @@ export class PhysicsWorld {
       this._processMerges(pendingMerges, mergedIds);
     }
 
-    this._updateVisualStatesAndDanger(dt);
+    if (pendingSplits.length > 0) {
+      this._processMitosisSplits(pendingSplits, splitIds);
+    }
+
+    if (this.activeChaos?.id === 'pong') {
+      this.activeChaos.paddlePrevX = this.activeChaos.paddleX;
+    }
+
+    this._updateVisualStatesAndDanger(simDt);
   }
 
   _stepChaosSpecials(dt) {
@@ -789,6 +1043,288 @@ export class PhysicsWorld {
         if (this.callbacks.onChaosFx) {
           this.callbacks.onChaosFx({ type: 'swap', x: a.x, y: a.y, x2: b.x, y2: b.y, tier: a.tier });
         }
+      }
+    } else if (id === 'pinball' && Array.isArray(this.activeChaos.bumpers)) {
+      for (const bm of this.activeChaos.bumpers) {
+        bm.flash = Math.max(0, bm.flash - dt * 3.8);
+        bm.cooldown = Math.max(0, bm.cooldown - dt);
+      }
+    } else if (id === 'kraken') {
+      const c = this.activeChaos;
+      if (c.krakenPhase === 'grab') {
+        const target = this.bodies.find((b) => b.id === c.krakenTargetId);
+        if (!target) {
+          c.krakenPhase = 'repelled';
+        } else {
+          c.krakenProgress += dt * 0.34;
+          target.x += (Math.min(this.jarRight - target.radius - 14, target.x + 25) - target.x) * Math.min(1, dt * 1.4);
+          target.vy = Math.min(target.vy, -38 - c.krakenProgress * 75);
+          target.mood = 'worried';
+          target.moodTimer = 0.25;
+          target.graceTimer = Math.max(target.graceTimer, 1.0);
+          if (c.krakenProgress >= 1) {
+            const stolen = this.removeFruitById(target.id);
+            c.krakenPhase = 'stolen';
+            if (stolen && this.callbacks.onChaosFx) {
+              this.callbacks.onChaosFx({ type: 'krakenSteal', x: stolen.x, y: stolen.y, tier: stolen.tier });
+            }
+          }
+        }
+      }
+    } else if (id === 'laser') {
+      const c = this.activeChaos;
+      c.laserTimer -= dt;
+      if (c.laserPhase === 'aim') {
+        const minY = this.bodies.length > 0
+          ? Math.max(185, Math.min(...this.bodies.map((f) => f.y)) - 10)
+          : 260;
+        const maxY = this.jarBottom - 16;
+        const span = Math.max(40, maxY - minY);
+        const phase = (c.elapsed * 0.85) % 2;
+        const tri = phase <= 1 ? phase : 2 - phase;
+        c.laserY = minY + tri * span;
+        if (c.laserTimer <= 0) {
+          c.laserPhase = 'fire';
+          c.laserTimer = 0.45;
+          c.laserHitIds = new Set();
+          if (this.callbacks.onChaosFx) {
+            this.callbacks.onChaosFx({ type: 'laserFire', x: 190, y: c.laserY, tier: 0 });
+          }
+        }
+      } else {
+        for (const b of this.bodies) {
+          if (c.laserHitIds.has(b.id)) continue;
+          if (Math.abs(b.y - c.laserY) <= b.radius + 10) {
+            c.laserHitIds.add(b.id);
+            if (b.tier > 0) {
+              b.tier -= 1;
+              const def = FRUITS[b.tier];
+              b.baseRadius = def.radius;
+              b.radius = def.radius;
+              b.mass = def.radius * def.radius;
+              b.invMass = 1 / b.mass;
+              b.vy -= 130;
+              b.squashX = 0.72;
+              b.squashY = 1.3;
+              b.mood = 'worried';
+              b.moodTimer = 1.1;
+              b.graceTimer = Math.max(b.graceTimer, 0.9);
+            } else {
+              b.vy -= 180;
+              b.mood = 'bonked';
+              b.moodTimer = 0.8;
+            }
+            if (this.callbacks.onChaosFx) {
+              this.callbacks.onChaosFx({ type: 'laserDevolve', x: b.x, y: b.y, tier: b.tier });
+            }
+          }
+        }
+        if (c.laserTimer <= 0) {
+          c.laserPhase = 'aim';
+          c.laserTimer = 1.4;
+        }
+      }
+    } else if (id === 'mosquitos' && Array.isArray(this.activeChaos.mosquitos)) {
+      for (const m of this.activeChaos.mosquitos) {
+        if (!m.alive) continue;
+        m.phase += dt * 16;
+        m.vx += Math.sin(m.phase * 0.4) * 240 * dt;
+        m.vy += Math.cos(m.phase * 0.35) * 240 * dt;
+        const spd = Math.hypot(m.vx, m.vy);
+        if (spd > 210) {
+          m.vx = (m.vx / spd) * 210;
+          m.vy = (m.vy / spd) * 210;
+        }
+        m.x += m.vx * dt;
+        m.y += m.vy * dt;
+        if (m.x < this.jarLeft + 18) { m.x = this.jarLeft + 18; m.vx = Math.abs(m.vx); }
+        if (m.x > this.jarRight - 18) { m.x = this.jarRight - 18; m.vx = -Math.abs(m.vx); }
+        if (m.y < JAR_BOUNDS.top + 24) { m.y = JAR_BOUNDS.top + 24; m.vy = Math.abs(m.vy); }
+        if (m.y > this.jarBottom - 26) { m.y = this.jarBottom - 26; m.vy = -Math.abs(m.vy); }
+        for (const b of this.bodies) {
+          const dx = b.x - m.x;
+          const dy = b.y - m.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist > 0.5 && dist < b.radius + 10) {
+            b.vx += (dx / dist) * 280 * dt;
+            b.vy += (dy / dist) * 220 * dt - 80 * dt;
+            m.vx = -(dx / dist) * 180;
+            m.vy = -(dy / dist) * 180;
+          }
+        }
+      }
+    } else if (id === 'meteors') {
+      const c = this.activeChaos;
+      c.meteorSpawnTimer -= dt;
+      if (c.meteorSpawnTimer <= 0) {
+        c.meteorSpawnTimer = 0.85;
+        const fromLeft = Math.random() < 0.5;
+        c.meteors.push({
+          x: fromLeft ? this.jarLeft + 25 + Math.random() * 140 : this.jarRight - 25 - Math.random() * 140,
+          y: JAR_BOUNDS.top - 18,
+          vx: (fromLeft ? 1 : -1) * (170 + Math.random() * 130),
+          vy: 470 + Math.random() * 110,
+          r: 14,
+          hitIds: new Set(),
+        });
+      }
+      const aliveMeteors = [];
+      for (const met of c.meteors) {
+        met.x += met.vx * dt;
+        met.y += met.vy * dt;
+        for (const b of this.bodies) {
+          if (met.hitIds.has(b.id)) continue;
+          const dx = b.x - met.x;
+          const dy = b.y - met.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < b.radius + met.r) {
+            met.hitIds.add(b.id);
+            const nx = dist > 0.5 ? dx / dist : 0;
+            const ny = dist > 0.5 ? dy / dist : -1;
+            b.vx += nx * 360 + met.vx * 0.35;
+            b.vy -= 260 + Math.abs(ny) * 120;
+            b.onFireTimer = 1.6;
+            b.mood = 'bonked';
+            b.moodTimer = 0.8;
+            b.graceTimer = Math.max(b.graceTimer, 1.2);
+            if (this.callbacks.onChaosFx) {
+              this.callbacks.onChaosFx({ type: 'meteorHit', x: met.x, y: met.y, tier: b.tier });
+            }
+          }
+        }
+        if (met.y < this.jarBottom + 40 && met.x > this.jarLeft - 40 && met.x < this.jarRight + 40) {
+          aliveMeteors.push(met);
+        }
+      }
+      c.meteors = aliveMeteors;
+    } else if (id === 'defrag') {
+      const span = Math.max(100, this.jarRight - this.jarLeft);
+      this.activeChaos.defragScanX = this.jarLeft + ((this.activeChaos.elapsed * 260) % span);
+    } else if (id === 'pong') {
+      const c = this.activeChaos;
+      c.pongFlash = Math.max(0, c.pongFlash - dt * 4.5);
+      c.pongCooldown = Math.max(0, c.pongCooldown - dt);
+    } else if (id === 'pacman') {
+      const c = this.activeChaos;
+      c.pacX += c.pacVx * dt;
+      c.pacY += c.pacVy * dt;
+      if (c.pacX < this.jarLeft + 22) { c.pacX = this.jarLeft + 22; c.pacVx = Math.abs(c.pacVx); }
+      if (c.pacX > this.jarRight - 22) { c.pacX = this.jarRight - 22; c.pacVx = -Math.abs(c.pacVx); }
+      if (c.pacY < JAR_BOUNDS.top + 24) { c.pacY = JAR_BOUNDS.top + 24; c.pacVy = Math.abs(c.pacVy); }
+      if (c.pacY > this.jarBottom - 24) { c.pacY = this.jarBottom - 24; c.pacVy = -Math.abs(c.pacVy); }
+      c.pacAngle = Math.atan2(c.pacVy, c.pacVx);
+
+      for (let i = this.bodies.length - 1; i >= 0; i--) {
+        const b = this.bodies[i];
+        if (b.tier > 2) continue;
+        if (Math.hypot(b.x - c.pacX, b.y - c.pacY) <= b.radius + 17) {
+          this.removeFruitById(b.id);
+          if (this.callbacks.onChaosFx) {
+            this.callbacks.onChaosFx({ type: 'pacmanChomp', x: b.x, y: b.y, tier: b.tier });
+          }
+          break;
+        }
+      }
+    } else if (id === 'lightning') {
+      const c = this.activeChaos;
+      c.lightningTimer -= dt;
+      if (c.lightningTimer <= 0) {
+        c.lightningTimer = 1.05;
+        const candidates = this.bodies.filter((b) => b.tier < FRUITS.length - 1);
+        if (candidates.length > 0) {
+          const target = candidates[Math.floor(Math.random() * candidates.length)];
+          target.tier += 1;
+          const def = FRUITS[target.tier];
+          target.baseRadius = def.radius;
+          target.radius = def.radius;
+          target.mass = def.radius * def.radius;
+          target.invMass = 1 / target.mass;
+          target.x = Math.max(this.jarLeft + target.radius, Math.min(this.jarRight - target.radius, target.x));
+          target.y = Math.min(this.jarBottom - target.radius, target.y);
+          target.vy -= 210;
+          target.onFireTimer = 1.6;
+          target.squashX = 1.28;
+          target.squashY = 0.74;
+          target.mood = 'happy';
+          target.moodTimer = 1.1;
+          target.graceTimer = Math.max(target.graceTimer, 1.1);
+          this._nudgeNearby(target.x, target.y, target.radius + 60, 120, target.id);
+          if (this.callbacks.onChaosFx) {
+            this.callbacks.onChaosFx({ type: 'lightningStrike', x: target.x, y: target.y, tier: target.tier });
+          }
+        }
+      }
+    } else if (id === 'dvd_bounce') {
+      const c = this.activeChaos;
+      c.dvdCornerCooldown = Math.max(0, c.dvdCornerCooldown - dt);
+      c.dvdX += c.dvdVx * dt;
+      c.dvdY += c.dvdVy * dt;
+      const hw = c.dvdW * 0.5;
+      const hh = c.dvdH * 0.5;
+      let hitH = false;
+      let hitV = false;
+      if (c.dvdX - hw < this.jarLeft) { c.dvdX = this.jarLeft + hw; c.dvdVx = Math.abs(c.dvdVx); hitH = true; }
+      if (c.dvdX + hw > this.jarRight) { c.dvdX = this.jarRight - hw; c.dvdVx = -Math.abs(c.dvdVx); hitH = true; }
+      if (c.dvdY - hh < JAR_BOUNDS.top) { c.dvdY = JAR_BOUNDS.top + hh; c.dvdVy = Math.abs(c.dvdVy); hitV = true; }
+      if (c.dvdY + hh > this.jarBottom) { c.dvdY = this.jarBottom - hh; c.dvdVy = -Math.abs(c.dvdVy); hitV = true; }
+      if (hitH || hitV) {
+        c.dvdColorIdx = (c.dvdColorIdx + 1) % 5;
+        const nearH = (c.dvdX - hw - this.jarLeft) < 16 || (this.jarRight - (c.dvdX + hw)) < 16;
+        const nearV = (c.dvdY - hh - JAR_BOUNDS.top) < 16 || (this.jarBottom - (c.dvdY + hh)) < 16;
+        if (nearH && nearV && c.dvdCornerCooldown <= 0) {
+          c.dvdCornerCooldown = 1.2;
+          if (this.callbacks.onChaosFx) {
+            this.callbacks.onChaosFx({ type: 'dvdCornerHit', x: c.dvdX, y: c.dvdY, tier: 15 });
+          }
+        }
+      }
+      for (const b of this.bodies) {
+        const dx = b.x - c.dvdX;
+        const dy = b.y - c.dvdY;
+        if (Math.abs(dx) < hw + b.radius && Math.abs(dy) < hh + b.radius) {
+          const dist = Math.max(1, Math.hypot(dx, dy));
+          b.vx += (dx / dist) * 420 * dt;
+          b.vy += (dy / dist) * 420 * dt;
+        }
+      }
+    } else if (id === 'disco') {
+      const c = this.activeChaos;
+      c.discoBeatTimer -= dt;
+      if (c.discoBeatTimer <= 0) {
+        c.discoBeatTimer = 0.62;
+        for (const b of this.bodies) {
+          b.vy -= 110 + Math.random() * 75;
+          b.vx += (Math.random() - 0.5) * 90;
+          b.mood = 'happy';
+          b.moodTimer = 0.55;
+          b.graceTimer = Math.max(b.graceTimer, 0.7);
+        }
+        if (this.callbacks.onChaosFx) {
+          this.callbacks.onChaosFx({ type: 'discoBeat', x: 190, y: 180, tier: 0 });
+        }
+      }
+    }
+  }
+
+  _processMitosisSplits(pendingSplits, splitIds) {
+    this.bodies = this.bodies.filter((b) => !splitIds.has(b.id));
+    for (const src of pendingSplits) {
+      const childTier = Math.max(0, src.tier - 1);
+      const childDef = FRUITS[childTier];
+      const off = Math.max(8, childDef.radius * 0.75);
+      for (const dir of [-1, 1]) {
+        this.spawnFruit(childTier, src.x + dir * off, src.y, {
+          vx: dir * (115 + Math.random() * 55),
+          vy: -135 - Math.random() * 60,
+          squashX: 1.25,
+          squashY: 0.78,
+          mood: 'bonked',
+          moodTimer: 0.9,
+          graceTimer: 0.9,
+        });
+      }
+      if (this.callbacks.onChaosFx) {
+        this.callbacks.onChaosFx({ type: 'mitosisSplit', x: src.x, y: src.y, tier: childTier });
       }
     }
   }
@@ -1002,7 +1538,7 @@ export class PhysicsWorld {
     const rvx = b.vx - a.vx;
     const rvy = b.vy - a.vy;
     const velAlongNormal = rvx * nx + rvy * ny;
-    if (velAlongNormal > 0) return;
+    if (velAlongNormal > 0) return 0;
 
     const e = restitution >= 1 ? restitution : (Math.abs(velAlongNormal) < 60 ? 0 : restitution);
     const j = (-(1 + e) * velAlongNormal) / totalInvMass;
@@ -1032,6 +1568,7 @@ export class PhysicsWorld {
     const impactSpeed = -velAlongNormal;
     this._onImpact(a, impactSpeed, allowAudio, (a.x + b.x) * 0.5, (a.y + b.y) * 0.5);
     this._onImpact(b, impactSpeed, false);
+    return impactSpeed;
   }
 
   _onImpact(body, speed, allowAudio, hitX = body.x, hitY = body.y) {
@@ -1088,7 +1625,15 @@ export class PhysicsWorld {
         continue;
       }
 
-      const nextTier = a.tier + 1;
+      let nextTier = a.tier + 1;
+      let dnaShift = 0;
+      if (this.activeChaos?.id === 'dna_glitch') {
+        const jumps = [2, 2, 1, -1];
+        const jump = jumps[Math.floor(Math.random() * jumps.length)];
+        nextTier = Math.max(0, Math.min(FRUITS.length - 1, a.tier + jump));
+        if (nextTier === a.tier && a.tier === 0) nextTier = 1;
+        dnaShift = nextTier - (a.tier + 1);
+      }
       const nextDef = FRUITS[nextTier];
       const clampedX = Math.max(
         this.jarLeft + nextDef.radius,
@@ -1118,6 +1663,7 @@ export class PhysicsWorld {
           newTier: nextTier,
           isMaxPop: false,
           fromPower,
+          dnaShift,
           body: newBody,
         });
       }

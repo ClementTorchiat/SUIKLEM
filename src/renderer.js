@@ -29,6 +29,7 @@ export function drawFruitShape(ctx, tier, radius, options = {}) {
     showFace = true,
     monochrome = false,
     mystery = false,
+    gameboy = false,
   } = options;
 
   ctx.save();
@@ -75,6 +76,27 @@ export function drawFruitShape(ctx, tier, radius, options = {}) {
 
     if (showFace) {
       _drawCursedFace(ctx, -1, radius, mood, isBlinking, time, true);
+    }
+    ctx.restore();
+    return;
+  }
+
+  if (gameboy) {
+    // 1989 DMG 4-tone olive LCD circle with crisp inner ring
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.fillStyle = tier % 2 === 0 ? '#9bbc0f' : '#8bac0f';
+    ctx.fill();
+    ctx.lineWidth = 2.6;
+    ctx.strokeStyle = '#0f380f';
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0, 0, Math.max(2, radius * 0.78), 0, Math.PI * 2);
+    ctx.lineWidth = 1.4;
+    ctx.strokeStyle = '#306230';
+    ctx.stroke();
+    if (showFace) {
+      _drawCursedFace(ctx, tier, radius, mood, isBlinking, time, true);
     }
     ctx.restore();
     return;
@@ -841,8 +863,8 @@ export class GameRenderer {
     }
   }
 
-  renderNextPreview(tier, monochrome = false, mystery = false) {
-    const key = `${tier}:${monochrome ? 1 : 0}:${mystery ? 1 : 0}`;
+  renderNextPreview(tier, monochrome = false, mystery = false, gameboy = false) {
+    const key = `${tier}:${monochrome ? 1 : 0}:${mystery ? 1 : 0}:${gameboy ? 1 : 0}`;
     if (key === this.lastRenderedNextTier) return;
     this.lastRenderedNextTier = key;
 
@@ -851,7 +873,7 @@ export class GameRenderer {
     ctx.save();
     ctx.translate(22, 24);
     const previewRadius = mystery ? 14 : Math.min(15, Math.max(10, FRUITS[tier].radius * 0.44));
-    drawFruitShape(ctx, tier, previewRadius, { showFace: true, monochrome, mystery });
+    drawFruitShape(ctx, tier, previewRadius, { showFace: true, monochrome, mystery, gameboy });
     ctx.restore();
   }
 
@@ -880,6 +902,7 @@ export class GameRenderer {
     const offsetX = (world.viewWidth - JAR_BOUNDS.width) * 0.5;
     const chaosId = world.activeChaos?.id ?? null;
     const mono = chaosId === 'monochrome';
+    const gameboy = chaosId === 'gameboy';
 
     ctx.clearRect(0, 0, world.viewWidth, height);
     ctx.save();
@@ -908,7 +931,118 @@ export class GameRenderer {
       ctx.translate(-focusX, -focusY);
     }
 
-    this._drawJarBackdrop(ctx, left, right, top, bottom, dangerY, world, time, mono);
+    this._drawJarBackdrop(ctx, left, right, top, bottom, dangerY, world, time, mono, gameboy);
+
+    if (chaosId === 'bullet_time' && !mono) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(0, 255, 102, 0.22)';
+      ctx.font = '700 12px "Pixelify Sans", ui-monospace, monospace';
+      for (let col = 0; col < 10; col++) {
+        const cx = left + 18 + col * 36;
+        const dropY = top + (((time * (65 + (col % 3) * 28) + col * 73)) % (bottom - top));
+        ctx.fillText(col % 2 === 0 ? '01' : 'WTF', cx, dropY);
+      }
+      ctx.restore();
+    }
+
+    if (chaosId === 'helium') {
+      ctx.save();
+      ctx.fillStyle = mono ? 'rgba(255,255,255,0.18)' : 'rgba(56, 189, 248, 0.22)';
+      for (let i = 0; i < 14; i++) {
+        const bx = left + 20 + ((i * 53) % (right - left - 40));
+        const by = bottom - ((time * (28 + (i % 4) * 11) + i * 67) % (bottom - top));
+        ctx.beginPath();
+        ctx.arc(bx, by, 3 + (i % 3) * 1.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = mono ? '#ffffff' : '#38bdf8';
+      ctx.font = '800 11px "Pixelify Sans", monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText('0.00 G • APESANTEUR', right - 12, top + 18);
+      ctx.restore();
+    }
+
+    if (chaosId === 'disco' && !mono) {
+      const center = (left + right) * 0.5;
+      const ballY = top + 34;
+      const colors = ['#00f5d4', '#ff2bd6', '#ffe600', '#a6ff2e'];
+      ctx.save();
+      for (let i = 0; i < 4; i++) {
+        const angle = time * (2.1 + i * 0.4) + i * 1.57;
+        const tx = center + Math.sin(angle) * 190;
+        ctx.fillStyle = colors[i];
+        ctx.globalAlpha = 0.14;
+        ctx.beginPath();
+        ctx.moveTo(center, ballY);
+        ctx.lineTo(tx - 38, bottom);
+        ctx.lineTo(tx + 38, bottom);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(center, top);
+      ctx.lineTo(center, ballY - 14);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(center, ballY, 16, 0, Math.PI * 2);
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fill();
+      ctx.strokeStyle = '#ff2bd6';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    if (chaosId === 'defrag' && world.activeChaos) {
+      const scanX = world.activeChaos.defragScanX ?? left;
+      ctx.save();
+      ctx.strokeStyle = mono ? '#ffffff' : '#00f5d4';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(scanX, top + 6);
+      ctx.lineTo(scanX, bottom - 6);
+      ctx.stroke();
+      ctx.fillStyle = mono ? 'rgba(255,255,255,0.18)' : 'rgba(0, 245, 212, 0.14)';
+      ctx.fillRect(Math.max(left, scanX - 18), top + 6, 18, bottom - top - 12);
+      ctx.restore();
+    }
+
+    if (chaosId === 'pinball' && Array.isArray(world.activeChaos?.bumpers)) {
+      ctx.save();
+      for (const bm of world.activeChaos.bumpers) {
+        const pulse = bm.flash > 0 ? 1 + bm.flash * 0.18 : 1;
+        ctx.save();
+        ctx.translate(bm.x, bm.y);
+        ctx.scale(pulse, pulse);
+        if (bm.flash > 0 && !mono) {
+          ctx.beginPath();
+          ctx.arc(0, 0, bm.r + 10, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 230, 0, ${bm.flash * 0.45})`;
+          ctx.fill();
+        }
+        ctx.beginPath();
+        ctx.arc(0, 0, bm.r, 0, Math.PI * 2);
+        ctx.fillStyle = bm.flash > 0.2 ? '#ffe600' : (mono ? '#ffffff' : '#ff2bd6');
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = mono ? '#000000' : '#00f5d4';
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 0, bm.r * 0.48, 0, Math.PI * 2);
+        ctx.fillStyle = '#090314';
+        ctx.fill();
+        ctx.fillStyle = '#ffe600';
+        ctx.font = '900 10px "Pixelify Sans", monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('25', 0, 0.5);
+        ctx.restore();
+      }
+      ctx.restore();
+    }
 
     if (bottom < JAR_BOUNDS.bottom - 1) {
       ctx.save();
@@ -1020,6 +1154,7 @@ export class GameRenderer {
         time,
         monochrome: mono,
         mystery: isMystery,
+        gameboy,
       });
       ctx.restore();
     }
@@ -1084,6 +1219,7 @@ export class GameRenderer {
           squashY: b.squashY,
           time,
           monochrome: mono,
+          gameboy,
         });
         ctx.restore();
       }
@@ -1362,6 +1498,181 @@ export class GameRenderer {
       ctx.restore();
     }
 
+    if (chaosId === 'tiltfloor' && world.activeChaos) {
+      const ang = world.activeChaos.tiltAngle || 0;
+      ctx.save();
+      ctx.fillStyle = mono ? 'rgba(255,255,255,0.22)' : 'rgba(56, 189, 248, 0.25)';
+      ctx.beginPath();
+      ctx.moveTo(left + 4, bottom - 34 + ang * 70);
+      ctx.lineTo(right - 4, bottom - 34 - ang * 70);
+      ctx.lineTo(right - 4, bottom - 4);
+      ctx.lineTo(left + 4, bottom - 4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    if (chaosId === 'laser' && world.activeChaos) {
+      const ly = world.activeChaos.laserY ?? 320;
+      ctx.save();
+      if (world.activeChaos.laserPhase === 'fire') {
+        ctx.fillStyle = mono ? '#ffffff' : 'rgba(255, 43, 214, 0.85)';
+        ctx.fillRect(left + 2, ly - 10, right - left - 4, 20);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(left + 2, ly - 4, right - left - 4, 8);
+      } else {
+        ctx.setLineDash([6, 6]);
+        ctx.strokeStyle = mono ? '#ffffff' : '#ff2a00';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(left + 4, ly);
+        ctx.lineTo(right - 4, ly);
+        ctx.stroke();
+        ctx.fillStyle = '#ffe600';
+        ctx.font = '800 11px "Pixelify Sans", monospace';
+        ctx.textAlign = 'left';
+        ctx.fillText('LASER DÉ-ÉVOLUTIF...', left + 12, ly - 8);
+      }
+      ctx.restore();
+    }
+
+    if (chaosId === 'kraken' && world.activeChaos?.krakenPhase === 'grab' && world.activeChaos.krakenTargetId) {
+      const target = world.bodies.find((b) => b.id === world.activeChaos.krakenTargetId);
+      if (target) {
+        const hitsLeft = Math.max(1, world.activeChaos.krakenMaxHits - world.activeChaos.krakenHits);
+        ctx.save();
+        ctx.strokeStyle = mono ? '#ffffff' : '#9333ea';
+        ctx.lineWidth = 11;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(right - 2, Math.max(top + 40, target.y - 45));
+        ctx.quadraticCurveTo((target.x + right) * 0.5, target.y - 30 + Math.sin(time * 8) * 14, target.x, target.y);
+        ctx.stroke();
+        ctx.strokeStyle = '#ffe600';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.arc(target.x, target.y, target.radius + 10, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = '#ffe600';
+        ctx.font = '900 11px "Pixelify Sans", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(`CLIQUE ${hitsLeft}× !`, target.x, target.y - target.radius - 14);
+        ctx.restore();
+      }
+    }
+
+    if (chaosId === 'mosquitos' && Array.isArray(world.activeChaos?.mosquitos)) {
+      ctx.save();
+      for (const m of world.activeChaos.mosquitos) {
+        if (!m.alive) continue;
+        const wingY = Math.sin(time * 42 + m.phase) * 4;
+        ctx.save();
+        ctx.translate(m.x, m.y);
+        ctx.fillStyle = mono ? '#ffffff' : 'rgba(0, 245, 212, 0.72)';
+        ctx.beginPath();
+        ctx.ellipse(-6, -4 + wingY, 6, 3, -0.4, 0, Math.PI * 2);
+        ctx.ellipse(6, -4 - wingY, 6, 3, 0.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(0, 2, 5.5, 0, Math.PI * 2);
+        ctx.fillStyle = mono ? '#000000' : '#ff2bd6';
+        ctx.fill();
+        ctx.strokeStyle = '#ffe600';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    if (chaosId === 'meteors' && Array.isArray(world.activeChaos?.meteors)) {
+      ctx.save();
+      for (const met of world.activeChaos.meteors) {
+        ctx.beginPath();
+        ctx.moveTo(met.x, met.y);
+        ctx.lineTo(met.x - met.vx * 0.09, met.y - met.vy * 0.09);
+        ctx.strokeStyle = mono ? '#ffffff' : '#ff7b00';
+        ctx.lineWidth = met.r * 1.4;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(met.x, met.y, met.r, 0, Math.PI * 2);
+        ctx.fillStyle = mono ? '#ffffff' : '#ffe600';
+        ctx.fill();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = mono ? '#000000' : '#dc2626';
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    if (chaosId === 'pong' && world.activeChaos) {
+      const c = world.activeChaos;
+      ctx.save();
+      ctx.strokeStyle = mono ? 'rgba(255,255,255,0.28)' : 'rgba(0, 245, 212, 0.25)';
+      ctx.setLineDash([6, 8]);
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(left + 12, c.paddleY);
+      ctx.lineTo(right - 12, c.paddleY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = c.pongFlash > 0.2 ? '#ffe600' : (mono ? '#ffffff' : '#00f5d4');
+      ctx.strokeStyle = '#090314';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.roundRect(c.paddleX - c.paddleHalfW, c.paddleY - c.paddleHalfH, c.paddleHalfW * 2, c.paddleHalfH * 2, 6);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    if (chaosId === 'pacman' && world.activeChaos) {
+      const c = world.activeChaos;
+      const mouth = Math.abs(Math.sin(time * 16)) * 0.65 + 0.08;
+      ctx.save();
+      ctx.translate(c.pacX, c.pacY);
+      ctx.rotate(c.pacAngle);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, 18, mouth, Math.PI * 2 - mouth);
+      ctx.closePath();
+      ctx.fillStyle = mono ? '#ffffff' : '#ffe600';
+      ctx.fill();
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = mono ? '#000000' : '#ff2bd6';
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(3, -8, 2.4, 0, Math.PI * 2);
+      ctx.fillStyle = '#090314';
+      ctx.fill();
+      ctx.restore();
+    }
+
+    if (chaosId === 'dvd_bounce' && world.activeChaos) {
+      const c = world.activeChaos;
+      const dvdPalette = ['#00f5d4', '#ff2bd6', '#ffe600', '#a6ff2e', '#ff7b00'];
+      const col = mono ? '#ffffff' : dvdPalette[c.dvdColorIdx % dvdPalette.length];
+      ctx.save();
+      ctx.translate(c.dvdX, c.dvdY);
+      ctx.fillStyle = mono ? '#000000' : '#090314';
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.roundRect(-c.dvdW * 0.5, -c.dvdH * 0.5, c.dvdW, c.dvdH, 10);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = col;
+      ctx.font = '900 13px "Pixelify Sans", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('DVD', 0, -4);
+      ctx.font = '700 8px "Pixelify Sans", monospace';
+      ctx.fillText('SUIKLEM', 0, 9);
+      ctx.restore();
+    }
+
     if (isFever) {
       ctx.save();
       ctx.strokeStyle = mono ? '#ffffff' : (Math.sin(time * 14) >= 0 ? '#ffe600' : '#ff2bd6');
@@ -1409,8 +1720,57 @@ export class GameRenderer {
       }
     }
 
-    this._drawJarForeground(ctx, left, right, top, bottom, world, time, mono);
+    this._drawJarForeground(ctx, left, right, top, bottom, world, time, mono, gameboy);
     ctx.restore();
+
+    if (gameboy) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(15, 56, 15, 0.28)';
+      ctx.lineWidth = 1;
+      for (let gx = 0; gx < world.viewWidth; gx += 4) {
+        ctx.beginPath();
+        ctx.moveTo(gx, 0);
+        ctx.lineTo(gx, height);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    if (chaosId === 'vhs') {
+      const wPx = this.canvas.width;
+      const hPx = this.canvas.height;
+      if (this.pixelCanvas.width !== wPx || this.pixelCanvas.height !== hPx) {
+        this.pixelCanvas.width = wPx;
+        this.pixelCanvas.height = hPx;
+      }
+      this.pixelCtx.clearRect(0, 0, wPx, hPx);
+      this.pixelCtx.drawImage(this.canvas, 0, 0);
+
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, wPx, hPx);
+      const tearY = ((time * 180) % hPx);
+      const sliceH = 14;
+      for (let y = 0; y < hPx; y += sliceH) {
+        const wave = Math.sin(time * 22 + y * 0.09) * 3.5;
+        const glitchTear = Math.abs(y - tearY) < 28 ? (Math.sin(time * 65 + y) * 16) : 0;
+        ctx.drawImage(this.pixelCanvas, 0, y, wPx, sliceH, wave + glitchTear, y, wPx, sliceH);
+      }
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      for (let y = 0; y < hPx; y += 6) {
+        ctx.fillRect(0, y, wPx, 2);
+      }
+      ctx.restore();
+
+      ctx.save();
+      ctx.fillStyle = '#090314';
+      ctx.fillRect(left + 10, top + 8, 128, 22);
+      ctx.fillStyle = '#a6ff2e';
+      ctx.font = '800 12px "Pixelify Sans", monospace';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('PLAY >  SP 1993', left + 16, top + 19);
+      ctx.restore();
+    }
 
     if (chaosId === 'pixelate') {
       const pw = Math.max(48, Math.round(76 * (world.viewWidth / JAR_BOUNDS.width)));
@@ -1453,7 +1813,7 @@ export class GameRenderer {
     ctx.restore();
   }
 
-  _drawJarBackdrop(ctx, left, right, top, bottom, dangerY, world, time, mono = false) {
+  _drawJarBackdrop(ctx, left, right, top, bottom, dangerY, world, time, mono = false, gameboy = false) {
     ctx.save();
     ctx.beginPath();
     ctx.moveTo(left, top);
@@ -1465,7 +1825,7 @@ export class GameRenderer {
 
     ctx.fillStyle = mono
       ? '#000000'
-      : (world.activeChaos ? this.palette.jarChaosBg : this.palette.jarBg);
+      : (gameboy ? '#0f380f' : (world.activeChaos ? this.palette.jarChaosBg : this.palette.jarBg));
     ctx.fill();
 
     if (!mono) {

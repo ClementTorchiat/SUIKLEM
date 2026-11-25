@@ -38,6 +38,10 @@ export class BackgroundRenderer {
     this.monochrome = Boolean(enabled);
   }
 
+  setRetroTheme(theme = null) {
+    this.retroTheme = theme;
+  }
+
   resize() {
     this.width = window.innerWidth || 1280;
     this.height = window.innerHeight || 800;
@@ -73,6 +77,32 @@ export class BackgroundRenderer {
         ctx.moveTo(0, y);
         ctx.lineTo(w, y);
         ctx.stroke();
+      }
+      ctx.restore();
+      return;
+    }
+
+    if (this.retroTheme === 'gameboy' || this.retroTheme === 'matrix') {
+      const isGb = this.retroTheme === 'gameboy';
+      const step = isGb ? 48 : 56;
+      const scroll = this.reducedMotion ? 0 : (time * (isGb ? 24 : 78)) % step;
+      ctx.save();
+      ctx.strokeStyle = isGb ? '#306230' : '#00ff66';
+      ctx.globalAlpha = isGb ? 0.35 : 0.22;
+      ctx.lineWidth = isGb ? 2 : 1.5;
+      for (let x = -step + scroll; x < w + step; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      if (isGb) {
+        for (let y = -step + scroll; y < h + step; y += step) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(w, y);
+          ctx.stroke();
+        }
       }
       ctx.restore();
       return;

@@ -107,9 +107,11 @@ export class BrainrotAudio {
       const darkChaos =
         this.musicState.chaosId === 'blackhole'
         || this.musicState.chaosId === 'flashlight'
-        || this.musicState.chaosId === 'talljar';
+        || this.musicState.chaosId === 'talljar'
+        || this.musicState.chaosId === 'bullet_time';
       let targetHz = 5600;
       if (darkChaos) targetHz = 520;
+      else if (this.musicState.chaosId === 'gameboy' || this.musicState.chaosId === 'vhs') targetHz = 1850;
       else if (this.musicState.mode === 'zen') targetHz = 2400;
       else if (this.musicState.fever) targetHz = 7800;
       else if (this.musicState.danger) targetHz = 6600;
@@ -1192,5 +1194,20 @@ export class BrainrotAudio {
       t += 0.025 + Math.random() * 0.055;
       this._playNoiseBurst({ freq: 3400 + Math.random() * 1400, q: 4.2, duration: 0.008, gain: 0.07, delay: t });
     }
+  }
+
+  playPinball() {
+    this.unlock();
+    if (this.muted || !this.ctx || this.ctx.state !== 'running') return;
+    this._playBodyTone({ freq: 140, endFreq: 75, duration: 0.06, gain: 0.16, type: 'triangle' });
+    this._playFMPluck({ freq: 1046.5, duration: 0.12, gain: 0.11, modRatio: 2.0, modDepth: 0.9, modDecay: 0.03 });
+    this._playFMPluck({ freq: 1567.98, duration: 0.14, gain: 0.09, modRatio: 2.0, modDepth: 0.6, modDecay: 0.03, delay: 0.03 });
+  }
+
+  playLaserSweep() {
+    this.unlock();
+    if (this.muted || !this.ctx || this.ctx.state !== 'running') return;
+    this._playBodyTone({ freq: 1320, endFreq: 210, duration: 0.24, gain: 0.18, type: 'sawtooth' });
+    this._playNoiseBurst({ freq: 2600, endFreq: 500, q: 1.5, duration: 0.2, gain: 0.1 });
   }
 }

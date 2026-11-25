@@ -182,6 +182,8 @@ class SuiklemGame {
 
     this.tickerBar = document.querySelector('.ticker-bar');
     this.tickerToggleBtn = document.getElementById('ticker-toggle');
+    this.subtitleEl = document.querySelector('.subtitle');
+    this.subtitleDefault = this.subtitleEl?.textContent ?? '';
     this.jarFrameEl = document.querySelector('.jar-frame');
     this.flashlightEl = document.getElementById('flashlight-overlay');
     this.fourthWallActorEl = document.getElementById('fourthwall-actor');
@@ -193,6 +195,10 @@ class SuiklemGame {
     this.popupsLayerEl = document.getElementById('popups-layer');
     this.popupsSpawnedForChaos = false;
     this.isMystery = false;
+    this.isGameBoy = false;
+    this.isMatrix = false;
+    this.isSabotage = false;
+    this.sabotageButtons = [];
     this.lagRenderAcc = 999;
     this.runawayX = 0;
     this.runawayY = 0;
@@ -444,12 +450,34 @@ class SuiklemGame {
       this.startNewGame();
     });
 
+    this.sabotageButtons = [
+      this.powerNukeBtn,
+      this.powerWindBtn,
+      this.powerCloneBtn,
+      this.powerPurgeBtn,
+      this.powerApocalypseBtn,
+      ...this.modeBtns,
+    ].filter(Boolean);
+    for (const btn of this.sabotageButtons) {
+      btn.addEventListener('pointerenter', () => {
+        if (!this.isSabotage || this.reducedMotion) return;
+        const dx = (Math.random() < 0.5 ? -1 : 1) * (14 + Math.random() * 14);
+        const dy = (Math.random() < 0.5 ? -1 : 1) * (8 + Math.random() * 10);
+        btn.style.setProperty('--flee-x', `${dx.toFixed(0)}px`);
+        btn.style.setProperty('--flee-y', `${dy.toFixed(0)}px`);
+      });
+    }
+
     this.canvas.addEventListener('pointerdown', (e) => {
       if (this.isGameOver) return;
       this.audio.unlock();
       if (this.powerMode) {
         const coords = this._getCanvasCoords(e.clientX, e.clientY);
         if (coords) this._handlePowerCanvasClick(coords.x, coords.y);
+        return;
+      }
+      const coords = this._getCanvasCoords(e.clientX, e.clientY);
+      if (coords && this.world.tryInteractChaos(coords.x, coords.y).handled) {
         return;
       }
       this.activePointerId = e.pointerId;
@@ -633,16 +661,14 @@ class SuiklemGame {
     this._resetSlotReel(modeCfg);
     this.isMonochrome = false;
     this.isMystery = false;
+    this.isGameBoy = false;
+    this.isMatrix = false;
+    this.isSabotage = false;
     this.lagRenderAcc = 999;
-    document.body.classList.remove('is-monochrome', 'is-upsidedown', 'is-talljar', 'is-quake', 'is-fever');
-    if (this.flashlightEl) this.flashlightEl.hidden = true;
-    if (this.fourthWallActorEl) this.fourthWallActorEl.hidden = true;
-    this.fourthWallStep = -1;
-    this.fourthWallLines = [];
-    if (this.feverPillEl) this.feverPillEl.hidden = true;
-    this._resetRunawayJar();
-    this._clearWin98Popups();
+    document.body.classList.remove('is-monochrome', 'is-upsidedown', 'is-talljar', 'is-quake', 'is-fever', 'is-gameboy', 'is-matrix', 'is-sabotage');
+    this._clearSabotageState();
     this.bgRenderer.setMonochrome(false);
+    this.bgRenderer.setRetroTheme(null);
     this.totalDrops = 0;
     this.totalMerges = 0;
     this.runSeconds = 0;
@@ -849,15 +875,32 @@ class SuiklemGame {
     }
 
     const tier = this.currentTier;
+    const isDoubleDrop = this.world.activeChaos?.id === 'double_drop' && !fromSpam;
     const jitter = fromSpam ? (Math.random() - 0.5) * 44 : 0;
-    const x = this._clampAimX(this.aimX + jitter, tier);
+    const x = this._clampAimX(this.aimX + jitter + (isDoubleDrop ? -16 : 0), tier);
     this.world.spawnFruit(tier, x, JAR_BOUNDS.dropY, {
+      vx: isDoubleDrop ? -36 : 0,
       vy: fromSpam ? 180 : 40,
       mood: 'falling',
       moodTimer: 0.65,
       squashX: 0.9,
       squashY: 1.12,
     });
+
+    if (isDoubleDrop) {
+      const twinTier = this._pickDropTier();
+      const x2 = this._clampAimX(this.aimX + 16, twinTier);
+      this.world.spawnFruit(twinTier, x2, JAR_BOUNDS.dropY + 4, {
+        vx: 36,
+        vy: 55,
+        mood: 'happy',
+        moodTimer: 0.85,
+        squashX: 0.9,
+        squashY: 1.12,
+      });
+      this._markDiscovered(twinTier);
+      this.renderer.spawnMicroExplosion(this.aimX, JAR_BOUNDS.dropY + 12, '#a6ff2e', '2 POUR 1 !');
+    }
 
     if (forced) {
       this.renderer.spawnMicroExplosion(x, JAR_BOUNDS.dropY + 10, '#ff2bd6', 'TROP LENT !');
@@ -873,18 +916,95 @@ class SuiklemGame {
     this.nextTier = this._pickDropTier();
     this.aimX = this._clampAimX(this.aimX, this.currentTier);
     const modeCfg = GAME_MODES[this.gameMode] || GAME_MODES.classic;
-    this.dropCooldown = fromSpam ? 0.08 : 0.22;
+    const isBulletTime = this.world.activeChaos?.id === 'bullet_time';
+    this.dropCooldown = fromSpam ? 0.08 : (isBulletTime ? 0.12 : 0.22);
     this.autoDropTimer = modeCfg.dropLimit ?? 1.0;
     this._updateHUD();
     this._updatePowerUI();
     this._updateTelemetryUI();
   }
 
-  _handleChaosFx({ type, x, y, tier }) {
+  _handleChaosFx({ type, x, y, tier, hitsLeft }) {
     if (type === 'popcorn') {
       this.renderer.spawnMicroExplosion(x, y, '#ff7b00', 'POP!!');
       this.renderer.triggerShake(5, 0.16);
       this.audio.playChomp();
+    } else if (type === 'pinballHit') {
+      this.audio.playPinball();
+      this._addScore(25);
+      this.renderer.spawnMicroExplosion(x, y, '#ffe600', '+25!');
+      this.renderer.triggerShake(3, 0.1);
+      this._updateHUD();
+    } else if (type === 'krakenSlap') {
+      this.audio.playSwitchSnap();
+      this.renderer.spawnMicroExplosion(x, y, '#00f5d4', `PAF! (${hitsLeft}×)`);
+      this.renderer.triggerShake(4, 0.12);
+    } else if (type === 'krakenRepelled') {
+      this.audio.playCashBlip(true);
+      this._addScore(80);
+      this.renderer.spawnMicroExplosion(x, y, '#a6ff2e', 'SAUVÉ ! +80');
+      this.renderer.triggerShake(7, 0.2);
+      this.moodEl.textContent = 'BIEN JOUÉ ! LE KRAKEN EST REPARTI LES TENTACULES VIDES !';
+      this._updateHUD();
+    } else if (type === 'krakenSteal') {
+      this.audio.playChomp();
+      this.renderer.spawnMicroExplosion(x, y, '#ff2bd6', 'TAXÉ !!');
+      this.renderer.triggerShake(9, 0.25);
+      this.moodEl.textContent = 'OUTCH ! LE KRAKEN T’A VOLÉ UN GROS MUTANT POUR LA TVA !';
+    } else if (type === 'laserFire') {
+      this.audio.playLaserSweep();
+      this.renderer.triggerShake(7, 0.22);
+      this.renderer.triggerGlitch(0.2);
+    } else if (type === 'laserDevolve') {
+      this.renderer.spawnMicroExplosion(x, y, '#ff2bd6', 'DÉ-ÉVOLUÉ !');
+    } else if (type === 'mosquitoSwat') {
+      this.audio.playChomp();
+      this._addScore(45);
+      this.powerCharge = Math.min(MAX_CHARGE, this.powerCharge + 45);
+      this.renderer.spawnMicroExplosion(x, y, '#a6ff2e', 'SPLAT ! +45 JUS');
+      this._updateHUD();
+      this._updatePowerUI();
+    } else if (type === 'meteorHit') {
+      this.audio.playBump(420);
+      this.renderer.spawnFlameBurst(x, y, 8);
+      this.renderer.triggerShake(6, 0.18);
+    } else if (type === 'pacmanChomp') {
+      this.audio.playChomp();
+      this._addScore(60);
+      this.renderer.spawnMicroExplosion(x, y, '#ffe600', 'WAKA ! +60');
+      this.renderer.triggerShake(4, 0.12);
+      this._updateHUD();
+    } else if (type === 'pongHit') {
+      this.audio.playPinball();
+      this._addScore(20);
+      this.renderer.spawnMicroExplosion(x, y, '#00f5d4', 'PONG ! +20');
+      this._updateHUD();
+    } else if (type === 'mitosisSplit') {
+      this.audio.playClone();
+      this.renderer.spawnMicroExplosion(x, y, '#ff2bd6', 'MITOSE ÷2 !');
+      this.renderer.triggerShake(5, 0.15);
+      this._updateHUD();
+    } else if (type === 'lightningStrike') {
+      this.audio.playGaugeReady();
+      const scoreBonus = FRUITS[tier]?.score ?? 25;
+      this._addScore(scoreBonus);
+      this._markDiscovered(tier);
+      if (tier > this.biggestTier) this.biggestTier = tier;
+      this.renderer.spawnLaserBolt(x + (Math.random() - 0.5) * 50, 0, x, y, '#ffe600');
+      this.renderer.spawnMicroExplosion(x, y, '#ffe600', `ZAP ! +${scoreBonus}`);
+      this.renderer.triggerShake(6, 0.18);
+      this._updateHUD();
+    } else if (type === 'dvdCornerHit') {
+      this.audio.playApocalypse();
+      this._addScore(500);
+      this.feverTimer = Math.max(this.feverTimer, 6.0);
+      this.renderer.spawnMicroExplosion(x, y, '#ffe600', 'COIN PARFAIT !! +500');
+      this.renderer.triggerShake(12, 0.4);
+      this.moodEl.textContent = 'INCROYABLE !! LE LOGO DVD A TOUCHÉ LE COIN PARFAIT (+500 + FEVER) !!';
+      this._updateHUD();
+    } else if (type === 'discoBeat') {
+      this._addScore(10);
+      this._updateHUD();
     } else if (type === 'rain') {
       this.renderer.spawnMicroExplosion(x, y, '#00f5d4', 'PLOUF');
     } else if (type === 'bonk') {
@@ -995,12 +1115,30 @@ class SuiklemGame {
     ctx.restore();
   }
 
+  _clearSabotageState() {
+    for (const btn of this.sabotageButtons || []) {
+      btn.style.removeProperty('--flee-x');
+      btn.style.removeProperty('--flee-y');
+    }
+    if (this.subtitleEl && this.subtitleDefault) {
+      this.subtitleEl.textContent = this.subtitleDefault;
+    }
+    if (this.flashlightEl) this.flashlightEl.hidden = true;
+    if (this.fourthWallActorEl) this.fourthWallActorEl.hidden = true;
+    this.fourthWallStep = -1;
+    this.fourthWallLines = [];
+    if (this.feverPillEl) this.feverPillEl.hidden = true;
+    this._resetRunawayJar();
+    this._clearWin98Popups();
+  }
+
   _resetRunawayJar() {
     this.runawayX = 0;
     this.runawayY = 0;
     if (this.jarFrameEl) {
       this.jarFrameEl.style.setProperty('--jar-tx', '0px');
       this.jarFrameEl.style.setProperty('--jar-ty', '0px');
+      this.jarFrameEl.style.removeProperty('--jar-rot');
     }
   }
 
@@ -1073,7 +1211,7 @@ class SuiklemGame {
     );
   }
 
-  _handleMerge({ x, y, newTier, isMaxPop, fromPower = false }) {
+  _handleMerge({ x, y, newTier, isMaxPop, fromPower = false, dnaShift = 0 }) {
     if (this.comboTimer > 0) {
       this.comboCount += 1;
     } else {
@@ -1128,7 +1266,11 @@ class SuiklemGame {
     }
 
     let floatLabel = `+${addedScore}`;
-    if (isMaxPop) {
+    if (dnaShift > 0) {
+      floatLabel = `ADN GLITCH +${dnaShift + 1} !!`;
+    } else if (dnaShift < 0) {
+      floatLabel = 'ERREUR ADN -1 !';
+    } else if (isMaxPop) {
       floatLabel = 'DOUBLE PASTÈQUE 3000 !! +300';
       this.moodEl.textContent = 'EXPLOSION NUCLÉAIRE DE PASTÈQUE ! LA NASA EST EN PANNE !';
       this._announce('Double Pastèque 3000 ! Plus 300 points.');
@@ -1606,12 +1748,13 @@ class SuiklemGame {
     this.isGameOver = true;
     this.feverTimer = 0;
     this._cancelPowerMode(false);
-    document.body.classList.remove('is-upsidedown', 'is-talljar', 'is-quake', 'is-fever');
-    if (this.flashlightEl) this.flashlightEl.hidden = true;
-    if (this.fourthWallActorEl) this.fourthWallActorEl.hidden = true;
-    if (this.feverPillEl) this.feverPillEl.hidden = true;
-    this._resetRunawayJar();
-    this._clearWin98Popups();
+    document.body.classList.remove('is-upsidedown', 'is-talljar', 'is-quake', 'is-fever', 'is-gameboy', 'is-matrix', 'is-sabotage');
+    this.isGameBoy = false;
+    this.isMatrix = false;
+    this.isSabotage = false;
+    this._clearSabotageState();
+    this.bgRenderer.setMonochrome(false);
+    this.bgRenderer.setRetroTheme(null);
     this.dangerBanner.hidden = true;
     this.chaosBanner.hidden = true;
     this.slotSpin = null;
@@ -1732,7 +1875,7 @@ class SuiklemGame {
     this.scoreEl.textContent = String(this.score);
     this.bestEl.textContent = String(this.bestScore);
     this.nextNameEl.textContent = mystery ? 'Mystère ???' : FRUITS[this.nextTier].name;
-    this.renderer.renderNextPreview(this.nextTier, this.isMonochrome, mystery);
+    this.renderer.renderNextPreview(this.nextTier, this.isMonochrome, mystery, this.isGameBoy);
   }
 
   _announce(text) {
@@ -1836,9 +1979,13 @@ class SuiklemGame {
       }
 
       const fixedStep = 1 / 60;
+      const simScale = this.world.activeChaos?.id === 'bullet_time' ? 0.28 : 1;
+      if (this.world.activeChaos?.id === 'pong') {
+        this.world.setPaddleX(this.aimX);
+      }
       this.accumulator += dt;
       while (this.accumulator >= fixedStep) {
-        this.world.step(fixedStep);
+        this.world.step(fixedStep, simScale);
         this.accumulator -= fixedStep;
       }
 
@@ -1902,6 +2049,10 @@ class SuiklemGame {
 
       const mono = this.world.activeChaos?.id === 'monochrome';
       const mystery = this.world.activeChaos?.id === 'mystery';
+      const gameboy = this.world.activeChaos?.id === 'gameboy';
+      const matrix = this.world.activeChaos?.id === 'bullet_time';
+      const sabotage = this.world.activeChaos?.id === 'ui_sabotage';
+      const tiltfloor = this.world.activeChaos?.id === 'tiltfloor';
       const upsidedown = this.world.activeChaos?.id === 'upsidedown';
       const talljar = this.world.activeChaos?.id === 'talljar';
       const runaway = this.world.activeChaos?.id === 'runaway';
@@ -1909,6 +2060,31 @@ class SuiklemGame {
       document.body.classList.toggle('is-upsidedown', upsidedown);
       document.body.classList.toggle('is-talljar', talljar);
       document.body.classList.toggle('is-quake', quake);
+      document.body.classList.toggle('is-gameboy', gameboy);
+      document.body.classList.toggle('is-matrix', matrix);
+      document.body.classList.toggle('is-sabotage', sabotage);
+
+      if (tiltfloor && !this.reducedMotion && this.jarFrameEl) {
+        const deg = ((this.world.activeChaos.tiltAngle || 0) * 180) / Math.PI * 0.45;
+        this.jarFrameEl.style.setProperty('--jar-rot', `${deg.toFixed(2)}deg`);
+      } else if (!upsidedown && this.jarFrameEl) {
+        this.jarFrameEl.style.removeProperty('--jar-rot');
+      }
+
+      if (sabotage !== this.isSabotage) {
+        this.isSabotage = sabotage;
+        if (sabotage && this.subtitleEl) {
+          this.subtitleEl.textContent = 'SYSTÈME PIRATÉ • ATTRAPE LES BOUTONS !!';
+        } else if (!sabotage) {
+          for (const btn of this.sabotageButtons) {
+            btn.style.removeProperty('--flee-x');
+            btn.style.removeProperty('--flee-y');
+          }
+          if (this.subtitleEl && this.subtitleDefault) {
+            this.subtitleEl.textContent = this.subtitleDefault;
+          }
+        }
+      }
 
       if (runaway && !this.reducedMotion && this.jarFrameEl) {
         const rect = this.jarFrameEl.getBoundingClientRect();
@@ -1939,13 +2115,16 @@ class SuiklemGame {
         this._clearWin98Popups();
       }
 
-      if (mono !== this.isMonochrome || mystery !== this.isMystery) {
+      if (mono !== this.isMonochrome || mystery !== this.isMystery || gameboy !== this.isGameBoy || matrix !== this.isMatrix) {
         this.isMonochrome = mono;
         this.isMystery = mystery;
+        this.isGameBoy = gameboy;
+        this.isMatrix = matrix;
         document.body.classList.toggle('is-monochrome', mono);
         this.bgRenderer.setMonochrome(mono);
+        this.bgRenderer.setRetroTheme(gameboy ? 'gameboy' : (matrix ? 'matrix' : null));
         this.nextNameEl.textContent = mystery ? 'Mystère ???' : FRUITS[this.nextTier].name;
-        this.renderer.renderNextPreview(this.nextTier, mono, mystery);
+        this.renderer.renderNextPreview(this.nextTier, mono, mystery, gameboy);
         this._renderECG();
       }
     }

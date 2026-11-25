@@ -267,6 +267,144 @@ const CHAOS_GLYPHS = {
       el('path', { d: 'M6 5C7.5 8 7.5 12 6 15M10 3.5C11 8 11 12 10 16.5M14 5C12.5 8 12.5 12 14 15', fill: 'none', stroke: '#a6ff2e', 'stroke-width': 1.3 }),
     );
   },
+  pinball: (s) => {
+    s.append(
+      el('circle', { cx: 10, cy: 10, r: 7.2, fill: '#ff2bd6', stroke: '#ffe600', 'stroke-width': 1.8 }),
+      el('circle', { cx: 10, cy: 10, r: 3.4, fill: '#00f5d4', stroke: '#090314', 'stroke-width': 1.3 }),
+    );
+  },
+  tiltfloor: (s) => {
+    s.append(
+      el('path', { d: 'M2 13Q6 10 10 13T18 13', fill: 'none', stroke: '#38bdf8', 'stroke-width': 2, 'stroke-linecap': 'round' }),
+      el('path', { d: 'M4 8L16 11L14.5 14L5.5 12Z', fill: '#ffe600', stroke: '#090314', 'stroke-width': 1.3, 'stroke-linejoin': 'round' }),
+    );
+  },
+  kraken: (s) => {
+    s.append(
+      el('path', { d: 'M4 16C5 9 9 4 14 5C17 6 17 10 14 11C12 11.5 11.5 9.5 13 9', fill: 'none', stroke: '#a855f7', 'stroke-width': 3, 'stroke-linecap': 'round' }),
+      el('circle', { cx: 6.5, cy: 12, r: 1.1, fill: '#ffe600' }),
+      el('circle', { cx: 9, cy: 8.5, r: 1.1, fill: '#ffe600' }),
+    );
+  },
+  laser: (s) => {
+    s.append(
+      el('line', { x1: 2, y1: 10, x2: 18, y2: 10, stroke: '#ff2bd6', 'stroke-width': 3.2, 'stroke-linecap': 'round' }),
+      el('line', { x1: 2, y1: 10, x2: 18, y2: 10, stroke: '#ffffff', 'stroke-width': 1.1 }),
+      el('polygon', { points: '5,6 2,10 5,14', fill: '#ffe600' }),
+    );
+  },
+  mosquitos: (s) => {
+    s.append(
+      el('ellipse', { cx: 7, cy: 7, rx: 3.5, ry: 2, transform: 'rotate(-25 7 7)', fill: '#00f5d4', opacity: 0.7 }),
+      el('ellipse', { cx: 13, cy: 7, rx: 3.5, ry: 2, transform: 'rotate(25 13 7)', fill: '#00f5d4', opacity: 0.7 }),
+      el('circle', { cx: 10, cy: 11.5, r: 3.2, fill: '#ff2bd6', stroke: '#090314', 'stroke-width': 1.4 }),
+      el('line', { x1: 10, y1: 14.5, x2: 10, y2: 18.5, stroke: '#ffe600', 'stroke-width': 1.6, 'stroke-linecap': 'round' }),
+    );
+  },
+  meteors: (s) => {
+    s.append(
+      el('path', { d: 'M16 3L9 10M17.5 6.5L12 12M12.5 2.5L7.5 7.5', stroke: '#ff7b00', 'stroke-width': 1.8, 'stroke-linecap': 'round' }),
+      el('circle', { cx: 7, cy: 13, r: 4.5, fill: '#ffe600', stroke: '#dc2626', 'stroke-width': 1.8 }),
+    );
+  },
+  bullet_time: (s) => {
+    s.append(
+      el('circle', { cx: 10, cy: 10, r: 7.5, fill: '#052e16', stroke: '#22c55e', 'stroke-width': 1.8 }),
+      el('path', { d: 'M10 5.5V10L13.5 12', fill: 'none', stroke: '#a6ff2e', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+    );
+  },
+  dna_glitch: (s) => {
+    s.append(
+      el('path', { d: 'M6 3C14 6 6 14 14 17M14 3C6 6 14 14 6 17', fill: 'none', stroke: '#00f5d4', 'stroke-width': 1.9, 'stroke-linecap': 'round' }),
+      el('line', { x1: 7.5, y1: 7, x2: 12.5, y2: 7, stroke: '#ff2bd6', 'stroke-width': 1.5 }),
+      el('line', { x1: 7.5, y1: 13, x2: 12.5, y2: 13, stroke: '#ffe600', 'stroke-width': 1.5 }),
+    );
+  },
+  defrag: (s) => {
+    s.append(
+      el('rect', { x: 2.5, y: 4, width: 4, height: 12, rx: 1, fill: '#00f5d4' }),
+      el('rect', { x: 8, y: 4, width: 4, height: 12, rx: 1, fill: '#ffe600' }),
+      el('rect', { x: 13.5, y: 4, width: 4, height: 12, rx: 1, fill: '#ff2bd6' }),
+    );
+  },
+  ui_sabotage: (s) => {
+    s.append(
+      el('rect', { x: 3, y: 6, width: 14, height: 8, rx: 2, fill: '#dc2626', stroke: '#ffe600', 'stroke-width': 1.5, 'stroke-dasharray': '3 1.5' }),
+      el('path', { d: 'M8 10H12M10 8V12', stroke: '#ffffff', 'stroke-width': 1.6, 'stroke-linecap': 'round' }),
+    );
+  },
+  gameboy: (s) => {
+    s.append(
+      el('rect', { x: 4.5, y: 2, width: 11, height: 16, rx: 2, fill: '#9bbc0f', stroke: '#0f380f', 'stroke-width': 1.6 }),
+      el('rect', { x: 6.5, y: 4, width: 7, height: 5.5, fill: '#306230', stroke: '#0f380f', 'stroke-width': 1 }),
+      el('circle', { cx: 13, cy: 13.5, r: 1.2, fill: '#0f380f' }),
+      el('path', { d: 'M7 13.5H9.5M8.25 12.2V14.8', stroke: '#0f380f', 'stroke-width': 1.3, 'stroke-linecap': 'round' }),
+    );
+  },
+  pacman: (s) => {
+    s.append(
+      el('path', { d: 'M10 10L16.5 6A7.5 7.5 0 1 0 16.5 14Z', fill: '#ffe600', stroke: '#090314', 'stroke-width': 1.5, 'stroke-linejoin': 'round' }),
+      el('circle', { cx: 10.5, cy: 6, r: 1.2, fill: '#090314' }),
+      el('circle', { cx: 17, cy: 10, r: 1.4, fill: '#ff2bd6' }),
+    );
+  },
+  pong: (s) => {
+    s.append(
+      el('rect', { x: 3, y: 12, width: 14, height: 3.5, rx: 1.5, fill: '#00f5d4', stroke: '#090314', 'stroke-width': 1.2 }),
+      el('rect', { x: 8, y: 4.5, width: 4, height: 4, rx: 0.8, fill: '#ffffff', stroke: '#ff2bd6', 'stroke-width': 1.2 }),
+      el('path', { d: 'M10 10.5V8.5', stroke: '#ffe600', 'stroke-width': 1.4, 'stroke-dasharray': '1.5 1.5' }),
+    );
+  },
+  mitosis: (s) => {
+    s.append(
+      el('circle', { cx: 6.5, cy: 10, r: 4, fill: '#ff2bd6', stroke: '#090314', 'stroke-width': 1.4 }),
+      el('circle', { cx: 13.5, cy: 10, r: 4, fill: '#00f5d4', stroke: '#090314', 'stroke-width': 1.4 }),
+      el('path', { d: 'M10 4V16', stroke: '#ffe600', 'stroke-width': 1.5, 'stroke-dasharray': '2 2' }),
+    );
+  },
+  lightning: (s) => {
+    s.append(
+      el('polygon', { points: '11.5,2 5,11 9.5,11 8,18 15,9 10.5,9', fill: '#ffe600', stroke: '#ff7b00', 'stroke-width': 1.3, 'stroke-linejoin': 'round' }),
+    );
+  },
+  helium: (s) => {
+    s.append(
+      el('circle', { cx: 10, cy: 9, r: 6.5, fill: 'none', stroke: '#38bdf8', 'stroke-width': 1.8 }),
+      el('path', { d: 'M10 13V5M7.5 7.5L10 5L12.5 7.5', fill: 'none', stroke: '#a6ff2e', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+      el('circle', { cx: 4, cy: 4.5, r: 1.2, fill: '#ffe600' }),
+      el('circle', { cx: 16, cy: 15, r: 1.2, fill: '#ff2bd6' }),
+    );
+  },
+  double_drop: (s) => {
+    s.append(
+      el('circle', { cx: 6.5, cy: 12, r: 4.2, fill: '#a6ff2e', stroke: '#090314', 'stroke-width': 1.4 }),
+      el('circle', { cx: 13.5, cy: 12, r: 4.2, fill: '#ff2bd6', stroke: '#090314', 'stroke-width': 1.4 }),
+      el('path', { d: 'M6.5 3V6M13.5 3V6', stroke: '#ffe600', 'stroke-width': 1.8, 'stroke-linecap': 'round' }),
+    );
+  },
+  vhs: (s) => {
+    s.append(
+      el('rect', { x: 2.5, y: 5, width: 15, height: 10, rx: 2, fill: '#1e293b', stroke: '#ff2bd6', 'stroke-width': 1.5 }),
+      el('circle', { cx: 7, cy: 10, r: 2.2, fill: '#090314', stroke: '#ffffff', 'stroke-width': 1.2 }),
+      el('circle', { cx: 13, cy: 10, r: 2.2, fill: '#090314', stroke: '#ffffff', 'stroke-width': 1.2 }),
+      el('line', { x1: 7, y1: 10, x2: 13, y2: 10, stroke: '#00f5d4', 'stroke-width': 1.2 }),
+    );
+  },
+  dvd_bounce: (s) => {
+    s.append(
+      el('ellipse', { cx: 10, cy: 9, rx: 7.5, ry: 4.2, fill: '#090314', stroke: '#00f5d4', 'stroke-width': 1.7 }),
+      el('ellipse', { cx: 10, cy: 14, rx: 6, ry: 2, fill: '#ff2bd6' }),
+      el('circle', { cx: 10, cy: 14, r: 1, fill: '#090314' }),
+    );
+  },
+  disco: (s) => {
+    s.append(
+      el('line', { x1: 10, y1: 2, x2: 10, y2: 5, stroke: '#e2e8f0', 'stroke-width': 1.5 }),
+      el('circle', { cx: 10, cy: 11, r: 5.8, fill: '#cbd5e1', stroke: '#ff2bd6', 'stroke-width': 1.5 }),
+      el('path', { d: 'M5 11H15M10 5.2V16.8M6 7.5H14M6 14.5H14', stroke: '#0f172a', 'stroke-width': 1 }),
+      el('circle', { cx: 8, cy: 9, r: 1, fill: '#ffe600' }),
+    );
+  },
 };
 
 export function createChaosIconSvg(id, size = 16, className = 'ui-svg-icon') {

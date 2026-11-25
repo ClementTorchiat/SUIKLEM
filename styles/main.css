@@ -5297,6 +5297,83 @@ body.is-monochrome .gameover-skull-svg {
   filter: grayscale(1) contrast(1000%);
 }
 
+/* Matrix Bullet-Time Mode */
+body.is-matrix {
+  --bg-page: #021208;
+  --text-main: #d9ffe5;
+  --text-muted: #6ee7b7;
+  --cyan: #00ff66;
+  --pink: #a6ff2e;
+}
+
+body.is-matrix .jar-frame {
+  border-color: #22c55e;
+  box-shadow: 0 0 26px rgba(0, 255, 102, 0.35), 5px 5px 0 #021208;
+}
+
+/* 1989 Game Boy Olive LCD Cartridge Mode */
+body.is-gameboy {
+  --bg-page: #8bac0f;
+  --surface: #9bbc0f;
+  --surface-muted: #306230;
+  --ink: #0f380f;
+  --text-main: #9bbc0f;
+  --text-muted: #8bac0f;
+  --cyan: #9bbc0f;
+  --pink: #0f380f;
+  --yellow: #9bbc0f;
+  --orange: #306230;
+  --lime: #9bbc0f;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(15, 56, 15, 0.14) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(15, 56, 15, 0.1) 0 1px, transparent 1px 3px);
+}
+
+body.is-gameboy .top-bar,
+body.is-gameboy .panel-card,
+body.is-gameboy .powers-card,
+body.is-gameboy .mode-switcher,
+body.is-gameboy .stat-score,
+body.is-gameboy .stat-best,
+body.is-gameboy .next-pill,
+body.is-gameboy .jar-frame,
+body.is-gameboy .vending-cabinet {
+  background-image: none;
+  background-color: #306230;
+  border-color: #0f380f;
+  box-shadow: 3px 3px 0 #0f380f;
+}
+
+body.is-gameboy .chaos-card .slot-cabinet,
+body.is-gameboy .telemetry-card .micro-stat,
+body.is-gameboy .evolution-list,
+body.is-gameboy .mood-text,
+body.is-gameboy .doomsday-lcd,
+body.is-gameboy .polygraph-leds {
+  background-image: none;
+  background-color: #0f380f;
+  border-color: #9bbc0f;
+}
+
+body.is-gameboy .ui-svg-icon,
+body.is-gameboy .brand-logo-svg,
+body.is-gameboy .fan-svg,
+body.is-gameboy .geiger-svg,
+body.is-gameboy .vending-shelf-svg {
+  filter: sepia(1) hue-rotate(48deg) saturate(2.8) contrast(1.1);
+}
+
+/* UI Sabotage Mode — Runaway Buttons */
+body.is-sabotage .power-btn,
+body.is-sabotage .mode-btn {
+  transform: translate(var(--flee-x, 0px), var(--flee-y, 0px));
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.14s ease;
+}
+
+body.is-sabotage .subtitle {
+  color: var(--pink);
+}
+
 body.is-monochrome .brand-logo-svg {
   filter: grayscale(1) contrast(1000%);
 }
