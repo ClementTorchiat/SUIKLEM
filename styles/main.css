@@ -111,7 +111,11 @@ button:not([aria-disabled="true"])>* {
 
 @media (min-width: 1360px) {
   .app-shell {
-    max-inline-size: 1620px;
+    inline-size: min(1620px, calc(100dvw / var(--ui-scale, 1)));
+    max-inline-size: none;
+    block-size: calc(100dvb / var(--ui-scale, 1));
+    transform-origin: top center;
+    scale: var(--ui-scale, 1);
   }
 }
 
@@ -494,7 +498,7 @@ body.hide-useless-stats .gameover-useless {
   }
 
   .app-shell {
-    block-size: 100dvb;
+    block-size: calc(100dvb / var(--ui-scale, 1));
     min-block-size: 0;
     overflow: hidden;
     padding-block: 0.34rem;
@@ -1917,7 +1921,7 @@ body.is-talljar #game-canvas {
 
 #game-canvas {
   display: block;
-  block-size: min(535px, calc(100dvb - 140px));
+  block-size: min(535px, calc((100dvb / var(--ui-scale, 1)) - 140px));
   inline-size: auto;
   max-inline-size: 94dvw;
   aspect-ratio: 380 / 560;
@@ -3102,6 +3106,9 @@ dialog {
   margin: auto;
   padding: 0;
   max-inline-size: min(92dvw, 490px);
+  max-block-size: calc(90dvb / var(--ui-scale, 1));
+  overflow-y: auto;
+  scale: var(--ui-scale, 1);
   inline-size: 100%;
   border: 3px solid #64748b;
   border-radius: 18px;
@@ -5602,6 +5609,7 @@ body.is-chill-intro .next-vat::after {
   align-items: center;
   gap: 0.9rem;
   max-inline-size: min(92vw, 520px);
+  scale: var(--ui-scale, 1);
 }
 
 .intro-boss-avatar {

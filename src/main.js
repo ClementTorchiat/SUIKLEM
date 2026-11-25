@@ -644,6 +644,11 @@ class SuiklemGame {
     window.addEventListener('blur', () => {
       this.keysHeld.clear();
     });
+
+    window.addEventListener('resize', () => {
+      window.__syncSuiklemUiScale?.();
+      this.renderer._resizeHiDPI(this.world.viewWidth);
+    });
   }
 
   _getCanvasCoords(clientX, clientY) {

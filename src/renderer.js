@@ -1130,7 +1130,10 @@ export class GameRenderer {
   }
 
   _resizeHiDPI(viewWidth = JAR_BOUNDS.width) {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const uiScale = (typeof getComputedStyle === 'function' && document?.documentElement)
+      ? (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ui-scale')) || 1)
+      : 1;
+    const dpr = Math.min((window.devicePixelRatio || 1) * Math.max(1, uiScale), 3);
     this.currentViewWidth = viewWidth;
     this.canvas.width = Math.round(viewWidth * dpr);
     this.canvas.height = Math.round(JAR_BOUNDS.height * dpr);

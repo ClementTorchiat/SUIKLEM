@@ -30,13 +30,22 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap">
   <script>
+    window.__syncSuiklemUiScale = () => {
+      const vw = window.innerWidth || 1280;
+      const vh = window.innerHeight || 800;
+      const scale = (vw >= 1560 && vh >= 840)
+        ? Math.max(1, Math.min(2.15, Math.min(vw / 1480, vh / 790)))
+        : 1;
+      document.documentElement.style.setProperty('--ui-scale', scale.toFixed(4));
+    };
+    window.__syncSuiklemUiScale();
     try {
       if (localStorage.getItem('suiklem-intro-seen') !== 'true') {
         document.documentElement.classList.add('is-chill-pre');
       }
     } catch {}
   </script>
-  <link rel="stylesheet" href="styles/main.css?v=19">
+  <link rel="stylesheet" href="styles/main.css?v=20">
   <script type="module" src="src/main.js"></script>
 </head>
 <body>
