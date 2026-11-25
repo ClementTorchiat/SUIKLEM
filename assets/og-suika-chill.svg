@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff8ee"/>
+      <stop offset="55%" stop-color="#ffebd6"/>
+      <stop offset="100%" stop-color="#fbe0d1"/>
+    </linearGradient>
+    <linearGradient id="jarGlass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.72"/>
+      <stop offset="100%" stop-color="#fff4e4" stop-opacity="0.55"/>
+    </linearGradient>
+    <radialGradient id="cherry" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#fff5f7"/>
+      <stop offset="32%" stop-color="#ff5c77"/>
+      <stop offset="100%" stop-color="#c92a49"/>
+    </radialGradient>
+    <radialGradient id="orange" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#fff9ef"/>
+      <stop offset="32%" stop-color="#ffa94d"/>
+      <stop offset="100%" stop-color="#d96b18"/>
+    </radialGradient>
+    <radialGradient id="peach" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#fff7f9"/>
+      <stop offset="32%" stop-color="#ffb5c2"/>
+      <stop offset="100%" stop-color="#e0748a"/>
+    </radialGradient>
+    <radialGradient id="grape" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#f8f5ff"/>
+      <stop offset="32%" stop-color="#a77de8"/>
+      <stop offset="100%" stop-color="#6d43b5"/>
+    </radialGradient>
+    <radialGradient id="melon" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#eaffea"/>
+      <stop offset="32%" stop-color="#58b368"/>
+      <stop offset="100%" stop-color="#2c7539"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Soft Pastel Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="130" cy="110" r="95" fill="#ffd6dc" opacity="0.42"/>
+  <circle cx="1070" cy="130" r="120" fill="#ffe2b8" opacity="0.45"/>
+  <circle cx="960" cy="540" r="145" fill="#d9f2d8" opacity="0.45"/>
+  <circle cx="210" cy="520" r="120" fill="#e7d9ff" opacity="0.35"/>
+
+  <!-- Left Title Card -->
+  <g transform="translate(88, 132)">
+    <rect x="0" y="0" width="540" height="366" rx="34" fill="#fffaf3" stroke="#d8b998" stroke-width="5"/>
+    <rect x="34" y="34" width="214" height="40" rx="20" fill="#ffedd5" stroke="#d9a066" stroke-width="2.5"/>
+    <text x="141" y="60" font-family="system-ui, -apple-system, sans-serif" font-size="19" font-weight="800" fill="#9a5b25" text-anchor="middle">DÉTENTE &amp; FUSION ZEN</text>
+
+    <text x="34" y="148" font-family="system-ui, -apple-system, sans-serif" font-size="68" font-weight="900" fill="#5e3a22">Suika Chill</text>
+    <text x="36" y="196" font-family="system-ui, -apple-system, sans-serif" font-size="25" font-weight="600" fill="#8c6244">Pose des fruits pastel tranquillement</text>
+    <text x="36" y="232" font-family="system-ui, -apple-system, sans-serif" font-size="25" font-weight="600" fill="#8c6244">jusqu’à la pastèque royale.</text>
+
+    <!-- Cute fruit evolution preview strip inside card -->
+    <g transform="translate(64, 302)">
+      <circle cx="0" cy="0" r="22" fill="url(#cherry)" stroke="#6c4a32" stroke-width="3.2"/>
+      <ellipse cx="7" cy="-24" rx="7" ry="4" transform="rotate(-25 7 -24)" fill="#74c365" stroke="#4a7c36" stroke-width="1.8"/>
+      <path d="M38 0 H54 M49 -5 L55 0 L49 5" fill="none" stroke="#c09b78" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="88" cy="0" r="26" fill="url(#orange)" stroke="#6c4a32" stroke-width="3.2"/>
+      <ellipse cx="96" cy="-28" rx="8" ry="4.5" transform="rotate(-25 96 -28)" fill="#74c365" stroke="#4a7c36" stroke-width="1.8"/>
+      <path d="M130 0 H146 M141 -5 L147 0 L141 5" fill="none" stroke="#c09b78" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="182" cy="0" r="30" fill="url(#peach)" stroke="#6c4a32" stroke-width="3.2"/>
+      <ellipse cx="192" cy="-32" rx="9" ry="5" transform="rotate(-25 192 -32)" fill="#74c365" stroke="#4a7c36" stroke-width="1.8"/>
+      <path d="M228 0 H244 M239 -5 L245 0 L239 5" fill="none" stroke="#c09b78" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="290" cy="0" r="37" fill="url(#melon)" stroke="#6c4a32" stroke-width="3.6"/>
+      <ellipse cx="302" cy="-39" rx="11" ry="6" transform="rotate(-25 302 -39)" fill="#74c365" stroke="#4a7c36" stroke-width="2"/>
+    </g>
+  </g>
+
+  <!-- Right Pastel Jar Showcase -->
+  <g transform="translate(716, 76)">
+    <!-- Jar Outer Rim -->
+    <rect x="0" y="0" width="380" height="478" rx="34" fill="url(#jarGlass)" stroke="#c7a07a" stroke-width="6"/>
+    <!-- Inner Glass Container -->
+    <path d="M24 56 V438 Q24 454 40 454 H340 Q356 454 356 438 V56" fill="none" stroke="#b98a60" stroke-width="7" stroke-linecap="round"/>
+    <!-- Dashed pastel top line -->
+    <line x1="30" y1="108" x2="350" y2="108" stroke="#d4aa82" stroke-width="3" stroke-dasharray="8 8"/>
+
+    <!-- Dropping Orange at Top -->
+    <line x1="190" y1="74" x2="190" y2="210" stroke="#e4b78a" stroke-width="3" stroke-dasharray="6 6"/>
+    <g transform="translate(190, 68)">
+      <path d="M0 -42 Q6 -58 16 -54" fill="none" stroke="#6c4a32" stroke-width="4" stroke-linecap="round"/>
+      <ellipse cx="18" cy="-50" rx="14" ry="8" transform="rotate(-25 18 -50)" fill="#74c365" stroke="#4a7c36" stroke-width="2.5"/>
+      <circle cx="0" cy="0" r="42" fill="url(#orange)" stroke="#6c4a32" stroke-width="4"/>
+      <circle cx="-14" cy="-3" r="4.5" fill="#4a2c18"/>
+      <circle cx="14" cy="-3" r="4.5" fill="#4a2c18"/>
+      <circle cx="-12.5" cy="-4.5" r="1.7" fill="#ffffff"/>
+      <circle cx="15.5" cy="-4.5" r="1.7" fill="#ffffff"/>
+      <ellipse cx="-20" cy="6" rx="6" ry="3.5" fill="#ff758f" opacity="0.45"/>
+      <ellipse cx="20" cy="6" rx="6" ry="3.5" fill="#ff758f" opacity="0.45"/>
+      <path d="M-7 8 Q0 15 7 8" fill="none" stroke="#4a2c18" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <!-- Big Smiling Pastel Watermelon Inside Jar -->
+    <g transform="translate(238, 362)">
+      <path d="M0 -84 Q10 -106 24 -100" fill="none" stroke="#6c4a32" stroke-width="5" stroke-linecap="round"/>
+      <ellipse cx="26" cy="-94" rx="18" ry="10" transform="rotate(-25 26 -94)" fill="#74c365" stroke="#4a7c36" stroke-width="3"/>
+      <circle cx="0" cy="0" r="84" fill="url(#melon)" stroke="#6c4a32" stroke-width="5"/>
+      <path d="M-38 -74 Q-20 0 -38 74 M0 -84 Q12 0 0 84 M38 -74 Q52 0 38 74" fill="none" stroke="#245d30" stroke-width="9" opacity="0.32"/>
+      <circle cx="-27" cy="-5" r="8" fill="#4a2c18"/>
+      <circle cx="27" cy="-5" r="8" fill="#4a2c18"/>
+      <circle cx="-24.5" cy="-7.5" r="3" fill="#ffffff"/>
+      <circle cx="29.5" cy="-7.5" r="3" fill="#ffffff"/>
+      <ellipse cx="-39" cy="11" rx="11" ry="6" fill="#ff758f" opacity="0.45"/>
+      <ellipse cx="39" cy="11" rx="11" ry="6" fill="#ff758f" opacity="0.45"/>
+      <path d="M-14 14 Q0 28 14 14" fill="none" stroke="#4a2c18" stroke-width="4.5" stroke-linecap="round"/>
+    </g>
+
+    <!-- Peach & Grape & Cherry Nested Beside Watermelon -->
+    <g transform="translate(100, 392)">
+      <circle cx="0" cy="0" r="54" fill="url(#peach)" stroke="#6c4a32" stroke-width="4.5"/>
+      <circle cx="-17" cy="-4" r="5.5" fill="#4a2c18"/>
+      <circle cx="17" cy="-4" r="5.5" fill="#4a2c18"/>
+      <circle cx="-15.5" cy="-5.5" r="2" fill="#ffffff"/>
+      <circle cx="18.5" cy="-5.5" r="2" fill="#ffffff"/>
+      <path d="M-9 10 Q0 18 9 10" fill="none" stroke="#4a2c18" stroke-width="3.5" stroke-linecap="round"/>
+    </g>
+
+    <g transform="translate(106, 294)">
+      <circle cx="0" cy="0" r="38" fill="url(#grape)" stroke="#6c4a32" stroke-width="4"/>
+      <circle cx="-12" cy="-2" r="4" fill="#4a2c18"/>
+      <circle cx="12" cy="-2" r="4" fill="#4a2c18"/>
+      <circle cx="-10.8" cy="-3.2" r="1.5" fill="#ffffff"/>
+      <circle cx="13.2" cy="-3.2" r="1.5" fill="#ffffff"/>
+      <path d="M-6 7 Q0 12 6 7" fill="none" stroke="#4a2c18" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <g transform="translate(186, 266)">
+      <circle cx="0" cy="0" r="28" fill="url(#cherry)" stroke="#6c4a32" stroke-width="3.5"/>
+      <circle cx="-9" cy="-2" r="3.2" fill="#4a2c18"/>
+      <circle cx="9" cy="-2" r="3.2" fill="#4a2c18"/>
+      <path d="M-5 5 Q0 9 5 5" fill="none" stroke="#4a2c18" stroke-width="2.4" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>

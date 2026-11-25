@@ -1,5 +1,6 @@
 import {
   FRUITS,
+  CHILL_FRUIT_PALETTE,
   DROP_MAX_TIER,
   MERGE_QUIPS,
   COMBO_QUIPS,
@@ -22,7 +23,15 @@ const STORAGE_MUSIC_MUTE_KEY = 'suiklem-music-muted';
 const STORAGE_HIDE_STATS_KEY = 'suiklem-hide-stats';
 const STORAGE_MODE_KEY = 'suiklem-mode';
 const STORAGE_ACHIEVEMENTS_KEY = 'suiklem-achievements';
+const STORAGE_INTRO_SEEN_KEY = 'suiklem-intro-seen';
 const CHARGE_PER_GAUGE = 185;
+
+const INTRO_BOSS_LINES = [
+  'Attends… stop tout. Tu croyais vraiment que c’était un jeu de fruits calme et normal ?',
+  'Ambiance pastel, musique douce, zéro stress… HAHAHA. T’as vraiment gobé ça ?',
+  'Bienvenue dans SUIKLEM.EXE ! Ici c’est 1 seconde max par coup, 53 catastrophes WTF et ZÉRO pitié !',
+  'Accroche ton cerveau… J’ALLUME LE BORDELLL !!',
+];
 const MAX_GAUGES = 5;
 const MAX_CHARGE = CHARGE_PER_GAUGE * MAX_GAUGES;
 const CLONE_MAX_TIER = 6;
@@ -182,8 +191,23 @@ class SuiklemGame {
 
     this.tickerBar = document.querySelector('.ticker-bar');
     this.tickerToggleBtn = document.getElementById('ticker-toggle');
+    this.brandTitleEl = document.querySelector('.brand-text h1');
+    this.brandTitleDefault = this.brandTitleEl?.textContent ?? 'SUIKLEM.EXE';
     this.subtitleEl = document.querySelector('.subtitle');
     this.subtitleDefault = this.subtitleEl?.textContent ?? '';
+    this.replayIntroBtn = document.getElementById('replay-intro-btn');
+    this.nextLabelEl = document.getElementById('next-label');
+    this.introFxOverlayEl = document.getElementById('intro-fx-overlay');
+    this.introBossOverlayEl = document.getElementById('intro-boss-overlay');
+    this.introBossCanvasEl = document.getElementById('intro-boss-canvas');
+    this.introBossCtx = this.introBossCanvasEl ? this.introBossCanvasEl.getContext('2d') : null;
+    this.introBossTextEl = document.getElementById('intro-boss-text');
+    this.introBossProgressEl = document.getElementById('intro-boss-progress');
+    this.introStage = readStorage(STORAGE_INTRO_SEEN_KEY, 'false') === 'true' ? 'none' : 'chill';
+    this.introDialogIndex = 0;
+    this.introTriggerDrops = 12;
+    this.introRevealTime = 0;
+    this.introRevealPhase = 0;
     this.jarFrameEl = document.querySelector('.jar-frame');
     this.flashlightEl = document.getElementById('flashlight-overlay');
     this.fourthWallActorEl = document.getElementById('fourthwall-actor');
@@ -347,8 +371,8 @@ class SuiklemGame {
     this._renderAchievements();
     this.bestEl.textContent = String(this.bestScore);
 
-    this._buildFruitList(this.evolutionListEl, 'evo-item', 16, 7);
-    this._buildFruitList(this.helpFruitGridEl, 'help-fruit-item', 20, 8.5);
+    this._buildFruitList(this.evolutionListEl, 'evo-item', 20, 6.8);
+    this._buildFruitList(this.helpFruitGridEl, 'help-fruit-item', 26, 8.8);
   }
 
   _buildFruitList(container, itemClass, boxSize, iconRadius) {
@@ -369,8 +393,8 @@ class SuiklemGame {
 
       const iconCtx = icon.getContext('2d');
       iconCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      iconCtx.translate(boxSize * 0.5, boxSize * 0.54);
-      drawFruitShape(iconCtx, fruit.tier, iconRadius, { showFace: false });
+      iconCtx.translate(boxSize * 0.5, boxSize * 0.55);
+      drawFruitShape(iconCtx, fruit.tier, iconRadius, { showFace: true });
 
       const name = document.createElement('span');
       name.className = 'evo-name';
@@ -429,6 +453,8 @@ class SuiklemGame {
       });
     }
     this.helpBtn.addEventListener('click', () => this.helpDialog.showModal());
+    this.replayIntroBtn?.addEventListener('click', () => this.replayChillIntro());
+    this.introBossOverlayEl?.addEventListener('click', () => this._advanceIntroDialogue());
     this.restartBtn.addEventListener('click', () => this.startNewGame());
     for (const btn of this.modeBtns) {
       btn.addEventListener('click', () => this.setGameMode(btn.dataset.mode));
@@ -494,7 +520,7 @@ class SuiklemGame {
     }
 
     this.canvas.addEventListener('pointerdown', (e) => {
-      if (this.isGameOver) return;
+      if (this.isGameOver || this.introStage === 'dialogue' || this.introStage === 'revealing') return;
       this.audio.unlock();
       if (this.powerMode) {
         const coords = this._getCanvasCoords(e.clientX, e.clientY);
@@ -550,6 +576,13 @@ class SuiklemGame {
     });
 
     window.addEventListener('keydown', (e) => {
+      if (this.introStage === 'dialogue') {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          this._advanceIntroDialogue();
+        }
+        return;
+      }
       if (this.helpDialog.open || this.gameoverDialog.open || this.achievementsDialog.open) return;
 
       if (e.key === 'Escape' && this.powerMode) {
@@ -694,6 +727,26 @@ class SuiklemGame {
     this._clearSabotageState();
     this.bgRenderer.setMonochrome(false);
     this.bgRenderer.setRetroTheme(null);
+    if (this.introStage === 'dialogue' || this.introStage === 'revealing') {
+      this.introStage = 'none';
+    }
+    this.introRevealTime = 0;
+    this.introRevealPhase = 0;
+    document.body.classList.remove(
+      'is-intro-revealing',
+      'reveal-step-1',
+      'reveal-step-2',
+      'reveal-step-3',
+      'reveal-step-4',
+      'reveal-step-5',
+    );
+    if (this.introFxOverlayEl) {
+      this.introFxOverlayEl.hidden = true;
+    }
+    if (this.introBossOverlayEl) {
+      this.introBossOverlayEl.hidden = true;
+    }
+    this._applyIntroStageVisuals();
     this.totalDrops = 0;
     this.totalMerges = 0;
     this.runSeconds = 0;
@@ -716,7 +769,9 @@ class SuiklemGame {
     this.aimX = JAR_BOUNDS.width / 2;
 
     if (this.controlsHintEl) {
-      this.controlsHintEl.textContent = `${modeCfg.hint} • Espace lâcher • 1–5 pouvoirs`;
+      this.controlsHintEl.textContent = this.introStage === 'chill'
+        ? 'Déplace avec la souris ou les flèches • Clique pour poser tranquillement'
+        : `${modeCfg.hint} • Espace lâcher • 1–5 pouvoirs`;
     }
     this._syncModeButtons();
     this._updateHUD();
@@ -739,6 +794,233 @@ class SuiklemGame {
     this.gameMode = modeId;
     writeStorage(STORAGE_MODE_KEY, modeId);
     this.startNewGame();
+  }
+
+  replayChillIntro() {
+    writeStorage(STORAGE_INTRO_SEEN_KEY, 'false');
+    if (this.helpDialog.open) this.helpDialog.close();
+    this.introStage = 'chill';
+    this.introDialogIndex = 0;
+    this.startNewGame();
+  }
+
+  _applyIntroStageVisuals() {
+    const isChill = this.introStage === 'chill' || this.introStage === 'dialogue';
+    document.body.classList.toggle('is-chill-intro', isChill);
+    this.renderer.setChillMode(isChill);
+    if (this.nextLabelEl) {
+      this.nextLabelEl.textContent = isChill ? 'Prochain fruit' : 'Prochain mutant';
+    }
+    const favEl = document.getElementById('site-favicon');
+    if (isChill) {
+      document.title = 'Suika Chill — Jeu de fusion de fruits pastel';
+      if (favEl) {
+        favEl.href = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Crect x='1' y='1' width='34' height='34' rx='9' fill='%23fff4e3' stroke='%23cfa57c' stroke-width='2'/%3E%3Cpath d='M18 11 C18 6.5 22 4 24.5 5.5' fill='none' stroke='%236c4a32' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M19 9.5 C22.5 5.5 27.5 6.5 28.5 10 C25 12 21 11.5 19 9.5 Z' fill='%2372b354' stroke='%234a7c36' stroke-width='1.3' stroke-linejoin='round'/%3E%3Ccircle cx='18' cy='20' r='10.5' fill='%23ff758f' stroke='%237a3342' stroke-width='1.8'/%3E%3Cellipse cx='14.2' cy='15.2' rx='3' ry='1.6' transform='rotate(-28 14.2 15.2)' fill='%23ffffff' opacity='0.6'/%3E%3Ccircle cx='14.5' cy='19.5' r='1.4' fill='%234a2c18'/%3E%3Ccircle cx='21.5' cy='19.5' r='1.4' fill='%234a2c18'/%3E%3Ccircle cx='14.9' cy='19.1' r='0.5' fill='%23ffffff'/%3E%3Ccircle cx='21.9' cy='19.1' r='0.5' fill='%23ffffff'/%3E%3Cpath d='M16 22.2 Q18 24.2 20 22.2' fill='none' stroke='%234a2c18' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E";
+      }
+      this.bgRenderer.setRetroTheme('chill');
+      if (this.brandTitleEl) this.brandTitleEl.textContent = 'Suika Chill';
+      if (this.subtitleEl) this.subtitleEl.textContent = 'Tri fruité pastel • Détente & zen';
+    } else {
+      document.title = 'SUIKLEM.EXE — Télémétrie du Bordel';
+      if (favEl) {
+        favEl.href = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23ff2bd6'/%3E%3Cstop offset='100%25' stop-color='%23ffe600'/%3E%3C/linearGradient%3E%3CradialGradient id='sk' cx='38%25' cy='32%25' r='65%25'%3E%3Cstop offset='0%25' stop-color='%23d9ff70'/%3E%3Cstop offset='55%25' stop-color='%2365a30d'/%3E%3Cstop offset='100%25' stop-color='%2314532d'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect x='1' y='1' width='34' height='34' rx='9' fill='url(%23bg)' stroke='%232b0b00' stroke-width='2'/%3E%3Cpath d='M18 3 L20.5 7.5 L15.5 8 Z' fill='%23ff2bd6' stroke='%231b0824' stroke-width='1.2' stroke-linejoin='round'/%3E%3Cpath d='M8 18 C8 10.5 12.5 7 18 7 C23.5 7 28 10.5 28 18 C28 24.5 25 29 18 29 C11 29 8 24.5 8 18 Z' fill='url(%23sk)' stroke='%23090314' stroke-width='2'/%3E%3Ccircle cx='13.5' cy='15.5' r='4.4' fill='%23ffffff' stroke='%23090314' stroke-width='1.5'/%3E%3Ccircle cx='14.2' cy='14.8' r='1.7' fill='%23090314'/%3E%3Ccircle cx='22.8' cy='16.5' r='3.4' fill='%23ffffff' stroke='%23090314' stroke-width='1.5'/%3E%3Ccircle cx='22.1' cy='17.3' r='1.4' fill='%23ff006e'/%3E%3Cpath d='M11.5 21.5 Q18 27 24.5 21' fill='%232e0619' stroke='%23090314' stroke-width='1.4' stroke-linecap='round'/%3E%3Cpath d='M15.5 24.2 Q18 28.5 20.8 24.2 Z' fill='%23ff2bd6' stroke='%23090314' stroke-width='1'/%3E%3Crect x='13.5' y='21.4' width='2.3' height='2' rx='0.5' fill='%23fde047'/%3E%3Cellipse cx='12' cy='10.5' rx='2.2' ry='1' transform='rotate(-24 12 10.5)' fill='%23ffffff' opacity='0.65'/%3E%3C/svg%3E";
+      }
+      if (!this.isGameBoy && !this.isMatrix) {
+        this.bgRenderer.setRetroTheme(null);
+      }
+      if (this.brandTitleEl) this.brandTitleEl.textContent = this.brandTitleDefault;
+      if (this.subtitleEl && !this.isSabotage && this.subtitleDefault) {
+        this.subtitleEl.textContent = this.subtitleDefault;
+      }
+    }
+  }
+
+  _startIntroBossDialogue() {
+    if (this.introStage !== 'chill') return;
+    this.introStage = 'dialogue';
+    this.introDialogIndex = 0;
+    this.activePointerId = null;
+    if (this.introBossOverlayEl) {
+      this.introBossOverlayEl.hidden = false;
+    }
+    this._syncIntroDialogueLine();
+    this._renderIntroBossCanvas();
+    this.audio.playChaosAlert();
+  }
+
+  _syncIntroDialogueLine() {
+    const line = INTRO_BOSS_LINES[this.introDialogIndex] ?? '';
+    if (this.introBossTextEl) this.introBossTextEl.textContent = line;
+    if (this.introBossProgressEl) {
+      this.introBossProgressEl.textContent = `${this.introDialogIndex + 1} / ${INTRO_BOSS_LINES.length}`;
+    }
+  }
+
+  _advanceIntroDialogue() {
+    if (this.introStage !== 'dialogue') return;
+    this.introDialogIndex += 1;
+    if (this.introDialogIndex < INTRO_BOSS_LINES.length) {
+      this._syncIntroDialogueLine();
+      this.audio.playSwitchSnap();
+      return;
+    }
+    this._finishIntroReveal();
+  }
+
+  _finishIntroReveal() {
+    this.introStage = 'revealing';
+    this.introRevealTime = 0;
+    this.introRevealPhase = 1;
+    writeStorage(STORAGE_INTRO_SEEN_KEY, 'true');
+    if (this.introBossOverlayEl) {
+      this.introBossOverlayEl.hidden = true;
+    }
+    this.gameMode = 'classic';
+    writeStorage(STORAGE_MODE_KEY, 'classic');
+    const modeCfg = GAME_MODES.classic;
+    this.world.setGravityY(modeCfg.gravityY);
+    this.autoDropTimer = modeCfg.dropLimit ?? 1.0;
+    this.chaosCountdown = 7.5;
+    this.chaosCycleTotal = 7.5;
+    this._syncModeButtons();
+    this._resetSlotReel(modeCfg);
+    this._applyIntroStageVisuals();
+
+    document.body.classList.remove(
+      'is-intro-revealing',
+      'reveal-step-1',
+      'reveal-step-2',
+      'reveal-step-3',
+      'reveal-step-4',
+      'reveal-step-5',
+    );
+    void document.body.offsetWidth;
+    document.body.classList.add('is-intro-revealing', 'reveal-step-1');
+
+    if (this.introFxOverlayEl) {
+      this.introFxOverlayEl.className = 'intro-fx-overlay step-1';
+      this.introFxOverlayEl.hidden = false;
+    }
+
+    // Visual mutation wave on every chill fruit already inside the jar!
+    for (const b of this.world.bodies) {
+      b.vy -= 130 + Math.random() * 80;
+      b.vx += (Math.random() - 0.5) * 140;
+      b.squashX = 1.32;
+      b.squashY = 0.72;
+      b.onFireTimer = 1.6;
+      b.mood = 'bonked';
+      b.moodTimer = 1.2;
+      this.renderer.spawnMergeEffect(b.x, b.y, b.tier, 'MUTATION !');
+    }
+
+    this.audio.playApocalypse();
+    this.renderer.triggerShake(14, 0.55);
+    this.renderer.triggerGlitch(0.5);
+    this.renderer.spawnMicroExplosion(JAR_BOUNDS.width * 0.5, 220, '#ff2bd6', 'PIRATAGE EN COURS...');
+    if (this.controlsHintEl) {
+      this.controlsHintEl.textContent = `${modeCfg.hint} • Espace lâcher • 1–5 pouvoirs`;
+    }
+    this.moodEl.textContent = 'SURPRISE !! MUTATION DU SYSTÈME EN COURS…';
+    this._announce('Révélation en cours : Suiklem.exe prend le contrôle.');
+    this._updateHUD();
+    this._updatePowerUI();
+    this._updateTelemetryUI();
+  }
+
+  _stepIntroReveal(dt) {
+    this.introRevealTime += dt;
+    const t = this.introRevealTime;
+
+    if (this.introRevealPhase < 2 && t >= 1.15) {
+      this.introRevealPhase = 2;
+      document.body.classList.add('reveal-step-2');
+      if (this.introFxOverlayEl) this.introFxOverlayEl.className = 'intro-fx-overlay step-2';
+      this.audio.playChaosAlert();
+      this.renderer.triggerShake(10, 0.35);
+      this.renderer.triggerGlitch(0.35);
+      this.renderer.spawnLaserBolt(14, 120, 366, 520, '#00f5d4');
+      this.renderer.spawnLaserBolt(366, 120, 14, 520, '#ff2bd6');
+    }
+
+    if (this.introRevealPhase < 3 && t >= 2.3) {
+      this.introRevealPhase = 3;
+      document.body.classList.add('reveal-step-3');
+      if (this.introFxOverlayEl) this.introFxOverlayEl.className = 'intro-fx-overlay step-3';
+      this.audio.playPinball();
+      this.renderer.triggerShake(9, 0.3);
+      this.renderer.spawnFlameBurst(75, 290, 10);
+      this.renderer.spawnMicroExplosion(120, 310, '#00f5d4', 'ARSENAL ARMÉ !');
+    }
+
+    if (this.introRevealPhase < 4 && t >= 3.45) {
+      this.introRevealPhase = 4;
+      document.body.classList.add('reveal-step-4');
+      if (this.introFxOverlayEl) this.introFxOverlayEl.className = 'intro-fx-overlay step-4';
+      this.audio.playSlotPull();
+      this.renderer.triggerShake(10, 0.32);
+      this.renderer.triggerGlitch(0.38);
+      this.renderer.spawnFlameBurst(305, 290, 10);
+      this.renderer.spawnMicroExplosion(265, 270, '#ffe600', 'ROULETTE WTF !');
+    }
+
+    if (this.introRevealPhase < 5 && t >= 4.55) {
+      this.introRevealPhase = 5;
+      document.body.classList.add('reveal-step-5');
+      if (this.introFxOverlayEl) this.introFxOverlayEl.className = 'intro-fx-overlay step-5';
+      this.audio.playGaugeReady();
+      this.renderer.triggerShake(12, 0.45);
+      this.renderer.triggerGlitch(0.42);
+      this.renderer.spawnLaserBolt(190, 0, 60, 540, '#a6ff2e');
+      this.renderer.spawnLaserBolt(190, 0, 320, 540, '#ff2bd6');
+      this.renderer.spawnMicroExplosion(190, 260, '#a6ff2e', 'SURCHARGE MAX !!');
+    }
+
+    if (t >= 5.65) {
+      this.introStage = 'none';
+      this.introRevealTime = 0;
+      this.introRevealPhase = 0;
+      document.body.classList.remove(
+        'is-intro-revealing',
+        'reveal-step-1',
+        'reveal-step-2',
+        'reveal-step-3',
+        'reveal-step-4',
+        'reveal-step-5',
+      );
+      if (this.introFxOverlayEl) {
+        this.introFxOverlayEl.hidden = true;
+        this.introFxOverlayEl.className = 'intro-fx-overlay';
+      }
+      this.autoDropTimer = 1.0;
+      this.audio.playChaosAlert();
+      this.renderer.spawnMicroExplosion(190, 200, '#ffe600', 'SUIKLEM.EXE EN LIGNE !!');
+      this.moodEl.textContent = 'TERMINÉ LE CALME ! 1 SECONDE MAX PAR COUP ! QUE LE BORDEL COMMENCE !';
+      this._announce('Suiklem.exe en ligne en mode Chaos.');
+    }
+  }
+
+  _renderIntroBossCanvas() {
+    if (!this.introBossCtx || !this.introBossCanvasEl) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const size = 144;
+    if (this.introBossCanvasEl.width !== size * dpr) {
+      this.introBossCanvasEl.width = size * dpr;
+      this.introBossCanvasEl.height = size * dpr;
+      this.introBossCanvasEl.style.width = `${size}px`;
+      this.introBossCanvasEl.style.height = `${size}px`;
+    }
+    const ctx = this.introBossCtx;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, size, size);
+    ctx.save();
+    ctx.translate(size * 0.5, size * 0.52);
+    const bounce = this.reducedMotion ? 1 : 1 + Math.sin(this.elapsedTime * 5) * 0.05;
+    drawFruitShape(ctx, 15, 50 * bounce, {
+      mood: 'happy',
+      time: this.elapsedTime,
+    });
+    ctx.restore();
   }
 
   _syncModeButtons() {
@@ -768,6 +1050,7 @@ class SuiklemGame {
   }
 
   _unlockAchievement(id) {
+    if (this.introStage !== 'none') return;
     if (this.unlockedAchievements.has(id)) return;
     const ach = ACHIEVEMENTS.find((a) => a.id === id);
     if (!ach) return;
@@ -827,6 +1110,7 @@ class SuiklemGame {
   }
 
   _maybeSpawnSpeechBubble(dt) {
+    if (this.introStage !== 'none' || this.world.chillMode) return;
     if (!this.hasStartedDropping || this.world.bodies.length < 2) return;
     this.speechCooldown -= dt;
     if (this.speechCooldown > 0 || this.renderer.speechBubble) return;
@@ -914,7 +1198,7 @@ class SuiklemGame {
   }
 
   dropCurrentFruit({ forced = false, fromSpam = false } = {}) {
-    if (this.isGameOver) return;
+    if (this.isGameOver || this.introStage === 'dialogue' || this.introStage === 'revealing') return;
     if (!fromSpam && (this.dropCooldown > 0 || this.world.activeChaos?.id === 'spamclick')) return;
 
     this.hasStartedDropping = true;
@@ -975,6 +1259,10 @@ class SuiklemGame {
     this._updateHUD();
     this._updatePowerUI();
     this._updateTelemetryUI();
+
+    if (this.introStage === 'chill' && this.totalDrops >= this.introTriggerDrops) {
+      this._startIntroBossDialogue();
+    }
   }
 
   _handleChaosFx({ type, x, y, tier, hitsLeft }) {
@@ -1297,10 +1585,11 @@ class SuiklemGame {
     this.totalMerges += 1;
     if (this.comboCount >= 2) this.iqScore += 2;
 
+    const isChill = this.introStage === 'chill' || this.world.chillMode;
     const baseScore = isMaxPop ? 300 : FRUITS[newTier].score;
     const comboBonus = this.comboCount > 1 ? Math.min(this.comboCount - 1, 5) * 3 : 0;
     const gained = baseScore + comboBonus;
-    if (this.comboCount >= 4) {
+    if (!isChill && this.comboCount >= 4) {
       const wasFever = this.feverTimer > 0;
       this.feverTimer = wasFever ? Math.min(8.0, this.feverTimer + 1.4) : 7.0;
       if (!wasFever) {
@@ -1324,7 +1613,7 @@ class SuiklemGame {
 
     const addedScore = this._addScore(gained);
 
-    const canChargeFromMerge = !fromPower && this.powerNoChargeTimer <= 0 && this.world.windTimer <= 0;
+    const canChargeFromMerge = !isChill && !fromPower && this.powerNoChargeTimer <= 0 && this.world.windTimer <= 0;
     if (canChargeFromMerge) {
       const prevGauges = this._availableGauges();
       const chargeGain = gained + (this.comboCount > 1 ? (this.comboCount - 1) * 4 : 0);
@@ -1343,32 +1632,34 @@ class SuiklemGame {
     }
 
     this.audio.playMerge(newTier, this.comboCount);
-    if (newTier >= 4 || this.comboCount >= 2 || isMaxPop) {
+    if (!isChill && (newTier >= 4 || this.comboCount >= 2 || isMaxPop)) {
       this.renderer.triggerShake(Math.min(11, 2.5 + newTier * 0.7), 0.25);
     }
 
-    let floatLabel = `+${addedScore}`;
-    if (dnaShift > 0) {
-      floatLabel = `ADN GLITCH +${dnaShift + 1} !!`;
-    } else if (dnaShift < 0) {
-      floatLabel = 'ERREUR ADN -1 !';
-    } else if (isMaxPop) {
-      floatLabel = 'DOUBLE PASTÈQUE 3000 !! +300';
-      this.moodEl.textContent = 'EXPLOSION NUCLÉAIRE DE PASTÈQUE ! LA NASA EST EN PANNE !';
-      this._announce('Double Pastèque 3000 ! Plus 300 points.');
-    } else if (this.comboCount >= 3) {
-      floatLabel = `COMBO ×${this.comboCount} !!`;
-      const quip = COMBO_QUIPS[Math.floor(Math.random() * COMBO_QUIPS.length)];
-      this.moodEl.textContent = `${quip} (×${this.comboCount})`;
-    } else if (isNewDiscovery) {
-      floatLabel = `${FRUITS[newTier].name} !`;
-      this.moodEl.textContent = `${FRUITS[newTier].name} : ${FRUITS[newTier].quip}`;
-      this._announce(`Nouveau mutant : ${FRUITS[newTier].name}.`);
-    } else if (Math.random() < 0.7) {
-      floatLabel = MERGE_QUIPS[Math.floor(Math.random() * MERGE_QUIPS.length)];
+    let floatLabel = isChill ? null : `+${addedScore}`;
+    if (!isChill) {
+      if (dnaShift > 0) {
+        floatLabel = `ADN GLITCH +${dnaShift + 1} !!`;
+      } else if (dnaShift < 0) {
+        floatLabel = 'ERREUR ADN -1 !';
+      } else if (isMaxPop) {
+        floatLabel = 'DOUBLE PASTÈQUE 3000 !! +300';
+        this.moodEl.textContent = 'EXPLOSION NUCLÉAIRE DE PASTÈQUE ! LA NASA EST EN PANNE !';
+        this._announce('Double Pastèque 3000 ! Plus 300 points.');
+      } else if (this.comboCount >= 3) {
+        floatLabel = `COMBO ×${this.comboCount} !!`;
+        const quip = COMBO_QUIPS[Math.floor(Math.random() * COMBO_QUIPS.length)];
+        this.moodEl.textContent = `${quip} (×${this.comboCount})`;
+      } else if (isNewDiscovery) {
+        floatLabel = `${FRUITS[newTier].name} !`;
+        this.moodEl.textContent = `${FRUITS[newTier].name} : ${FRUITS[newTier].quip}`;
+        this._announce(`Nouveau mutant : ${FRUITS[newTier].name}.`);
+      } else if (Math.random() < 0.7) {
+        floatLabel = MERGE_QUIPS[Math.floor(Math.random() * MERGE_QUIPS.length)];
+      }
     }
 
-    this.renderer.spawnMergeEffect(x, y, newTier, floatLabel);
+    this.renderer.spawnMergeEffect(x, y, newTier, floatLabel, { chill: isChill });
     this._updateHUD();
     this._updatePowerUI();
     this._updateTelemetryUI();
@@ -1858,6 +2149,26 @@ class SuiklemGame {
     this._clearSabotageState();
     this.bgRenderer.setMonochrome(false);
     this.bgRenderer.setRetroTheme(null);
+    if (this.introStage === 'dialogue' || this.introStage === 'revealing') {
+      this.introStage = 'none';
+    }
+    this.introRevealTime = 0;
+    this.introRevealPhase = 0;
+    document.body.classList.remove(
+      'is-intro-revealing',
+      'reveal-step-1',
+      'reveal-step-2',
+      'reveal-step-3',
+      'reveal-step-4',
+      'reveal-step-5',
+    );
+    if (this.introFxOverlayEl) {
+      this.introFxOverlayEl.hidden = true;
+    }
+    if (this.introBossOverlayEl) {
+      this.introBossOverlayEl.hidden = true;
+    }
+    this._applyIntroStageVisuals();
     this.dangerBanner.hidden = true;
     this.chaosBanner.hidden = true;
     this.slotSpin = null;
@@ -1984,10 +2295,13 @@ class SuiklemGame {
 
   _updateHUD() {
     const mystery = this.world.activeChaos?.id === 'mystery';
+    const isChill = this.introStage === 'chill' || this.introStage === 'dialogue';
     this.scoreEl.textContent = String(this.score);
     this.bestEl.textContent = String(this.bestScore);
-    this.nextNameEl.textContent = mystery ? 'Mystère ???' : FRUITS[this.nextTier].name;
-    this.renderer.renderNextPreview(this.nextTier, this.isMonochrome, mystery, this.isGameBoy);
+    this.nextNameEl.textContent = isChill
+      ? (CHILL_FRUIT_PALETTE[this.nextTier]?.name ?? 'Fruit')
+      : (mystery ? 'Mystère ???' : FRUITS[this.nextTier].name);
+    this.renderer.renderNextPreview(this.nextTier, this.isMonochrome, mystery, this.isGameBoy, isChill);
   }
 
   _announce(text) {
@@ -2004,10 +2318,21 @@ class SuiklemGame {
     }
 
     const modalOpen = this.helpDialog.open || this.gameoverDialog.open || this.achievementsDialog.open;
+    const introPaused = this.introStage === 'dialogue';
+    const isRevealing = this.introStage === 'revealing';
+    const isChillIntro = this.introStage === 'chill';
     const modeCfg = GAME_MODES[this.gameMode] || GAME_MODES.classic;
-    this.audio.setPaused(modalOpen || this.isGameOver);
+    this.audio.setPaused(modalOpen || introPaused || this.isGameOver);
 
-    if (!this.isGameOver && !modalOpen) {
+    if (introPaused) {
+      this._renderIntroBossCanvas();
+    }
+
+    if (isRevealing) {
+      this._stepIntroReveal(dt);
+    }
+
+    if (!this.isGameOver && !modalOpen && !introPaused) {
       if (this.hasStartedDropping) {
         this.runSeconds += dt;
       }
@@ -2033,9 +2358,11 @@ class SuiklemGame {
         }
       }
 
-      // Forced drop timer (Classic: 1s, Inferno: 0.55s, Zen: off)
+      // Forced drop timer (Classic: 1s, Inferno: 0.55s, Zen/Chill/Revealing: off)
       if (
-        modeCfg.dropLimit !== null
+        !isChillIntro
+        && !isRevealing
+        && modeCfg.dropLimit !== null
         && this.hasStartedDropping
         && !this.powerMode
         && this.dropCooldown <= 0
@@ -2056,8 +2383,8 @@ class SuiklemGame {
         }
       }
 
-      // Random Chaos Roulette timer + integrated slot machine spin (disabled in Zen mode)
-      if (modeCfg.chaosEnabled && this.hasStartedDropping && !this.world.activeChaos && (this.world.bodies.length >= 2 || this.slotSpin)) {
+      // Random Chaos Roulette timer + integrated slot machine spin (disabled in Zen, Chill & Reveal)
+      if (!isChillIntro && !isRevealing && modeCfg.chaosEnabled && this.hasStartedDropping && !this.world.activeChaos && (this.world.bodies.length >= 2 || this.slotSpin)) {
         this.chaosCountdown -= dt;
         const spinDuration = this._getSlotSpinDuration(modeCfg);
         if (!this.slotSpin && this.chaosCountdown <= spinDuration) {
@@ -2120,11 +2447,13 @@ class SuiklemGame {
         this._unlockAchievement('survival_cringe');
       }
 
-      this._maybeSpawnSpeechBubble(dt);
+      if (!isChillIntro) {
+        this._maybeSpawnSpeechBubble(dt);
+      }
 
       // Re-clamp held fruit aimX inside dynamic stretched/snapped jar bounds
       this.aimX = this._clampAimX(this.aimX, this.currentTier);
-      this.dangerBanner.hidden = Boolean(this.powerMode) || !this.world.isDangerActive;
+      this.dangerBanner.hidden = isChillIntro || Boolean(this.powerMode) || !this.world.isDangerActive;
 
       if (this.world.activeChaos) {
         const c = this.world.activeChaos;
@@ -2165,8 +2494,8 @@ class SuiklemGame {
       }
 
       this.audio.setMusicState({
-        mode: this.gameMode,
-        danger: this.world.isDangerActive,
+        mode: isChillIntro ? 'zen' : this.gameMode,
+        danger: isChillIntro ? false : this.world.isDangerActive,
         fever: isFever,
         chaosId: this.world.activeChaos?.id ?? null,
       });
@@ -2302,8 +2631,8 @@ class SuiklemGame {
         world: this.world,
         aimX: this.aimX,
         currentTier: this.currentTier,
-        canDrop: !this.isGameOver && this.dropCooldown <= 0,
-        showDropTimer: Boolean(modeCfg.dropLimit) && this.hasStartedDropping && this.world.activeChaos?.id !== 'spamclick',
+        canDrop: !this.isGameOver && !introPaused && !isRevealing && this.dropCooldown <= 0,
+        showDropTimer: !isChillIntro && !isRevealing && Boolean(modeCfg.dropLimit) && this.hasStartedDropping && this.world.activeChaos?.id !== 'spamclick',
         dropTimerRatio: this.autoDropTimer / (modeCfg.dropLimit || 1),
         time: this.elapsedTime,
         powerMode: this.powerMode,

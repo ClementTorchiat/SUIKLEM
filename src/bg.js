@@ -82,6 +82,28 @@ export class BackgroundRenderer {
       return;
     }
 
+    if (this.retroTheme === 'chill') {
+      ctx.save();
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, '#fff7ea');
+      grad.addColorStop(1, '#fbe6cc');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+
+      const cols = ['#ffd1dc', '#ffe4b5', '#d9f2d9', '#cfe9ff'];
+      for (let i = 0; i < 14; i++) {
+        const bx = ((i * 193 + (this.reducedMotion ? 0 : time * 10 * ((i % 3) + 1))) % (w + 120)) - 60;
+        const by = ((i * 131 + (this.reducedMotion ? 0 : time * 6)) % (h + 120)) - 60;
+        ctx.fillStyle = cols[i % cols.length];
+        ctx.globalAlpha = 0.38;
+        ctx.beginPath();
+        ctx.arc(bx, by, 26 + (i % 4) * 14, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+      return;
+    }
+
     if (this.retroTheme === 'gameboy' || this.retroTheme === 'matrix') {
       const isGb = this.retroTheme === 'gameboy';
       const step = isGb ? 48 : 56;

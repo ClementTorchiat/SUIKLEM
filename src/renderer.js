@@ -1,4 +1,4 @@
-import { FRUITS, CHAOS_PALETTES } from './fruits.js';
+import { FRUITS, CHAOS_PALETTES, CHILL_FRUIT_PALETTE } from './fruits.js';
 import { JAR_BOUNDS } from './physics.js';
 
 const RANDOM_STICKERS = [
@@ -30,6 +30,7 @@ export function drawFruitShape(ctx, tier, radius, options = {}) {
     monochrome = false,
     mystery = false,
     gameboy = false,
+    chill = false,
   } = options;
 
   ctx.save();
@@ -81,6 +82,99 @@ export function drawFruitShape(ctx, tier, radius, options = {}) {
     return;
   }
 
+  if (chill) {
+    const ch = CHILL_FRUIT_PALETTE[tier] || CHILL_FRUIT_PALETTE[0];
+    // Soft pastel round fruit body
+    const fGrad = ctx.createRadialGradient(-radius * 0.28, -radius * 0.3, radius * 0.1, 0, 0, radius);
+    fGrad.addColorStop(0, '#fff9f2');
+    fGrad.addColorStop(0.28, ch.color);
+    fGrad.addColorStop(1, ch.shade);
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.fillStyle = fGrad;
+    ctx.fill();
+    ctx.lineWidth = Math.max(1.8, radius * 0.075);
+    ctx.strokeStyle = '#6c4a32';
+    ctx.stroke();
+
+    // Cute watermelon stripes on bigger melons
+    if (tier === 10 || tier === 15) {
+      ctx.save();
+      ctx.clip();
+      ctx.strokeStyle = 'rgba(30, 80, 35, 0.35)';
+      ctx.lineWidth = Math.max(2, radius * 0.12);
+      for (const sx of [-0.48, 0, 0.48]) {
+        ctx.beginPath();
+        ctx.arc(radius * sx * 1.4, 0, radius * 0.92, -Math.PI * 0.45, Math.PI * 0.45);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // Little stem + fresh pastel leaf on top
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(0, -radius + 1);
+    ctx.quadraticCurveTo(radius * 0.08, -radius - Math.max(4, radius * 0.24), radius * 0.18, -radius - Math.max(3, radius * 0.18));
+    ctx.strokeStyle = '#6c4a32';
+    ctx.lineWidth = Math.max(1.6, radius * 0.09);
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(radius * 0.26, -radius - Math.max(2, radius * 0.12), Math.max(3.5, radius * 0.24), Math.max(2, radius * 0.12), -0.35, 0, Math.PI * 2);
+    ctx.fillStyle = ch.leaf;
+    ctx.fill();
+    ctx.lineWidth = 1.1;
+    ctx.strokeStyle = '#4a7c36';
+    ctx.stroke();
+    ctx.restore();
+
+    if (showFace) {
+      // Gentle kawaii Suika face
+      const eyeY = -radius * 0.06;
+      const eyeSep = radius * 0.34;
+      const eyeR = Math.max(1.6, radius * 0.11);
+      ctx.fillStyle = '#4a2c18';
+      for (const side of [-1, 1]) {
+        if (isBlinking) {
+          ctx.beginPath();
+          ctx.moveTo(side * eyeSep - eyeR, eyeY);
+          ctx.lineTo(side * eyeSep + eyeR, eyeY);
+          ctx.lineWidth = 1.6;
+          ctx.strokeStyle = '#4a2c18';
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.arc(side * eyeSep, eyeY, eyeR, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(side * eyeSep + eyeR * 0.28, eyeY - eyeR * 0.3, eyeR * 0.36, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#4a2c18';
+        }
+        // Soft blush cheeks
+        ctx.fillStyle = 'rgba(255, 115, 145, 0.42)';
+        ctx.beginPath();
+        ctx.ellipse(side * (eyeSep + radius * 0.12), eyeY + radius * 0.2, radius * 0.14, radius * 0.08, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#4a2c18';
+      }
+      ctx.beginPath();
+      ctx.strokeStyle = '#4a2c18';
+      ctx.lineWidth = Math.max(1.3, radius * 0.065);
+      ctx.lineCap = 'round';
+      if (mood === 'worried') {
+        ctx.arc(0, radius * 0.24, Math.max(1.8, radius * 0.1), 0, Math.PI * 2);
+      } else {
+        ctx.arc(0, radius * 0.14, Math.max(2.2, radius * 0.16), 0.2, Math.PI - 0.2);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+    return;
+  }
+
   if (gameboy) {
     // 1989 DMG 4-tone olive LCD circle with crisp inner ring
     ctx.beginPath();
@@ -110,6 +204,8 @@ export function drawFruitShape(ctx, tier, radius, options = {}) {
   ctx.fill();
   ctx.restore();
 
+  _drawWeirdBackLayer(ctx, tier, radius, time);
+
   const grad = ctx.createRadialGradient(
     -radius * 0.3,
     -radius * 0.3,
@@ -120,8 +216,8 @@ export function drawFruitShape(ctx, tier, radius, options = {}) {
   );
   if (tier === 15) {
     grad.addColorStop(0, '#ffe600');
-    grad.addColorStop(0.42, '#ff006e');
-    grad.addColorStop(0.75, '#00f5d4');
+    grad.addColorStop(0.38, '#ff006e');
+    grad.addColorStop(0.72, '#00f5d4');
     grad.addColorStop(1, '#8338ec');
   } else {
     grad.addColorStop(0, def.highlight);
@@ -138,6 +234,16 @@ export function drawFruitShape(ctx, tier, radius, options = {}) {
   ctx.strokeStyle = '#090314';
   ctx.stroke();
 
+  // Inner comic rim sheen
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(0, 0, Math.max(1, radius - Math.max(1.5, radius * 0.06)), -Math.PI * 0.88, -Math.PI * 0.18);
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.32)';
+  ctx.lineWidth = Math.max(1.2, radius * 0.055);
+  ctx.lineCap = 'round';
+  ctx.stroke();
+  ctx.restore();
+
   _drawWeirdDetails(ctx, tier, radius, time);
 
   ctx.beginPath();
@@ -152,198 +258,688 @@ export function drawFruitShape(ctx, tier, radius, options = {}) {
   ctx.restore();
 }
 
-function _drawWeirdDetails(ctx, tier, r, time) {
+function _drawWeirdBackLayer(ctx, tier, r, time) {
   ctx.save();
+  const ink = '#090314';
+  const outline = Math.max(1.5, r * 0.065);
+
   switch (tier) {
-    case 0: // Atome Sus: glowing cyan orbiting electron ring
-      ctx.strokeStyle = '#00f5d4';
-      ctx.lineWidth = 1.6;
+    case 0: {
+      // Radioactive pink/cyan back aura
+      const aura = ctx.createRadialGradient(0, 0, r * 0.7, 0, 0, r * 1.28);
+      aura.addColorStop(0, 'rgba(0, 245, 212, 0.42)');
+      aura.addColorStop(1, 'rgba(0, 245, 212, 0)');
+      ctx.fillStyle = aura;
       ctx.beginPath();
-      ctx.ellipse(0, 0, r * 1.18, r * 0.42, 0.5, 0, Math.PI * 2);
-      ctx.stroke();
-      break;
-
-    case 1: // Cornichon Sigma: bumpy warts
-      ctx.fillStyle = '#147a00';
-      for (let i = 0; i < 5; i++) {
-        const a = i * 1.25 + 0.4;
-        ctx.beginPath();
-        ctx.arc(Math.cos(a) * r * 0.65, Math.sin(a) * r * 0.65, r * 0.09, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      break;
-
-    case 2: // Canard Énervé: orange duck beak
-      ctx.fillStyle = '#ff7b00';
-      ctx.strokeStyle = '#090314';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      ctx.ellipse(0, r * 0.38, r * 0.35, r * 0.17, 0, 0, Math.PI * 2);
+      ctx.arc(0, 0, r * 1.28, 0, Math.PI * 2);
       ctx.fill();
-      ctx.stroke();
       break;
+    }
 
-    case 3: // Nugget Suspect: crispy crumb spots
-      ctx.fillStyle = '#78350f';
-      for (const [cx, cy] of [[-0.45, -0.45], [0.5, -0.32], [-0.48, 0.38], [0.42, 0.48]]) {
-        ctx.beginPath();
-        ctx.arc(cx * r, cy * r, r * 0.07, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      break;
-
-    case 4: // Poulpe WiFi: cyan WiFi bars
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
-      ctx.lineCap = 'round';
-      for (let i = 1; i <= 2; i++) {
-        ctx.beginPath();
-        ctx.arc(0, -r * 0.52, r * 0.18 * i, -Math.PI * 0.8, -Math.PI * 0.2);
-        ctx.stroke();
-      }
-      break;
-
-    case 5: // Taco Illégal: neon lettuce ridge
-      ctx.strokeStyle = '#39ff14';
-      ctx.lineWidth = Math.max(2, r * 0.09);
+    case 2: {
+      // Fluffy angry duck feather tuft on top
+      ctx.fillStyle = '#ffe600';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = outline;
+      ctx.lineJoin = 'round';
       ctx.beginPath();
-      ctx.arc(0, -r * 0.14, r * 0.72, -Math.PI * 0.85, -Math.PI * 0.15);
-      ctx.stroke();
-      break;
-
-    case 6: // Chaussette Mouillée: green stink waves + heel patch
-      ctx.fillStyle = '#475569';
-      ctx.beginPath();
-      ctx.arc(-r * 0.45, r * 0.42, r * 0.22, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#a6ff2e';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      ctx.moveTo(-r * 0.25, -r * 0.92);
-      ctx.quadraticCurveTo(-r * 0.4, -r * 1.15, -r * 0.2, -r * 1.25);
-      ctx.moveTo(r * 0.2, -r * 0.92);
-      ctx.quadraticCurveTo(r * 0.05, -r * 1.15, r * 0.25, -r * 1.25);
-      ctx.stroke();
-      break;
-
-    case 7: // Aubergine Cursed: green calyx crown
-      ctx.fillStyle = '#39ff14';
-      ctx.strokeStyle = '#090314';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      ctx.moveTo(-r * 0.32, -r * 0.78);
-      ctx.lineTo(0, -r * 1.15);
-      ctx.lineTo(r * 0.32, -r * 0.78);
+      ctx.moveTo(-r * 0.24, -r * 0.85);
+      ctx.quadraticCurveTo(-r * 0.36, -r * 1.24, -r * 0.08, -r * 1.06);
+      ctx.quadraticCurveTo(0, -r * 1.32, r * 0.14, -r * 1.04);
+      ctx.quadraticCurveTo(r * 0.34, -r * 1.2, r * 0.22, -r * 0.84);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
       break;
+    }
 
-    case 8: // Donut Toxique: glowing slime hole + sprinkles
-      ctx.fillStyle = '#39ff14';
-      ctx.strokeStyle = '#090314';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(0, r * 0.36, r * 0.24, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      for (const [sx, sy, col] of [[-0.5, -0.45, '#00f5d4'], [0.48, -0.42, '#ffe600'], [0.55, 0.2, '#39ff14']]) {
-        ctx.fillStyle = col;
-        ctx.fillRect(sx * r - 3, sy * r - 2, 6, 3);
-      }
-      break;
-
-    case 9: // Fromage Nuclear: glowing green holes
-      ctx.fillStyle = '#39ff14';
-      ctx.strokeStyle = '#090314';
-      ctx.lineWidth = 1.6;
-      for (const [hx, hy, hr] of [[-0.46, -0.42, 0.14], [0.46, 0.36, 0.16], [-0.42, 0.44, 0.1]]) {
+    case 4: {
+      // 4 wiggly octopus tentacles below + router antenna behind crown
+      ctx.fillStyle = '#00b4d8';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = outline;
+      ctx.lineJoin = 'round';
+      for (const [tx, sway] of [[-0.62, 0], [-0.24, 1.2], [0.24, 2.4], [0.62, 3.6]]) {
+        const dx = Math.sin(time * 5 + sway) * r * 0.08;
         ctx.beginPath();
-        ctx.arc(hx * r, hy * r, hr * r, 0, Math.PI * 2);
+        ctx.moveTo(tx * r - r * 0.14, r * 0.68);
+        ctx.quadraticCurveTo(tx * r + dx, r * 1.28, tx * r + dx * 1.3, r * 1.02);
+        ctx.quadraticCurveTo(tx * r + r * 0.14, r * 1.15, tx * r + r * 0.14, r * 0.72);
+        ctx.closePath();
         ctx.fill();
         ctx.stroke();
       }
-      break;
-
-    case 10: // Piment Enragé: flame crown stem
-      ctx.fillStyle = '#ffe600';
-      ctx.strokeStyle = '#090314';
-      ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      ctx.moveTo(-r * 0.22, -r * 0.85);
-      ctx.lineTo(0, -r * 1.24);
-      ctx.lineTo(r * 0.22, -r * 0.85);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      break;
-
-    case 11: // Pizza Ananas: melted cheese + pineapple chunks
-      ctx.fillStyle = '#ffe600';
-      for (let i = 0; i < 6; i++) {
-        const a = (i * Math.PI) / 3 + 0.2;
-        ctx.fillRect(Math.cos(a) * r * 0.56 - 4, Math.sin(a) * r * 0.56 - 4, 8, 8);
-      }
-      break;
-
-    case 12: // Boule Disco Satan: sparkling disco grid
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(0, 0, r * 0.95, 0, Math.PI * 2);
-      ctx.clip();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.52)';
-      ctx.lineWidth = 1.5;
-      for (let y = -r; y <= r; y += r * 0.35) {
-        ctx.beginPath();
-        ctx.moveTo(-r, y);
-        ctx.lineTo(r, y);
-        ctx.stroke();
-      }
-      for (let x = -r; x <= r; x += r * 0.35) {
-        ctx.beginPath();
-        ctx.moveTo(x, -r);
-        ctx.lineTo(x, r);
-        ctx.stroke();
-      }
-      ctx.restore();
-      break;
-
-    case 13: // Cerveau Cramé: squiggly brain folds + lightning bolt
-      ctx.strokeStyle = '#9d174d';
-      ctx.lineWidth = 2.2;
+      // WiFi antenna mast
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = Math.max(2, r * 0.1);
       ctx.beginPath();
       ctx.moveTo(0, -r * 0.9);
-      ctx.lineTo(0, r * 0.9);
+      ctx.lineTo(0, -r * 1.2);
       ctx.stroke();
+      ctx.fillStyle = '#00f5d4';
       ctx.beginPath();
-      ctx.arc(-r * 0.42, -r * 0.42, r * 0.22, 0, Math.PI);
-      ctx.arc(r * 0.42, -r * 0.42, r * 0.22, 0, Math.PI);
+      ctx.arc(0, -r * 1.22, Math.max(2.2, r * 0.11), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineWidth = 1.4;
       ctx.stroke();
       break;
+    }
 
-    case 14: // Shrek Cosmique: trumpet ogre ears
-      ctx.fillStyle = '#84cc16';
-      ctx.strokeStyle = '#090314';
-      ctx.lineWidth = 2.2;
+    case 5: {
+      // Crunchy golden folded taco shell wings behind & underneath
+      ctx.fillStyle = '#facc15';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = outline;
+      ctx.beginPath();
+      ctx.arc(0, r * 0.08, r * 1.08, 0.15, Math.PI - 0.15);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 6: {
+      // Soggy sock ankle cuff at top-right + green stink fumes rising behind
+      ctx.save();
+      ctx.translate(r * 0.36, -r * 0.78);
+      ctx.rotate(0.32);
+      ctx.fillStyle = '#e2e8f0';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = outline;
+      ctx.beginPath();
+      ctx.roundRect(-r * 0.28, -r * 0.42, r * 0.56, r * 0.52, r * 0.1);
+      ctx.fill();
+      ctx.stroke();
+      // Classic varsity sock stripes
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(-r * 0.25, -r * 0.3, r * 0.5, r * 0.08);
+      ctx.fillStyle = '#2563eb';
+      ctx.fillRect(-r * 0.25, -r * 0.17, r * 0.5, r * 0.08);
+      ctx.restore();
+      break;
+    }
+
+    case 7: {
+      // Curled stem behind calyx
+      ctx.strokeStyle = '#15803d';
+      ctx.lineWidth = Math.max(3, r * 0.14);
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 0.9);
+      ctx.quadraticCurveTo(r * 0.1, -r * 1.24, r * 0.26, -r * 1.15);
+      ctx.stroke();
+      break;
+    }
+
+    case 10: {
+      // Roaring fiery aura halo behind chili
+      const flicker = Math.sin(time * 12) * r * 0.07;
+      ctx.fillStyle = '#ff7b00';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = outline;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.54, -r * 0.62);
+      ctx.quadraticCurveTo(-r * 0.48, -r * 1.18, -r * 0.22, -r * 0.92);
+      ctx.quadraticCurveTo(0, -r * 1.38 + flicker, r * 0.22, -r * 0.92);
+      ctx.quadraticCurveTo(r * 0.48, -r * 1.18, r * 0.54, -r * 0.62);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 12: {
+      // Satin-gloss devil horns for Boule Disco Satan
+      ctx.fillStyle = '#ef4444';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = outline;
+      ctx.lineJoin = 'round';
       for (const side of [-1, 1]) {
         ctx.beginPath();
-        ctx.moveTo(side * r * 0.84, -r * 0.28);
-        ctx.lineTo(side * r * 1.2, -r * 0.62);
-        ctx.lineTo(side * r * 1.14, -r * 0.34);
-        ctx.lineTo(side * r * 0.86, -r * 0.06);
+        ctx.moveTo(side * r * 0.42, -r * 0.78);
+        ctx.quadraticCurveTo(side * r * 0.82, -r * 1.12, side * r * 0.72, -r * 1.24);
+        ctx.quadraticCurveTo(side * r * 0.5, -r * 1.05, side * r * 0.22, -r * 0.88);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
       }
       break;
+    }
 
-    case 15: // PASTÈQUE 3000: chaotic rainbow waves
+    case 14: {
+      // Cosmic nebula stardust ring + detailed Shrek trumpet ogre ears
+      const cosmic = ctx.createRadialGradient(0, 0, r * 0.82, 0, 0, r * 1.25);
+      cosmic.addColorStop(0, 'rgba(131, 56, 236, 0.55)');
+      cosmic.addColorStop(1, 'rgba(0, 245, 212, 0)');
+      ctx.fillStyle = cosmic;
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 1.25, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = outline;
+      for (const side of [-1, 1]) {
+        ctx.fillStyle = '#84cc16';
+        ctx.beginPath();
+        ctx.moveTo(side * r * 0.82, -r * 0.28);
+        ctx.quadraticCurveTo(side * r * 1.16, -r * 0.58, side * r * 1.24, -r * 0.58);
+        ctx.lineTo(side * r * 1.16, -r * 0.28);
+        ctx.quadraticCurveTo(side * r * 0.98, -r * 0.14, side * r * 0.84, -r * 0.04);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Trumpet ear funnel cavity
+        ctx.fillStyle = '#3f6212';
+        ctx.beginPath();
+        ctx.ellipse(side * r * 1.17, -r * 0.43, r * 0.06, r * 0.14, side * 0.35, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    }
+
+    case 15: {
+      // Prismatic shockwave halo + floating holographic crown
+      const pulse = 1 + Math.sin(time * 5) * 0.04;
+      const halo = ctx.createRadialGradient(0, 0, r * 0.88, 0, 0, r * 1.26 * pulse);
+      halo.addColorStop(0, 'rgba(255, 230, 0, 0.5)');
+      halo.addColorStop(0.5, 'rgba(255, 0, 110, 0.3)');
+      halo.addColorStop(1, 'rgba(0, 245, 212, 0)');
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 1.26 * pulse, 0, Math.PI * 2);
+      ctx.fill();
+
+      const hover = Math.sin(time * 4) * r * 0.04;
+      ctx.fillStyle = '#ffe600';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = outline;
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.38, -r * 0.94 + hover);
+      ctx.lineTo(-r * 0.44, -r * 1.26 + hover);
+      ctx.lineTo(-r * 0.18, -r * 1.08 + hover);
+      ctx.lineTo(0, -r * 1.32 + hover);
+      ctx.lineTo(r * 0.18, -r * 1.08 + hover);
+      ctx.lineTo(r * 0.44, -r * 1.26 + hover);
+      ctx.lineTo(r * 0.38, -r * 0.94 + hover);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+  }
+  ctx.restore();
+}
+
+function _drawWeirdDetails(ctx, tier, r, time) {
+  ctx.save();
+  const ink = '#090314';
+  const outline = Math.max(1.4, r * 0.055);
+
+  switch (tier) {
+    case 0: {
+      // Atome Sus: crossed 3D electron orbitals + two orbiting glowing electrons
+      for (const tilt of [0.55, -0.55]) {
+        ctx.save();
+        ctx.rotate(tilt);
+        ctx.strokeStyle = 'rgba(0, 245, 212, 0.92)';
+        ctx.lineWidth = Math.max(1.3, r * 0.11);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r * 1.22, r * 0.4, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        const phase = time * 4 + (tilt > 0 ? 0 : Math.PI);
+        const ex = Math.cos(phase) * r * 1.22;
+        const ey = Math.sin(phase) * r * 0.4;
+        ctx.fillStyle = tilt > 0 ? '#ffe600' : '#00f5d4';
+        ctx.strokeStyle = ink;
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.arc(ex, ey, Math.max(1.8, r * 0.17), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+      break;
+    }
+
+    case 1: {
+      // Cornichon Sigma: crunchy pickle warts + chiseled Giga-Chad jawline
+      ctx.fillStyle = '#147a00';
+      for (const [ax, ay] of [[-0.64, -0.36], [0.66, -0.25], [-0.56, 0.25], [0.58, 0.22], [-0.25, -0.74]]) {
+        ctx.beginPath();
+        ctx.arc(ax * r, ay * r, r * 0.085, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Chiseled jawline accent
+      ctx.fillStyle = '#22c55e';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = outline;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.56, r * 0.44);
+      ctx.lineTo(-r * 0.34, r * 0.86);
+      ctx.lineTo(0, r * 0.95);
+      ctx.lineTo(r * 0.34, r * 0.86);
+      ctx.lineTo(r * 0.56, r * 0.44);
+      ctx.stroke();
+      break;
+    }
+
+    case 2: {
+      // Canard Énervé: puffed angry cheek + sculpted shouting orange duck beak + anger mark
+      ctx.fillStyle = 'rgba(255, 115, 0, 0.45)';
+      ctx.beginPath();
+      ctx.ellipse(-r * 0.56, r * 0.18, r * 0.16, r * 0.1, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(r * 0.56, r * 0.18, r * 0.16, r * 0.1, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Open shouting upper + lower duck bill
+      ctx.fillStyle = '#ff7b00';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = outline;
+      ctx.beginPath();
+      ctx.ellipse(0, r * 0.36, r * 0.42, r * 0.19, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#991b1b';
+      ctx.beginPath();
+      ctx.ellipse(0, r * 0.42, r * 0.26, r * 0.09, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      // Comic anger vein at top-right (4 separate curved brackets)
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = Math.max(1.4, r * 0.075);
+      for (const [ox, oy, a0, a1] of [
+        [0.44, -0.58, -0.3, 1.3],
+        [0.72, -0.58, 1.8, 3.4],
+        [0.44, -0.34, -1.3, 0.3],
+        [0.72, -0.34, 2.8, 4.4],
+      ]) {
+        ctx.beginPath();
+        ctx.arc(ox * r, oy * r, r * 0.11, a0, a1);
+        ctx.stroke();
+      }
+      break;
+    }
+
+    case 3: {
+      // Nugget Suspect: crispy panko crust speckles + sneaky black bandit domino mask
+      ctx.fillStyle = '#78350f';
+      for (const [cx, cy] of [[-0.55, -0.45], [0.58, -0.35], [-0.52, 0.42], [0.46, 0.5], [0, 0.68]]) {
+        ctx.beginPath();
+        ctx.arc(cx * r, cy * r, r * 0.075, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.fillStyle = '#1e1b4b';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = outline;
+      ctx.beginPath();
+      ctx.roundRect(-r * 0.66, -r * 0.34, r * 1.32, r * 0.42, r * 0.2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 4: {
+      // Poulpe WiFi: glowing crisp 3-bar cyan WiFi radar
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = Math.max(1.6, r * 0.08);
+      ctx.lineCap = 'round';
+      for (let i = 1; i <= 3; i++) {
+        ctx.beginPath();
+        ctx.arc(0, -r * 0.56, r * 0.13 * i, -Math.PI * 0.82, -Math.PI * 0.18);
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#ffe600';
+      ctx.beginPath();
+      ctx.arc(0, -r * 0.56, Math.max(1.5, r * 0.07), 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 5: {
+      // Taco Illégal: crunchy taco tortilla speckles + frilly neon lettuce + melted cheese + illegal X stamp
       ctx.save();
       ctx.beginPath();
       ctx.arc(0, 0, r * 0.96, 0, Math.PI * 2);
       ctx.clip();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-      ctx.lineWidth = r * 0.09;
+      // Frilly neon lettuce wave across upper rim
+      ctx.fillStyle = '#39ff14';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = outline;
+      ctx.beginPath();
+      ctx.moveTo(-r, -r * 0.35);
+      for (let px = -1; px <= 1; px += 0.35) {
+        ctx.quadraticCurveTo((px + 0.17) * r, -r * 0.62, (px + 0.35) * r, -r * 0.38);
+      }
+      ctx.lineTo(r, -r);
+      ctx.lineTo(-r, -r);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // Dripping melted nacho cheese
+      ctx.fillStyle = '#ffe600';
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.55, -r * 0.48);
+      ctx.quadraticCurveTo(-r * 0.35, -r * 0.16, -r * 0.22, -r * 0.45);
+      ctx.quadraticCurveTo(0, -r * 0.08, r * 0.18, -r * 0.45);
+      ctx.quadraticCurveTo(r * 0.38, -r * 0.2, r * 0.55, -r * 0.48);
+      ctx.fill();
+      ctx.restore();
+      break;
+    }
+
+    case 6: {
+      // Chaussette Mouillée: heel patch, soggy water droplets, animated stink waves
+      ctx.fillStyle = '#475569';
+      ctx.beginPath();
+      ctx.arc(-r * 0.46, r * 0.42, r * 0.24, 0, Math.PI * 2);
+      ctx.fill();
+      // Water droplets clinging at bottom
+      ctx.fillStyle = '#38bdf8';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = 1.4;
+      for (const [dx, dy] of [[-0.25, 0.92], [0.22, 0.98]]) {
+        ctx.beginPath();
+        ctx.moveTo(dx * r, dy * r - r * 0.16);
+        ctx.quadraticCurveTo(dx * r + r * 0.12, dy * r + r * 0.06, dx * r, dy * r + r * 0.12);
+        ctx.quadraticCurveTo(dx * r - r * 0.12, dy * r + r * 0.06, dx * r, dy * r - r * 0.16);
+        ctx.fill();
+        ctx.stroke();
+      }
+      // Rising green stink clouds
+      const wave = Math.sin(time * 6) * r * 0.06;
+      ctx.strokeStyle = '#a6ff2e';
+      ctx.lineWidth = Math.max(1.8, r * 0.07);
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.38, -r * 0.88);
+      ctx.quadraticCurveTo(-r * 0.52 + wave, -r * 1.15, -r * 0.3, -r * 1.32);
+      ctx.moveTo(-r * 0.06, -r * 0.95);
+      ctx.quadraticCurveTo(-r * 0.18 - wave, -r * 1.2, 0, -r * 1.38);
+      ctx.stroke();
+      break;
+    }
+
+    case 7: {
+      // Aubergine Cursed: glossy 4-leaf calyx crown + sparkles
+      ctx.fillStyle = '#39ff14';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = outline;
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.48, -r * 0.72);
+      ctx.lineTo(-r * 0.22, -r * 0.94);
+      ctx.lineTo(0, -r * 1.16);
+      ctx.lineTo(r * 0.22, -r * 0.94);
+      ctx.lineTo(r * 0.48, -r * 0.72);
+      ctx.quadraticCurveTo(0, -r * 0.56, -r * 0.48, -r * 0.72);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 8: {
+      // Donut Toxique: gooey radioactive lime icing + central slime hole + neon sprinkles
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.96, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.fillStyle = '#a6ff2e';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = outline;
+      ctx.beginPath();
+      ctx.moveTo(-r, -r * 0.12);
+      ctx.quadraticCurveTo(-r * 0.65, r * 0.2, -r * 0.35, -r * 0.05);
+      ctx.quadraticCurveTo(0, r * 0.24, r * 0.32, -r * 0.04);
+      ctx.quadraticCurveTo(r * 0.65, r * 0.18, r, -r * 0.12);
+      ctx.lineTo(r, -r);
+      ctx.lineTo(-r, -r);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      // True glowing acid hole near lower center
+      ctx.fillStyle = '#1a2e05';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = outline;
+      ctx.beginPath();
+      ctx.arc(0, r * 0.38, r * 0.24, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#39ff14';
+      ctx.beginPath();
+      ctx.arc(0, r * 0.38, r * 0.14, 0, Math.PI * 2);
+      ctx.fill();
+
+      for (const [sx, sy, rot, col] of [
+        [-0.55, -0.52, 0.4, '#00f5d4'],
+        [0.54, -0.46, -0.5, '#ffe600'],
+        [0.02, -0.68, 0.2, '#ff2bd6'],
+        [-0.58, 0.22, -0.3, '#00f5d4'],
+        [0.56, 0.24, 0.6, '#ffe600'],
+      ]) {
+        ctx.save();
+        ctx.translate(sx * r, sy * r);
+        ctx.rotate(rot);
+        ctx.fillStyle = col;
+        ctx.fillRect(-r * 0.08, -r * 0.035, r * 0.16, r * 0.07);
+        ctx.restore();
+      }
+      break;
+    }
+
+    case 9: {
+      // Fromage Nuclear: 3D glowing green uranium craters + mini nuclear trefoil badge
+      for (const [hx, hy, hr] of [[-0.5, -0.44, 0.15], [0.5, 0.38, 0.17], [-0.46, 0.44, 0.11]]) {
+        ctx.fillStyle = '#14532d';
+        ctx.strokeStyle = ink;
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.arc(hx * r, hy * r, hr * r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#39ff14';
+        ctx.beginPath();
+        ctx.arc(hx * r + hr * r * 0.12, hy * r + hr * r * 0.12, hr * r * 0.62, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Crisp mini trefoil nuclear mark on forehead
+      ctx.save();
+      ctx.translate(0, -r * 0.56);
+      ctx.fillStyle = ink;
+      for (let k = 0; k < 3; k++) {
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        const a0 = k * ((Math.PI * 2) / 3) - Math.PI / 2 - 0.38;
+        ctx.arc(0, 0, Math.max(3, r * 0.16), a0, a0 + 0.76);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.fillStyle = '#39ff14';
+      ctx.beginPath();
+      ctx.arc(0, 0, Math.max(1.2, r * 0.045), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      break;
+    }
+
+    case 10: {
+      // Piment Enragé: bright yellow inner flame crown + steam puffs on ears
+      const flicker = Math.sin(time * 14) * r * 0.05;
+      ctx.fillStyle = '#ffe600';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = outline;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.28, -r * 0.8);
+      ctx.lineTo(-r * 0.12, -r * 1.12 + flicker);
+      ctx.lineTo(0, -r * 0.94);
+      ctx.lineTo(r * 0.14, -r * 1.18 - flicker);
+      ctx.lineTo(r * 0.28, -r * 0.8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Steam vents flanking head
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = 1.4;
+      for (const side of [-1, 1]) {
+        ctx.beginPath();
+        ctx.arc(side * r * 1.05, -r * 0.14, r * 0.14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(side * r * 1.18, -r * 0.26, r * 0.1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+      break;
+    }
+
+    case 11: {
+      // Pizza Ananas: crispy golden crust outer rim + pepperoni rounds + provocative pineapple chunks
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.97, 0, Math.PI * 2);
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = Math.max(4, r * 0.22);
+      ctx.stroke();
+      ctx.restore();
+
+      // Pepperoni slices
+      ctx.fillStyle = '#991b1b';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = 1.4;
+      for (const [px, py] of [[-0.5, -0.45], [0.54, 0.25], [-0.46, 0.44]]) {
+        ctx.beginPath();
+        ctx.arc(px * r, py * r, r * 0.14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      // Golden pineapple chunks
+      ctx.fillStyle = '#ffe600';
+      ctx.strokeStyle = '#92400e';
+      ctx.lineWidth = 1.4;
+      for (const [ax, ay, rot] of [[0.5, -0.44, 0.4], [-0.04, 0.56, -0.3], [0.06, -0.64, 0.8]]) {
+        ctx.save();
+        ctx.translate(ax * r, ay * r);
+        ctx.rotate(rot);
+        ctx.beginPath();
+        ctx.moveTo(-r * 0.11, r * 0.08);
+        ctx.lineTo(0, -r * 0.12);
+        ctx.lineTo(r * 0.12, r * 0.09);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+      break;
+    }
+
+    case 12: {
+      // Boule Disco Satan: mirrored disco facets + animated prism glints
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.95, 0, Math.PI * 2);
+      ctx.clip();
+      const glintColors = ['rgba(255,255,255,0.45)', 'rgba(0,245,212,0.45)', 'rgba(255,43,214,0.4)'];
+      const step = Math.max(6, r * 0.34);
+      let idx = 0;
+      for (let y = -r; y < r; y += step) {
+        for (let x = -r; x < r; x += step) {
+          if ((idx + Math.floor(time * 5)) % 4 === 0) {
+            ctx.fillStyle = glintColors[idx % glintColors.length];
+            ctx.fillRect(x, y, step, step);
+          }
+          idx++;
+        }
+      }
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.lineWidth = 1.3;
+      for (let p = -r; p <= r; p += step) {
+        ctx.beginPath();
+        ctx.moveTo(-r, p);
+        ctx.lineTo(r, p);
+        ctx.moveTo(p, -r);
+        ctx.lineTo(p, r);
+        ctx.stroke();
+      }
+      ctx.restore();
+      break;
+    }
+
+    case 13: {
+      // Cerveau Cramé: sculpted sulci brain folds + sizzling cyan electric spark bolt
+      ctx.strokeStyle = '#9d174d';
+      ctx.lineWidth = Math.max(2, r * 0.065);
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 0.92);
+      ctx.lineTo(0, r * 0.92);
+      ctx.stroke();
+      for (const [fx, fy, fr] of [[-0.44, -0.45, 0.22], [0.44, -0.45, 0.22], [-0.48, 0.38, 0.2], [0.48, 0.38, 0.2]]) {
+        ctx.beginPath();
+        ctx.arc(fx * r, fy * r, fr * r, 0, Math.PI * 1.15);
+        ctx.stroke();
+      }
+      // Crackling yellow lightning bolt zapping at temple
+      ctx.strokeStyle = '#ffe600';
+      ctx.lineWidth = Math.max(1.8, r * 0.06);
+      ctx.beginPath();
+      ctx.moveTo(r * 0.42, -r * 0.72);
+      ctx.lineTo(r * 0.62, -r * 0.54);
+      ctx.lineTo(r * 0.48, -r * 0.46);
+      ctx.lineTo(r * 0.7, -r * 0.28);
+      ctx.stroke();
+      break;
+    }
+
+    case 14: {
+      // Shrek Cosmique: ogre brown tunic vest collar + twinkling cosmic stars
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.96, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.fillStyle = '#78350f';
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = outline;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.9, r * 0.55);
+      ctx.lineTo(-r * 0.22, r * 0.68);
+      ctx.lineTo(0, r * 0.98);
+      ctx.lineTo(r * 0.22, r * 0.68);
+      ctx.lineTo(r * 0.9, r * 0.55);
+      ctx.lineTo(r, r * 1.1);
+      ctx.lineTo(-r, r * 1.1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      // Orbiting 4-point cosmic stars
+      ctx.fillStyle = '#ffe600';
+      for (const [sx, sy] of [[-0.64, -0.62], [0.66, -0.58]]) {
+        ctx.beginPath();
+        ctx.arc(sx * r, sy * r, Math.max(1.8, r * 0.065), 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    }
+
+    case 15: {
+      // PASTÈQUE 3000: glowing neon cyber stripes + diamond crown jewel accent
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.96, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.52)';
+      ctx.lineWidth = r * 0.085;
       for (let i = -2; i <= 2; i++) {
         ctx.beginPath();
         ctx.moveTo(i * r * 0.36, -r);
@@ -352,15 +948,16 @@ function _drawWeirdDetails(ctx, tier, r, time) {
       }
       ctx.restore();
       break;
+    }
   }
   ctx.restore();
 }
 
 function _drawCursedFace(ctx, tier, r, mood, isBlinking, time, monochrome = false) {
   const eyeX = r * 0.3;
-  const eyeY = -r * 0.1;
-  const leftEyeR = Math.max(2.8, r * 0.17);
-  const rightEyeR = monochrome ? leftEyeR : Math.max(2.4, r * (tier % 2 === 0 ? 0.13 : 0.21));
+  const eyeY = tier === 8 ? -r * 0.28 : -r * 0.1;
+  const leftEyeR = Math.max(2.6, r * (tier === 8 ? 0.145 : 0.17));
+  const rightEyeR = monochrome ? leftEyeR : Math.max(2.2, r * (tier % 2 === 0 ? 0.13 : 0.21));
   const ink = monochrome ? '#000000' : '#090314';
   const accentFill = monochrome ? '#000000' : '#ff2bd6';
 
@@ -370,15 +967,21 @@ function _drawCursedFace(ctx, tier, r, mood, isBlinking, time, monochrome = fals
   ctx.lineJoin = 'round';
 
   if (tier === 15 && mood !== 'worried') {
+    // Pixel-stepped MLG Deal-With-It cyber visor with diagonal shine
     ctx.fillStyle = ink;
-    const gw = r * 0.42;
-    const gh = r * 0.2;
+    const gw = r * 0.44;
+    const gh = r * 0.22;
     ctx.fillRect(-eyeX - gw * 0.55, eyeY - gh * 0.5, gw, gh);
+    ctx.fillRect(-eyeX - gw * 0.4, eyeY + gh * 0.45, gw * 0.7, gh * 0.24);
     ctx.fillRect(eyeX - gw * 0.45, eyeY - gh * 0.5, gw, gh);
-    ctx.fillRect(-eyeX, eyeY - gh * 0.35, eyeX * 2, gh * 0.3);
-    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(eyeX - gw * 0.3, eyeY + gh * 0.45, gw * 0.7, gh * 0.24);
+    ctx.fillRect(-eyeX - gw * 0.55, eyeY - gh * 0.35, eyeX * 2 + gw, gh * 0.28);
+    ctx.fillStyle = '#00f5d4';
     ctx.fillRect(-eyeX - gw * 0.35, eyeY - gh * 0.28, gw * 0.22, gh * 0.24);
     ctx.fillRect(eyeX - gw * 0.25, eyeY - gh * 0.28, gw * 0.22, gh * 0.24);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-eyeX - gw * 0.1, eyeY - gh * 0.08, gw * 0.14, gh * 0.18);
+    ctx.fillRect(eyeX, eyeY - gh * 0.08, gw * 0.14, gh * 0.18);
   } else if (mood === 'bonked') {
     for (const [cx, er] of [[-eyeX, leftEyeR * 0.65], [eyeX, rightEyeR * 0.65]]) {
       ctx.beginPath();
@@ -430,8 +1033,10 @@ function _drawCursedFace(ctx, tier, r, mood, isBlinking, time, monochrome = fals
     ctx.stroke();
   }
 
-  const mouthY = eyeY + r * 0.36;
-  if (tier === 2) return;
+  // Canard Énervé has duck beak; Donut Toxique keeps the center acid hole clear in idle
+  if (tier === 2 || (tier === 8 && mood !== 'worried')) return;
+
+  const mouthY = tier === 8 ? eyeY + r * 0.24 : eyeY + r * 0.36;
 
   if (mood === 'worried') {
     ctx.beginPath();
@@ -508,6 +1113,10 @@ export class GameRenderer {
 
   setPalette(palette) {
     this.palette = palette;
+  }
+
+  setChillMode(enabled) {
+    this.chillMode = Boolean(enabled);
   }
 
   _resizeHiDPI(viewWidth = JAR_BOUNDS.width) {
@@ -659,60 +1268,68 @@ export class GameRenderer {
     this.lasers.push({ pts, color, life: 0.26, maxLife: 0.26 });
   }
 
-  spawnMergeEffect(x, y, tier, labelText) {
+  spawnMergeEffect(x, y, tier, labelText, { chill = false } = {}) {
     const def = FRUITS[tier];
-    // Double concentric shockwaves!
+    const ch = CHILL_FRUIT_PALETTE[tier] || CHILL_FRUIT_PALETTE[0];
+    const primaryColor = chill ? ch.color : def.color;
+    const secondaryColor = chill ? ch.leaf : this.palette.yellow;
+
+    // Double concentric shockwaves (gentle pastel in chill mode)
     this.shockwaves.push({
       x,
       y,
       radius: def.radius * 0.35,
-      maxRadius: def.radius * 2.1 + 28,
-      color: def.color,
-      life: 0.38,
-      maxLife: 0.38,
+      maxRadius: def.radius * (chill ? 1.65 : 2.1) + 22,
+      color: primaryColor,
+      life: chill ? 0.32 : 0.38,
+      maxLife: chill ? 0.32 : 0.38,
     });
     this.shockwaves.push({
       x,
       y,
       radius: 4,
-      maxRadius: def.radius * 1.4 + 16,
-      color: this.palette.yellow,
-      life: 0.28,
-      maxLife: 0.28,
+      maxRadius: def.radius * 1.25 + 14,
+      color: secondaryColor,
+      life: 0.26,
+      maxLife: 0.26,
     });
 
-    const count = this.reducedMotion ? 5 : Math.min(28, 10 + tier * 2);
-    const palette = [def.highlight, def.color, this.palette.yellow, this.palette.pink, this.palette.cyan];
+    const count = this.reducedMotion ? 5 : (chill ? Math.min(12, 6 + tier) : Math.min(28, 10 + tier * 2));
+    const palette = chill
+      ? [ch.color, ch.shade, ch.leaf, '#fff7ea']
+      : [def.highlight, def.color, this.palette.yellow, this.palette.pink, this.palette.cyan];
     for (let i = 0; i < count; i++) {
       const a = (Math.PI * 2 * i) / count + Math.random() * 0.4;
-      const speed = 85 + Math.random() * 165;
+      const speed = (chill ? 55 : 85) + Math.random() * (chill ? 85 : 165);
       this.particles.push({
         x,
         y,
         vx: Math.cos(a) * speed,
-        vy: Math.sin(a) * speed - 45,
-        size: 3.5 + Math.random() * 5,
+        vy: Math.sin(a) * speed - (chill ? 25 : 45),
+        size: 3 + Math.random() * (chill ? 3.5 : 5),
         color: palette[i % palette.length],
-        life: 0.5 + Math.random() * 0.3,
-        maxLife: 0.8,
+        life: 0.45 + Math.random() * 0.25,
+        maxLife: 0.7,
       });
     }
 
-    this.spawnStarBurst(x, y, Math.min(8, 3 + Math.floor(tier / 2)));
+    if (!chill) {
+      this.spawnStarBurst(x, y, Math.min(8, 3 + Math.floor(tier / 2)));
 
-    if (tier >= 4) {
-      this.spawnFlameBurst(x, y, 9);
-      this.triggerGlitch(0.16);
-      this.spawnLaserBolt(
-        x,
-        y,
-        JAR_BOUNDS.left + Math.random() * (JAR_BOUNDS.right - JAR_BOUNDS.left),
-        JAR_BOUNDS.top + Math.random() * 140,
-        palette[tier % palette.length],
-      );
+      if (tier >= 4) {
+        this.spawnFlameBurst(x, y, 9);
+        this.triggerGlitch(0.16);
+        this.spawnLaserBolt(
+          x,
+          y,
+          JAR_BOUNDS.left + Math.random() * (JAR_BOUNDS.right - JAR_BOUNDS.left),
+          JAR_BOUNDS.top + Math.random() * 140,
+          palette[tier % palette.length],
+        );
+      }
     }
 
-    if (labelText) {
+    if (labelText && !chill) {
       this.floatingTexts.push({
         x,
         y: y - 10,
@@ -752,7 +1369,7 @@ export class GameRenderer {
     }
 
     // Nonsense random fires, micro-explosions, wall flames & chain lasers!
-    if (!this.reducedMotion && world && world.bodies.length > 0) {
+    if (!this.reducedMotion && world && !world.chillMode && world.bodies.length > 0) {
       for (const b of world.bodies) {
         if (b.onFireTimer > 0 && Math.random() < dt * 20) {
           this.spawnFlameBurst(b.x, b.y - b.radius * 0.4, 2);
@@ -863,8 +1480,8 @@ export class GameRenderer {
     }
   }
 
-  renderNextPreview(tier, monochrome = false, mystery = false, gameboy = false) {
-    const key = `${tier}:${monochrome ? 1 : 0}:${mystery ? 1 : 0}:${gameboy ? 1 : 0}`;
+  renderNextPreview(tier, monochrome = false, mystery = false, gameboy = false, chill = false) {
+    const key = `${tier}:${monochrome ? 1 : 0}:${mystery ? 1 : 0}:${gameboy ? 1 : 0}:${chill ? 1 : 0}`;
     if (key === this.lastRenderedNextTier) return;
     this.lastRenderedNextTier = key;
 
@@ -872,8 +1489,8 @@ export class GameRenderer {
     ctx.clearRect(0, 0, 44, 44);
     ctx.save();
     ctx.translate(22, 24);
-    const previewRadius = mystery ? 14 : Math.min(15, Math.max(10, FRUITS[tier].radius * 0.44));
-    drawFruitShape(ctx, tier, previewRadius, { showFace: true, monochrome, mystery, gameboy });
+    const previewRadius = mystery ? 13 : Math.min(13.5, Math.max(9.5, FRUITS[tier].radius * 0.42));
+    drawFruitShape(ctx, tier, previewRadius, { showFace: true, monochrome, mystery, gameboy, chill });
     ctx.restore();
   }
 
@@ -1155,6 +1772,7 @@ export class GameRenderer {
         monochrome: mono,
         mystery: isMystery,
         gameboy,
+        chill: this.chillMode,
       });
       ctx.restore();
     }
@@ -1220,6 +1838,7 @@ export class GameRenderer {
           time,
           monochrome: mono,
           gameboy,
+          chill: this.chillMode,
         });
         ctx.restore();
       }
@@ -1825,10 +2444,10 @@ export class GameRenderer {
 
     ctx.fillStyle = mono
       ? '#000000'
-      : (gameboy ? '#0f380f' : (world.activeChaos ? this.palette.jarChaosBg : this.palette.jarBg));
+      : (gameboy ? '#0f380f' : (this.chillMode ? '#fffaf0' : (world.activeChaos ? this.palette.jarChaosBg : this.palette.jarBg)));
     ctx.fill();
 
-    if (!mono) {
+    if (!mono && !this.chillMode) {
       ctx.save();
       ctx.clip();
       ctx.strokeStyle = world.activeChaos ? this.palette.pink : this.palette.cyan;
@@ -1857,7 +2476,7 @@ export class GameRenderer {
     ctx.globalAlpha = dangerAlpha;
     ctx.strokeStyle = mono
       ? '#ffffff'
-      : (world.isDangerActive ? this.palette.pink : this.palette.yellow);
+      : (this.chillMode ? '#e59866' : (world.isDangerActive ? this.palette.pink : this.palette.yellow));
     ctx.beginPath();
     ctx.moveTo(left + 8, dangerY);
     ctx.lineTo(right - 8, dangerY);
@@ -1891,6 +2510,8 @@ export class GameRenderer {
     ctx.lineCap = 'round';
     if (mono) {
       ctx.strokeStyle = '#ffffff';
+    } else if (this.chillMode) {
+      ctx.strokeStyle = '#d49a6a';
     } else if (world.activeChaos) {
       ctx.strokeStyle = Math.sin(time * 6) >= 0 ? this.palette.pink : this.palette.yellow;
     } else {

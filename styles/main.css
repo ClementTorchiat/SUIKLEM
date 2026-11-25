@@ -4509,7 +4509,7 @@ body.is-monochrome .slot-glitch-bar {
 }
 
 .mixer-needle {
-  transform-origin: 70px 32px;
+  transform-origin: 70px 44px;
   transition: transform 0.12s ease-out;
 }
 
@@ -4735,7 +4735,7 @@ body.is-monochrome .slot-glitch-bar {
 }
 
 .geiger-needle {
-  transform-origin: 70px 30px;
+  transform-origin: 70px 43px;
 }
 
 .geiger-status {
@@ -5228,6 +5228,20 @@ body.is-monochrome .doomsday-card.is-midnight .doomsday-badge {
 }
 
 /* Custom Brand Logo SVG */
+.brand-logo-chill-svg {
+  display: none;
+  inline-size: 30px;
+  block-size: 30px;
+}
+
+body.is-chill-intro .brand-logo-svg {
+  display: none;
+}
+
+body.is-chill-intro .brand-logo-chill-svg {
+  display: block;
+}
+
 .brand-logo-svg {
   display: block;
   inline-size: 30px;
@@ -5407,6 +5421,444 @@ body.is-sabotage .subtitle {
 
 .achievement-item.is-secret:not(.is-unlocked) .achievement-info strong {
   color: #e879f9;
+}
+
+.dialog-footer-split {
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* --- Acte 1 : Faux Suika Chill Pastel (1ère visite) --- */
+body.is-chill-intro {
+  --bg-page: #fdf4e7;
+  --surface: #fff9ef;
+  --surface-muted: #f5e5cf;
+  --ink: #5c3d28;
+  --text-main: #4a3120;
+  --text-muted: #8b684f;
+  --cyan: #e09f67;
+  --pink: #e57a84;
+  --yellow: #f2b749;
+  --orange: #e08245;
+  --lime: #72b354;
+  cursor: auto;
+  background-image: none;
+}
+
+body.is-chill-intro button:not([aria-disabled="true"]),
+body.is-chill-intro :where(a, summary, input[type="range"]):not([aria-disabled="true"]) {
+  cursor: pointer;
+}
+
+body.is-chill-intro #game-canvas {
+  cursor: grab;
+  background-color: #fffaf0;
+  border-color: #d9b28c;
+  box-shadow: none;
+}
+
+body.is-chill-intro .ticker-bar,
+body.is-chill-intro .wing-panel,
+body.is-chill-intro .mode-switcher,
+body.is-chill-intro .powers-card,
+body.is-chill-intro .telemetry-left,
+body.is-chill-intro .panel-right,
+body.is-chill-intro .led-strip,
+body.is-chill-intro #stats-toggle,
+body.is-chill-intro #achievements-btn,
+body.is-chill-intro #help-btn,
+body.is-chill-intro #restart-btn,
+body.is-chill-intro .jar-beacon,
+body.is-chill-intro .jar-clamp,
+body.is-chill-intro .jar-manifold {
+  display: none !important;
+}
+
+@media (min-width: 941px) {
+  body.is-chill-intro .workspace {
+    grid-template-columns: minmax(175px, 215px) auto;
+    gap: 1.4rem;
+    align-items: center;
+  }
+
+  body.is-chill-intro .side-panel {
+    block-size: auto;
+    gap: 0.7rem;
+  }
+}
+
+body.is-chill-intro .top-bar {
+  grid-template-columns: auto auto;
+  justify-content: space-between;
+}
+
+body.is-chill-intro .brand,
+body.is-chill-intro .top-actions,
+body.is-chill-intro .stat-score,
+body.is-chill-intro .stat-best,
+body.is-chill-intro .next-pill,
+body.is-chill-intro .jar-frame {
+  background-image: none;
+  background-color: #fff8ec;
+  border: 2.5px solid #d4a373;
+  box-shadow: 0 4px 0 rgba(139, 98, 60, 0.22);
+}
+
+body.is-chill-intro .brand-badge {
+  background-image: linear-gradient(145deg, #a7e88a, #f9d57e);
+  border-color: #8b623c;
+  transform: none;
+}
+
+body.is-chill-intro .brand-text h1 {
+  color: #5c3d28;
+  text-shadow: none;
+}
+
+body.is-chill-intro .subtitle,
+body.is-chill-intro .stat-label,
+body.is-chill-intro .next-label,
+body.is-chill-intro .controls-hint {
+  color: #8b684f;
+  text-shadow: none;
+}
+
+body.is-chill-intro .stat-value,
+body.is-chill-intro .next-name {
+  color: #4a3120;
+  text-shadow: none;
+}
+
+body.is-chill-intro .icon-btn {
+  background-image: none;
+  background-color: #f6e7d4;
+  border-color: #d4a373;
+  color: #5c3d28;
+  box-shadow: 0 2px 0 rgba(139, 98, 60, 0.2);
+}
+
+body.is-chill-intro .next-vat {
+  background: #fff3df;
+  border: 2px solid #deb68b;
+  border-radius: 10px;
+  box-shadow: inset 0 1px 2px rgba(139, 98, 60, 0.14);
+}
+
+body.is-chill-intro .next-vat-chamber {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+body.is-chill-intro .stat-score .stat-value,
+body.is-chill-intro .stat-best .stat-value,
+body.is-chill-intro .next-header-plate,
+body.is-chill-intro .next-preview {
+  background: #fff3df;
+  background-image: none;
+  border: 1.5px solid #deb68b;
+  box-shadow: inset 0 1px 2px rgba(139, 98, 60, 0.12);
+  color: #4a3120;
+}
+
+body.is-chill-intro .next-vat-cap,
+body.is-chill-intro .next-vat-base,
+body.is-chill-intro .vat-liquid,
+body.is-chill-intro .vat-glass-overlay,
+body.is-chill-intro .next-bio-led,
+body.is-chill-intro .vat-bubble,
+body.is-chill-intro .next-vat::after {
+  display: none;
+}
+
+/* --- Acte 2 : Intrusion Dialogue Pastèque 3000 --- */
+.intro-boss-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: radial-gradient(circle at center, rgba(46, 8, 72, 0.72) 0%, rgba(7, 2, 16, 0.92) 72%);
+  backdrop-filter: blur(4px);
+  cursor: var(--cursor-pointer);
+}
+
+.intro-boss-overlay[hidden] {
+  display: none;
+}
+
+.intro-boss-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  max-inline-size: min(92vw, 520px);
+}
+
+.intro-boss-avatar {
+  padding: 0.4rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(166, 255, 46, 0.25), rgba(255, 43, 214, 0.14), transparent 72%);
+  filter: drop-shadow(0 0 22px rgba(255, 43, 214, 0.65));
+}
+
+.intro-boss-box {
+  inline-size: 100%;
+  padding: 0.9rem 1.1rem;
+  border-radius: 16px;
+  border: 3px solid var(--pink);
+  background: linear-gradient(170deg, #271042 0%, #120624 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.25),
+    0 0 28px rgba(255, 43, 214, 0.45),
+    6px 6px 0 #07020f;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.intro-boss-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.intro-boss-speaker {
+  font-size: 0.88rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--lime);
+  text-shadow: 0 0 8px rgba(166, 255, 46, 0.5);
+}
+
+.intro-boss-progress {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.1rem 0.4rem;
+  border-radius: 6px;
+  background: #3b0764;
+  border: 1px solid var(--pink);
+  color: var(--yellow);
+}
+
+.intro-boss-text {
+  margin: 0;
+  font-size: 1.04rem;
+  font-weight: 700;
+  line-height: 1.38;
+  color: #fdf7ff;
+  min-block-size: 3em;
+}
+
+.intro-boss-next-hint {
+  align-self: flex-end;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--cyan);
+  letter-spacing: 0.05em;
+}
+
+/* --- Acte 3 : Explosion Motion-Design Progressive (5.65s) --- */
+.intro-fx-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 940;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.intro-fx-overlay[hidden] {
+  display: none;
+}
+
+.intro-fx-flash {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.intro-fx-shockwave {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: 60px;
+  block-size: 60px;
+  margin: -30px 0 0 -30px;
+  border-radius: 50%;
+  border: 6px solid var(--pink);
+  box-shadow: 0 0 36px var(--cyan), inset 0 0 28px var(--yellow);
+  opacity: 0;
+}
+
+.intro-fx-banner {
+  position: fixed;
+  inset-block-end: 18px;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  padding: 0.35rem 1rem;
+  border-radius: 999px;
+  border: 2px solid var(--yellow);
+  background: rgba(9, 3, 20, 0.9);
+  color: var(--pink);
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  box-shadow: 0 0 20px rgba(255, 43, 214, 0.65);
+  white-space: nowrap;
+}
+
+/* During progressive reveal, keep future waves hidden before their cue */
+body.is-intro-revealing .ticker-bar,
+body.is-intro-revealing .led-strip,
+body.is-intro-revealing .panel-left > *,
+body.is-intro-revealing .panel-right > *,
+body.is-intro-revealing .wing-left > *,
+body.is-intro-revealing .wing-right > * {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .intro-boss-avatar {
+    animation: boss-float 2.2s ease-in-out infinite;
+  }
+
+  .intro-boss-next-hint {
+    animation: hint-blink 0.9s steps(2, end) infinite;
+  }
+
+  /* Wave 1 (0.00s): Strobe Flash + Bocal + Top Brand/Actions */
+  body.is-intro-revealing.reveal-step-1 .intro-fx-flash {
+    animation: intro-strobe 0.85s ease-out both;
+  }
+
+  body.is-intro-revealing.reveal-step-1 .top-bar {
+    animation: slam-from-top 0.85s var(--spring-ease) both;
+  }
+
+  body.is-intro-revealing.reveal-step-1 .jar-frame {
+    animation: jar-pop-slam 0.95s var(--spring-ease) both;
+  }
+
+  /* Wave 2 (1.15s): Ticker Bar & LED Strip */
+  body.is-intro-revealing.reveal-step-2 .ticker-bar {
+    opacity: 1;
+    animation: ticker-zoom-in 0.72s var(--spring-ease) both;
+  }
+
+  body.is-intro-revealing.reveal-step-2 .led-strip {
+    opacity: 1;
+    animation: slam-from-bottom 0.75s var(--spring-ease) both;
+  }
+
+  /* Wave 3 (2.30s): Left Column Staggered Cascade */
+  body.is-intro-revealing.reveal-step-3 .panel-left > * {
+    opacity: 1;
+    animation: slam-from-left 0.72s var(--spring-ease) both;
+  }
+
+  body.is-intro-revealing.reveal-step-3 .panel-left > *:nth-child(2) { animation-delay: 0.14s; }
+  body.is-intro-revealing.reveal-step-3 .panel-left > *:nth-child(3) { animation-delay: 0.28s; }
+  body.is-intro-revealing.reveal-step-3 .panel-left > *:nth-child(4) { animation-delay: 0.42s; }
+  body.is-intro-revealing.reveal-step-3 .panel-left > *:nth-child(5) { animation-delay: 0.56s; }
+
+  /* Wave 4 (3.45s): Right Column (Roulette WTF + Telemetry + Mutations + Radio) */
+  body.is-intro-revealing.reveal-step-4 .panel-right > * {
+    opacity: 1;
+    animation: slam-from-right 0.72s var(--spring-ease) both;
+  }
+
+  body.is-intro-revealing.reveal-step-4 .panel-right > *:nth-child(2) { animation-delay: 0.16s; }
+  body.is-intro-revealing.reveal-step-4 .panel-right > *:nth-child(3) { animation-delay: 0.32s; }
+  body.is-intro-revealing.reveal-step-4 .panel-right > *:nth-child(4) { animation-delay: 0.48s; }
+
+  /* Wave 5 (4.55s): Outer Wings Domino Cascade + Fullscreen Shockwave */
+  body.is-intro-revealing.reveal-step-5 .wing-left > * {
+    opacity: 1;
+    animation: slam-from-left 0.65s var(--spring-ease) both;
+  }
+
+  body.is-intro-revealing.reveal-step-5 .wing-right > * {
+    opacity: 1;
+    animation: slam-from-right 0.65s var(--spring-ease) both;
+  }
+
+  body.is-intro-revealing.reveal-step-5 .wing-panel > *:nth-child(2) { animation-delay: 0.12s; }
+  body.is-intro-revealing.reveal-step-5 .wing-panel > *:nth-child(3) { animation-delay: 0.24s; }
+  body.is-intro-revealing.reveal-step-5 .wing-panel > *:nth-child(4) { animation-delay: 0.36s; }
+  body.is-intro-revealing.reveal-step-5 .wing-panel > *:nth-child(5) { animation-delay: 0.48s; }
+
+  body.is-intro-revealing.reveal-step-5 .intro-fx-shockwave {
+    animation: shockwave-boom 0.95s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.is-intro-revealing .ticker-bar,
+  body.is-intro-revealing .led-strip,
+  body.is-intro-revealing .panel-left > *,
+  body.is-intro-revealing .panel-right > *,
+  body.is-intro-revealing .wing-left > *,
+  body.is-intro-revealing .wing-right > * {
+    opacity: 1;
+  }
+}
+
+@keyframes intro-strobe {
+  0% { opacity: 0.95; background: #ffffff; }
+  25% { opacity: 0.72; background: #ff2bd6; }
+  55% { opacity: 0.45; background: #00f5d4; }
+  100% { opacity: 0; background: transparent; }
+}
+
+@keyframes shockwave-boom {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(36); border-width: 1px; }
+}
+
+@keyframes ticker-zoom-in {
+  from { opacity: 0; transform: scaleX(0.15) scaleY(1.8); }
+  to { opacity: 1; transform: scaleX(1) scaleY(1); }
+}
+
+@keyframes boss-float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-7px) scale(1.04); }
+}
+
+@keyframes hint-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+@keyframes slam-from-top {
+  from { opacity: 0; transform: translateY(-90px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes slam-from-left {
+  from { opacity: 0; transform: translateX(-280px) rotate(-6deg) scale(0.84); }
+  to { opacity: 1; transform: translateX(0) rotate(0deg) scale(1); }
+}
+
+@keyframes slam-from-right {
+  from { opacity: 0; transform: translateX(280px) rotate(6deg) scale(0.84); }
+  to { opacity: 1; transform: translateX(0) rotate(0deg) scale(1); }
+}
+
+@keyframes slam-from-bottom {
+  from { opacity: 0; transform: translateY(70px) scale(0.88); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes jar-pop-slam {
+  0% { transform: scale(1.22) rotate(-3deg); }
+  45% { transform: scale(0.95) rotate(2deg); }
+  75% { transform: scale(1.04) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg); }
 }
 
 body.is-monochrome .brand-logo-svg {

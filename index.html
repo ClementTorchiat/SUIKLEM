@@ -3,12 +3,33 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SUIKLEM.EXE — Télémétrie du Bordel</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23ff2bd6'/%3E%3Cstop offset='100%25' stop-color='%23ffe600'/%3E%3C/linearGradient%3E%3CradialGradient id='sk' cx='38%25' cy='32%25' r='65%25'%3E%3Cstop offset='0%25' stop-color='%23d9ff70'/%3E%3Cstop offset='55%25' stop-color='%2365a30d'/%3E%3Cstop offset='100%25' stop-color='%2314532d'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect x='1' y='1' width='34' height='34' rx='9' fill='url(%23bg)' stroke='%232b0b00' stroke-width='2'/%3E%3Cpath d='M18 3 L20.5 7.5 L15.5 8 Z' fill='%23ff2bd6' stroke='%231b0824' stroke-width='1.2' stroke-linejoin='round'/%3E%3Cpath d='M8 18 C8 10.5 12.5 7 18 7 C23.5 7 28 10.5 28 18 C28 24.5 25 29 18 29 C11 29 8 24.5 8 18 Z' fill='url(%23sk)' stroke='%23090314' stroke-width='2'/%3E%3Ccircle cx='13.5' cy='15.5' r='4.4' fill='%23ffffff' stroke='%23090314' stroke-width='1.5'/%3E%3Ccircle cx='14.2' cy='14.8' r='1.7' fill='%23090314'/%3E%3Ccircle cx='22.8' cy='16.5' r='3.4' fill='%23ffffff' stroke='%23090314' stroke-width='1.5'/%3E%3Ccircle cx='22.1' cy='17.3' r='1.4' fill='%23ff006e'/%3E%3Cpath d='M11.5 21.5 Q18 27 24.5 21' fill='%232e0619' stroke='%23090314' stroke-width='1.4' stroke-linecap='round'/%3E%3Cpath d='M15.5 24.2 Q18 28.5 20.8 24.2 Z' fill='%23ff2bd6' stroke='%23090314' stroke-width='1'/%3E%3Crect x='13.5' y='21.4' width='2.3' height='2' rx='0.5' fill='%23fde047'/%3E%3Cellipse cx='12' cy='10.5' rx='2.2' ry='1' transform='rotate(-24 12 10.5)' fill='%23ffffff' opacity='0.65'/%3E%3C/svg%3E">
+  <title>Suika Chill — Jeu de fusion de fruits pastel</title>
+  <meta name="description" content="Un petit jeu de fusion de fruits pastel relaxant et zen. Pose tes cerises, fraises, pêches et pastèques tranquillement !">
+  <meta name="theme-color" content="#ffb5c2">
+
+  <!-- OpenGraph / Discord Trap Embed (apparence 100% Suika Chill) -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Suika Chill">
+  <meta property="og:title" content="Suika Chill — Jeu de fusion de fruits pastel">
+  <meta property="og:description" content="Un petit jeu de fusion de fruits zen et pastel. Pose tes fruits tranquillement et fais pousser la pastèque royale.">
+  <meta property="og:url" content="https://clementtorchiat.github.io/SUIKLEM/">
+  <meta property="og:image" content="https://clementtorchiat.github.io/SUIKLEM/assets/og-suika-chill.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Suika Chill — Un bocal de fruits pastel zen et kawaii">
+
+  <!-- Twitter / X Large Preview Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Suika Chill — Jeu de fusion de fruits pastel">
+  <meta name="twitter:description" content="Pose des fruits pastel tranquillement jusqu’à la pastèque royale. 100% détente.">
+  <meta name="twitter:image" content="https://clementtorchiat.github.io/SUIKLEM/assets/og-suika-chill.png">
+
+  <link id="site-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Crect x='1' y='1' width='34' height='34' rx='9' fill='%23fff4e3' stroke='%23cfa57c' stroke-width='2'/%3E%3Cpath d='M18 11 C18 6.5 22 4 24.5 5.5' fill='none' stroke='%236c4a32' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M19 9.5 C22.5 5.5 27.5 6.5 28.5 10 C25 12 21 11.5 19 9.5 Z' fill='%2372b354' stroke='%234a7c36' stroke-width='1.3' stroke-linejoin='round'/%3E%3Ccircle cx='18' cy='20' r='10.5' fill='%23ff758f' stroke='%237a3342' stroke-width='1.8'/%3E%3Cellipse cx='14.2' cy='15.2' rx='3' ry='1.6' transform='rotate(-28 14.2 15.2)' fill='%23ffffff' opacity='0.6'/%3E%3Ccircle cx='14.5' cy='19.5' r='1.4' fill='%234a2c18'/%3E%3Ccircle cx='21.5' cy='19.5' r='1.4' fill='%234a2c18'/%3E%3Ccircle cx='14.9' cy='19.1' r='0.5' fill='%23ffffff'/%3E%3Ccircle cx='21.9' cy='19.1' r='0.5' fill='%23ffffff'/%3E%3Cpath d='M16 22.2 Q18 24.2 20 22.2' fill='none' stroke='%234a2c18' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap">
-  <link rel="stylesheet" href="styles/main.css?v=15">
+  <link rel="stylesheet" href="styles/main.css?v=18">
   <script type="module" src="src/main.js"></script>
 </head>
 <body>
@@ -18,6 +39,17 @@
     <header class="top-bar">
       <div class="brand">
         <span class="brand-badge" aria-hidden="true">
+          <svg class="brand-logo-chill-svg" viewBox="0 0 36 36" width="30" height="30" aria-hidden="true" focusable="false">
+            <path d="M18 11C18 6.5 22 4 24.5 5.5" fill="none" stroke="#6c4a32" stroke-width="2" stroke-linecap="round"/>
+            <path d="M19 9.5C22.5 5.5 27.5 6.5 28.5 10C25 12 21 11.5 19 9.5Z" fill="#72b354" stroke="#4a7c36" stroke-width="1.3" stroke-linejoin="round"/>
+            <circle cx="18" cy="20" r="10.5" fill="#ff758f" stroke="#7a3342" stroke-width="1.8"/>
+            <ellipse cx="14.2" cy="15.2" rx="3" ry="1.6" transform="rotate(-28 14.2 15.2)" fill="#ffffff" opacity="0.6"/>
+            <circle cx="14.5" cy="19.5" r="1.4" fill="#4a2c18"/>
+            <circle cx="21.5" cy="19.5" r="1.4" fill="#4a2c18"/>
+            <circle cx="14.9" cy="19.1" r="0.5" fill="#ffffff"/>
+            <circle cx="21.9" cy="19.1" r="0.5" fill="#ffffff"/>
+            <path d="M16 22.2Q18 24.2 20 22.2" fill="none" stroke="#4a2c18" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
           <svg class="brand-logo-svg" viewBox="0 0 36 36" width="30" height="30" aria-hidden="true" focusable="false">
             <defs>
               <radialGradient id="logo-skin" cx="38%" cy="32%" r="65%">
@@ -204,14 +236,22 @@
             <span id="mixer-readout" class="mixer-readout">50%</span>
           </div>
           <div class="mixer-meter-wrap" aria-hidden="true">
-            <svg viewBox="0 0 140 36" width="140" height="36" class="mixer-meter-svg" aria-hidden="true" focusable="false">
-              <rect x="1" y="1" width="138" height="34" rx="5" fill="#060911" stroke="#334155" stroke-width="1.4"/>
-              <path d="M22 30 A52 52 0 0 1 118 30" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="3 3"/>
-              <path d="M98 16 A52 52 0 0 1 118 30" fill="none" stroke="#ff2bd6" stroke-width="2.4"/>
-              <g id="mixer-needle" class="mixer-needle">
-                <line x1="70" y1="32" x2="70" y2="7" stroke="#ffe600" stroke-width="2" stroke-linecap="round"/>
+            <svg viewBox="0 0 140 50" width="140" height="50" class="mixer-meter-svg" aria-hidden="true" focusable="false">
+              <rect x="1" y="1" width="138" height="48" rx="6" fill="#060911" stroke="#334155" stroke-width="1.4"/>
+              <path d="M35.56 27.95 A38 38 0 0 1 104.44 27.95" fill="none" stroke="rgba(56, 189, 248, 0.16)" stroke-width="5"/>
+              <path d="M38.28 29.21 A35 35 0 0 1 101.72 29.21" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-dasharray="3 3"/>
+              <path d="M83.11 11.55 A35 35 0 0 1 101.72 29.21" fill="none" stroke="#ff2bd6" stroke-width="3.2" stroke-linecap="round"/>
+              <g stroke="#94a3b8" stroke-width="1.3" stroke-linecap="round">
+                <line x1="36.4" y1="22.8" x2="40.5" y2="25.1"/>
+                <line x1="51.1" y1="10.4" x2="53.4" y2="14.7"/>
+                <line x1="70" y1="5.5" x2="70" y2="10.5"/>
+                <line x1="88.9" y1="10.4" x2="86.6" y2="14.7"/>
+                <line x1="103.6" y1="22.8" x2="99.5" y2="25.1"/>
               </g>
-              <circle cx="70" cy="31" r="3.5" fill="#94a3b8" stroke="#090314" stroke-width="1"/>
+              <g id="mixer-needle" class="mixer-needle">
+                <line x1="70" y1="44" x2="70" y2="12" stroke="#ffe600" stroke-width="2.2" stroke-linecap="round"/>
+              </g>
+              <circle cx="70" cy="43.5" r="3.8" fill="#94a3b8" stroke="#090314" stroke-width="1.2"/>
             </svg>
           </div>
           <div class="mixer-sliders">
@@ -264,14 +304,22 @@
             <span id="geiger-value" class="geiger-value">0.42 mSv</span>
           </div>
           <div class="geiger-dial-wrap" aria-hidden="true">
-            <svg viewBox="0 0 140 34" width="140" height="34" class="geiger-svg" aria-hidden="true" focusable="false">
-              <rect x="1" y="1" width="138" height="32" rx="5" fill="#0d0b04" stroke="#713f12" stroke-width="1.4"/>
-              <path d="M20 28 A52 52 0 0 1 82 10" fill="none" stroke="#84cc16" stroke-width="2.2"/>
-              <path d="M84 10 A52 52 0 0 1 120 28" fill="none" stroke="#ef4444" stroke-width="2.4"/>
-              <g id="geiger-needle" class="geiger-needle">
-                <line x1="70" y1="30" x2="70" y2="7" stroke="#fef08a" stroke-width="1.8" stroke-linecap="round"/>
+            <svg viewBox="0 0 140 50" width="140" height="50" class="geiger-svg" aria-hidden="true" focusable="false">
+              <rect x="1" y="1" width="138" height="48" rx="6" fill="#0d0b04" stroke="#713f12" stroke-width="1.4"/>
+              <path d="M36.5 25.5 A38 38 0 0 1 103.5 25.5" fill="none" stroke="rgba(234, 179, 8, 0.14)" stroke-width="5.5"/>
+              <path d="M39.98 27.04 A34 34 0 0 1 78.80 10.16" fill="none" stroke="#84cc16" stroke-width="3" stroke-linecap="round"/>
+              <path d="M80.80 10.74 A34 34 0 0 1 100.02 27.04" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+              <g stroke="#fde047" stroke-width="1.2" stroke-linecap="round" opacity="0.85">
+                <line x1="37.4" y1="22.1" x2="41.4" y2="24.5"/>
+                <line x1="51.6" y1="10.2" x2="53.8" y2="14.4"/>
+                <line x1="70" y1="5.5" x2="70" y2="10.5"/>
+                <line x1="88.4" y1="10.2" x2="86.2" y2="14.4"/>
+                <line x1="102.6" y1="22.1" x2="98.6" y2="24.5"/>
               </g>
-              <circle cx="70" cy="29" r="3.2" fill="#eab308" stroke="#291202" stroke-width="1"/>
+              <g id="geiger-needle" class="geiger-needle">
+                <line x1="70" y1="43" x2="70" y2="11" stroke="#fef08a" stroke-width="2" stroke-linecap="round"/>
+              </g>
+              <circle cx="70" cy="42.5" r="3.6" fill="#eab308" stroke="#291202" stroke-width="1.2"/>
             </svg>
           </div>
           <div class="geiger-foot">
@@ -471,7 +519,7 @@
 
           <div class="next-readout-panel">
             <div class="next-header-plate">
-              <span class="stat-label">Prochain mutant</span>
+              <span id="next-label" class="stat-label">Prochain mutant</span>
               <span class="next-bio-led" aria-hidden="true"></span>
             </div>
             <div class="next-preview">
@@ -1250,7 +1298,8 @@
       <h2>Les 16 créatures mutantes</h2>
       <ol id="help-fruit-grid" class="help-fruit-grid"></ol>
 
-      <form method="dialog" class="dialog-footer">
+      <form method="dialog" class="dialog-footer dialog-footer-split">
+        <button type="button" id="replay-intro-btn" class="wing-action-btn">REVOIR L'INTRO CHILL</button>
         <button type="submit" class="primary-btn" autofocus>ENVOYER LA SAUCE</button>
       </form>
     </div>
@@ -1322,5 +1371,29 @@
     <div id="fourthwall-bubble" class="fourthwall-bubble"></div>
     <canvas id="fourthwall-canvas" width="136" height="136" aria-hidden="true"></canvas>
   </aside>
+
+  <!-- Séquence Intro Pastèque 3000 -->
+  <div id="intro-boss-overlay" class="intro-boss-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="intro-boss-speaker">
+    <div class="intro-boss-stage">
+      <div class="intro-boss-avatar">
+        <canvas id="intro-boss-canvas" width="144" height="144" aria-hidden="true"></canvas>
+      </div>
+      <div class="intro-boss-box">
+        <div class="intro-boss-head">
+          <span id="intro-boss-speaker" class="intro-boss-speaker">PASTÈQUE 3000</span>
+          <span id="intro-boss-progress" class="intro-boss-progress">1 / 4</span>
+        </div>
+        <p id="intro-boss-text" class="intro-boss-text"></p>
+        <span class="intro-boss-next-hint">CLIQUE OU APPUIE SUR ESPACE POUR CONTINUER</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calque FX Explosion Révélation (5.6s) -->
+  <div id="intro-fx-overlay" class="intro-fx-overlay" hidden aria-hidden="true">
+    <div class="intro-fx-flash"></div>
+    <div class="intro-fx-shockwave"></div>
+    <div class="intro-fx-banner">SURCHARGE SYSTÈME • MUTATION EN COURS</div>
+  </div>
 </body>
 </html>
