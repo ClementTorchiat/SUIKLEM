@@ -24,7 +24,7 @@ const CHARGE_PER_GAUGE = 185;
 const MAX_GAUGES = 5;
 const MAX_CHARGE = CHARGE_PER_GAUGE * MAX_GAUGES;
 const CLONE_MAX_TIER = 6;
-const SLOT_ROW_HEIGHT = 26;
+const SLOT_ROW_HEIGHT = 22;
 const SLOT_SPIN_DURATION_CLASSIC = 3.5;
 const SLOT_SPIN_DURATION_INFERNO = 2.2;
 
@@ -321,7 +321,7 @@ class SuiklemGame {
     this._renderAchievements();
     this.bestEl.textContent = String(this.bestScore);
 
-    this._buildFruitList(this.evolutionListEl, 'evo-item', 18, 8);
+    this._buildFruitList(this.evolutionListEl, 'evo-item', 16, 7);
     this._buildFruitList(this.helpFruitGridEl, 'help-fruit-item', 20, 8.5);
   }
 
